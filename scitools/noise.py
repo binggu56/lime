@@ -8,23 +8,6 @@ Created on Fri Aug  3 16:27:19 2018
 
 import numpy as np
 
-
-#! program to illustrate the colored Gaussian Noise generator CGAUSS
-#! The routine must be initialized with CGAUS0 and calls a flat distribution
-#! random number generator available with most compilers or you can write your
-#! own. Here we used the routine RAN1 from Numerical Recipes 2nd Edition, by
-#! Press, Teukolsky, Vetterling, and Flannery.
-#!
-#! It now uses the F90 intrinsic subroutine RANDOM_NUMBER.
-#!
-#! The White Guassian noise generator GASDEV from Numerical Recipes was
-#! adapted to produce Colored Gaussian noise. The basic equations for this
-#! computation are presented in the article by
-#! Fox et al., Physical Review A vol.38(1988) page 5938.
-#! This code was [originally] compiled and tested with Microsoft Powerstation.
-#
-#! It was modified by Walt Brainerd to be standard Fortran and
-#! compiled on NAGWare F90.
 def corr(eps):
     """
     calculate the autocorrelation function in variable MEAN.
