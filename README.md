@@ -7,7 +7,7 @@ The ojective here is to provide a simple-to-use package for researchers includin
 ### noise 
 Generate white and colored noise to simulate stohcastic dynamics, e.g., stochastic Schodinger equations. 
 
-### Style 
+### Plotting 
 A matplotlib style file to generate publication quality figures. 
 
 ### Quantum dynamics 
