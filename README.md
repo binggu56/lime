@@ -10,6 +10,15 @@ Generate white and colored noise to simulate stohcastic dynamics, e.g., stochast
 ### style 
 A matplotlib style file to generate publication quality figures. 
 
+### quantum dynamics 
+Methods to solve time-dependent Schodinger equations. 
+
+### band structure 
+Compute band stucture from tight-binding Hamiltonians. 
+
+## Open quantum systems 
+__to be added__
+
 
 
 
