@@ -13,6 +13,9 @@ A matplotlib style file to generate publication quality figures.
 ### Quantum dynamics 
 Methods to solve time-dependent Schodinger equations. 
 
+##### Non-adiabatic quantum dynamics 
+
+
 ### Band structure 
 Compute band stucture from tight-binding Hamiltonians. 
 
