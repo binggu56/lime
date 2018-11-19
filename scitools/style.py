@@ -1,16 +1,34 @@
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-def set_style(size=12):
+def set_style(fontsize=12):
 
-    rc('text', usetex=True)
-    plt.rcParams['text.latex.preamble'] = [
-    r'\usepackage{tgheros}',    # helvetica font
-    r'\usepackage{sansmath}',   # math-font matching  helvetica
-    r'\sansmath'                # actually tell tex to use it!
-    r'\usepackage{siunitx}',    # micro symbols
-    r'\sisetup{detect-all}',    # force siunitx to use the fonts
-    ]
+    size = fontsize
+    fontProperties = {'family':'sans-serif','sans-serif':['Helvetica'],
+    'weight' : 'normal', 'size' : fontsize}
+    rc('font', **fontProperties)
+
+    rc('text', usetex=False)
+
+    plt.rc('xtick', color='k', labelsize='medium', direction='in')
+    plt.rc('ytick', color='k', labelsize='medium', direction='in')
+    plt.rc('xtick.major', size=4, pad=4)
+    plt.rc('xtick.minor', size=2, pad=4)
+    #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+
+
+#    plt.rcParams['text.latex.preamble'] = [
+###    r'\usepackage{time}',
+#    r'\usepackage{tgheros}',    # helvetica font
+#    r'\usepackage[]{amsmath}',   # math-font matching  helvetica
+#    r'\usepackage{bm}',
+##    r'\sansmath'                # actually tell tex to use it!
+#    r'\usepackage{siunitx}',    # micro symbols
+#    r'\sisetup{detect-all}',    # force siunitx to use the fonts
+#    ]
+
+    #rc('text.latex', preamble=r'\usepackage{cmbright}')
+
 
 
     plt.rc('xtick', labelsize=size)
@@ -35,7 +53,7 @@ def set_style(size=12):
     plt.rc('ytick.major', size=4, pad=4)
     plt.rc('ytick.minor', size=3, pad=4)
 
-    #plt.rc('savefig',dpi=300)
+    plt.rc('savefig',dpi=120)
 
 
 

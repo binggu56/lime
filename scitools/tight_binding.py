@@ -2,6 +2,8 @@ import sys
 import numpy as np
 from scipy import linalg
 from scipy.special import jv
+from .common import delta, dagger
+from .style import set_style
 
 class TightBinding:
     def __init__(self, Norbs, a, r, onsite, hop_inter, hop_intra, D=1):
@@ -47,11 +49,11 @@ class TightBinding:
 
                 H[j,i] = np.conj(H[i,j])
 
-        eigvals = linalg.eigvals(H)
+        eigvals, eigvecs = linalg.eigh(H)
 
-        return eigvals
+        return eigvals, eigvecs
 
-    def Floquet_bands(self, k, Nt, E0, omega):
+    def Floquet_bands(self, k, Nt, E0, omega, method='velocity gauge'):
         """
         Compute the Floquet-Bloch band structure for a tight-binding model
             in the first BZ using the minimal coupling method k -> k + A(t)
@@ -86,37 +88,79 @@ class TightBinding:
         N0 = -(Nt-1)/2 # starting point for Fourier companent of time exp(i n w t)
 
         # construc the Floquet H for a general tight-binding Hamiltonian
-        for n in range(Nt):
-            for m in range(Nt):
+        if method == 'Pieles substitution':
+            for n in range(Nt):
+                for m in range(Nt):
 
-                # atomic basis index
-                for a in range(Norbs):
-                    for b in range(Norbs):
+                    # atomic basis index
+                    for a in range(Norbs):
+                        for b in range(Norbs):
 
-                    # map the index i to double-index (n,k) n : time Fourier component
-                    # with relationship for this :  Norbs * n + k = i
+                        # map the index i to double-index (n,k) n : time Fourier component
+                        # with relationship for this :  Norbs * n + k = i
 
-                        i = Norbs * n + a
-                        j = Norbs * m + b
-#                # fill a block of the Floquet Matrix
-#                istart = Norbs * n
-#                iend = Norbs * (n+1)
-#                jstart = Norbs * m
-#                jend = Norbs * (m+1)
+                            i = Norbs * n + a
+                            j = Norbs * m + b
+    #                # fill a block of the Floquet Matrix
+    #                istart = Norbs * n
+    #                iend = Norbs * (n+1)
+    #                jstart = Norbs * m
+    #                jend = Norbs * (m+1)
+    #
+    #                F[istart:iend, jstart:jend] = HamiltonFT(H0, H1, n-m) + (n + N0) \
+    #                         * omega * delta(n, m) * np.eye(Norbs)
+                            z1 = E0/omega * (r[a] - r[b])
+                            z2 = E0/omega * (R + r[a] - r[b])
+                            F[i,j] = (onsite[a] + (n+N0) * omega) *\
+                                delta(n, m) * delta(a, b) \
+                                + hop_intra[a,b] * np.exp(-1j * k * (r[a] - r[b])) *\
+                                         (-1j)**(m-n) * jv(m-n, z1) + \
+                                + hop_inter[a,b] * np.exp(-1j * k * (R + r[a] - r[b]))\
+                                    * (-1j)**(m-n) * jv(m-n, z2)
+
+        elif method == 'velocity gauge': # velocity gauge H_RM(t) = A(t) * p
+
+            # band structure at k
+            eps, U = self.bands(k)
+            P = self.MME(k, U)
+
+            I = np.eye(Norbs)
+
+            for n in range(Nt):
+                for m in range(Nt):
+
+#                    # atomic basis index
+#                    for a in range(Norbs):
+#                        for b in range(Norbs):
 #
-#                F[istart:iend, jstart:jend] = HamiltonFT(H0, H1, n-m) + (n + N0) \
-#                         * omega * delta(n, m) * np.eye(Norbs)
-                        z = E0/omega * (r[a] - r[b])
+#                        # map the index i to double-index (n,k) n : time Fourier component
+#                        # with relationship for this :  Norbs * n + k = i
+#
+#                            i = Norbs * n + a
+#                            j = Norbs * m + b
 
-                        F[i,j] = onsite[a] * float(a==b) + \
-                            (n+N0) * omega * float(n==m) * float(a==b)\
-                            + hop_intra[a,b] * np.exp(-1j * k * (r[a] - r[b])) *\
-                                     (-1j)**(m-n) * jv(m-n, z) + \
-                            + hop_inter[a,b] * np.exp(-1j * k * (R + r[a] - r[b]))\
-                                * (-1j)**(m-n) * jv(m-n, z)
+                    # fill a block of the Floquet Matrix
+                    istart = Norbs * n
+                    iend = Norbs * (n+1)
+                    jstart = Norbs * m
+                    jend = Norbs * (m+1)
+    #
+    #                F[istart:iend, jstart:jend] = HamiltonFT(H0, H1, n-m) + (n + N0) \
+    #                         * omega * delta(n, m) * np.eye(Norbs)
+                    F[istart:iend, jstart:jend] = (np.diagflat(eps) + \
+                                (n + N0) * omega) * delta(n, m) * I \
+                                + E0/2./omega * P * \
+                                (delta(n, m+1) + delta(n, m-1))
 
+#                            F[i,j] = self.bands(k)[0][a] * float(a==b) + \
+#                                (n+N0) * omega * float(n==m) * float(a==b)\
+#                                + E0/2./omega * (k * float(a==b) + P[a,b]) * \
+#                                (float(n==m+1) + float(n==m-1))
+#                            # here the M should be the momentum matrix elements in terms of Bloch modes
                         #F[j,i] = np.conj(F[i,j])
-
+        else:
+            sys.exit('Error: There is no such method to \
+                     compute light-matter interaction.')
 
 
         # for a two-state model
@@ -151,6 +195,39 @@ class TightBinding:
 
         return eigvals_subset, eigvecs_subset
 
+    def MME(self, k, U):
+        """
+        Compute the momentum matrix elements <nk|p|mk>
+        Returns:
+            P: complex array (Norbs, Norbs), momentum matrix elements in terms of Bloch
+                eigenstates
+        """
+        R = self.a
+        Norbs = self.Norbs
+        hop_intra = self.hop_intra
+        hop_inter = self.hop_inter
+        r = self.r
+
+        P = np.zeros((Norbs, Norbs), dtype=np.complex128)
+
+        # hopping parameters
+
+
+        for b in range(Norbs):
+            for a in range(Norbs):
+
+                P[b, a] = -1j * (r[b] - r[a]) * hop_intra[b, a] * \
+                     np.exp(-1j * k * (r[b] - r[a])) + \
+                     hop_inter[b, a] * (-1j) * (R + r[b] - r[a]) * \
+                     np.exp(-1j * k *(R + r[b] - r[a]))
+
+                P[a, b] = np.conj(P[b, a])
+
+        P = np.matmul(dagger(U), np.matmul(P, U))
+
+        return P
+
+
 #    def HamiltonFT(self, n, k):
 #
 #        H = np.zeros((Norbs, Norbs), dtype=np.complex128)
@@ -176,8 +253,8 @@ def test_FloquetBloch():
 
     onsite = np.array([-1.6 , 1.6])
     #hop = -1.0
-    Nt = 15
-    E0 = 2.0
+    Nt = 21
+    E0 = 0.12
     omega = 0.38
 
 
@@ -194,14 +271,22 @@ def test_FloquetBloch():
 
     f = open('Floquet_bands.dat', 'w')
     for k in kz:
+
+#        eigvals = TB.Floquet_bands(k, Nt, E0, omega, method=\
+#                                   'Pieles substitution')[0]
         eigvals = TB.Floquet_bands(k, Nt, E0, omega)[0]
+
 
         f.write('{} {} {} \n'.format(k, *np.real(eigvals)))
 
     f.close()
 
-    fig, ax = plt.subplots(figsize=(4,4))
+
+    fig, ax = plt.subplots()
+    set_style()
+
     k, Ev, Ec = np.genfromtxt('Floquet_bands.dat',unpack=True)
+
     for n in range(0,1):
         ax.plot(k, Ev + n * omega, 'k-',  label=r'$E_v(k)$')
         ax.plot(k, Ec + n * omega, 'k-',  label=r'$E_c(k)$')
@@ -215,10 +300,10 @@ def test_FloquetBloch():
 
     #ax.set_xlim(0,10)
     #ax.legend()
-    ax.set_xlabel('k')
-    ax.set_ylabel('Energy (a.u.)')
+    ax.set_xlabel('Wavevector $k$')
+    ax.set_ylabel('Energy $\epsilon({k})$ (a.u.)')
     plt.savefig('Floquet_bands.eps',dpi=1200)
     plt.draw()
 
 #test_TightBinding()
-test_FloquetBloch()
+#test_FloquetBloch()
