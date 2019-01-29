@@ -6,3 +6,4 @@ from .tight_binding import TightBinding
 from .common import delta, dagger
 from .phys import fermi, heaviside
 import.units
+import .oqs import *
