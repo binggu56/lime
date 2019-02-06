@@ -21,3 +21,18 @@ def fermi(E, Ef = 0.0, T = 1e-4):
 
 def heaviside(x):
     return 0.5 * (np.sign(x) + 1)
+
+def commutator(A,B):
+    assert(A.shape == B.shape)
+    return A.dot(B) - B.dot(A)
+
+
+def anticommutator(A,B):
+    assert(A.shape == B.shape)
+    return A.dot(B) + B.dot(A)
+
+def dagger(a):
+    return H.conjugate().transpose()
+
+def coth(x):
+    return 1./np.tanh(x)
