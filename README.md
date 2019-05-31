@@ -17,10 +17,14 @@ Methods to solve time-dependent Schodinger equations.
 
 
 ### Band structure 
-Compute band stucture from tight-binding Hamiltonians. 
+# Compute band stucture from tight-binding Hamiltonians. 
+# Compute Floquet-Bloch band structure for tight-binding models. 
 
 ### Open quantum systems 
-__to be added__
+# Lindblad quantum master equation 
+# Redfield quantum master equation 
+# Second-order time-convolutionless master equation 
+# Hierachical equation of motion 
 
 
 
