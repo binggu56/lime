@@ -12,19 +12,20 @@ A matplotlib style file to generate publication quality figures.
 
 ### Quantum dynamics 
 Methods to solve time-dependent Schodinger equations. 
+- Split-operator method with fast fourier transform 
 
 ##### Non-adiabatic quantum dynamics 
 
 
-### Band structure 
-# Compute band stucture from tight-binding Hamiltonians. 
-# Compute Floquet-Bloch band structure for tight-binding models. 
+### Band structure of solids  
+- Compute band stucture from tight-binding Hamiltonians. 
+- Compute Floquet-Bloch band structure for tight-binding models. 
 
 ### Open quantum systems 
-# Lindblad quantum master equation 
-# Redfield quantum master equation 
-# Second-order time-convolutionless master equation 
-# Hierachical equation of motion 
+- Lindblad quantum master equation 
+- Redfield quantum master equation 
+- Second-order time-convolutionless master equation 
+- Hierachical equation of motion 
 
 
 
