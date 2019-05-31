@@ -32,7 +32,25 @@ def anticommutator(A,B):
     return A.dot(B) + B.dot(A)
 
 def dagger(a):
-    return H.conjugate().transpose()
+    return a.conjugate().transpose()
 
 def coth(x):
     return 1./np.tanh(x)
+
+def pauliz():
+     return np.array([[1.0,0.0],[0.0,-1.0]], dtype=np.complex128)
+
+def paulix():
+    return np.array([[0.0,1.0],[1.0,0.0]], dtype=np.complex128)
+
+def pauliy():
+    return np.array([[0.0,-1j],[1j,0.0]], dtype=np.complex128)
+
+# spin-half matrices 
+sz = np.array([[0.5,0.0],[0.0,-0.5]])
+
+sx = np.array([[0.0,1.0],[1.0,0.0]])
+
+sy = np.array([[0.0,-1j],[1j,0.0]]) 
+
+s0 = np.identity(2)

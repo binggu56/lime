@@ -5,5 +5,5 @@ from .Floquet import quasiE
 from .tight_binding import TightBinding
 from .common import delta, dagger
 from .phys import *
-import.units
-import .oqs import *
+from .units import au2ev
+from .oqs import *
