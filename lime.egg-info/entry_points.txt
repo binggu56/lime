@@ -1,0 +1,3 @@
+[console_scripts]
+scitools = scitools.cli:main
+
