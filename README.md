@@ -10,6 +10,20 @@ Check http://binggu.me/lime for documentations!
 
 # Quantum chemistry 
 
+# Open quantum systems 
+- Lindblad quantum master equation
+- Redfield theory  
+- second-order time-convolutionless master equation 
+- hierarchical equation of motion 
+
+# Quantum transport 
+- Landauer transport 
+
+# Soid state materials 
+- Band structure from tight-binding Hamiltonians 
+
+# Periodically driven matter 
+- Floquet spectrum 
 
 # Others 
 ## Schmidt decomposition 
