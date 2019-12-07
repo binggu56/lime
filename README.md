@@ -8,6 +8,9 @@ Check http://binggu.me/lime for documentations!
 ## Wavepacket dynamics 
 - Split-operator method 
 
+## Nonadiabatic dynamics 
+- Split-operator method 
+
 # Quantum chemistry 
 
 # Open quantum systems 
