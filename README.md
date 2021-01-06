@@ -7,24 +7,23 @@ Check http://binggu.me/lime for documentations!
 Main modules
 
 # Nonlinear molecular spectroscopy 
-# sum-of-states
+- sum-of-states for multilevel system 
 
-# dynamical method
-## Quantum regression theorem 
-Direct evaluating the many-point correlation functions with the quantum regression theorem 
+- correlation function approach (for open quantum systems)
+Direct computing the many-point correlation functions with the quantum regression theorem 
 
-## driven dynamics
-Simulating the laser-driven dynamics  
+- non-perturbative approah (for all systems provided the dynamics can be solved) 
+Simulating the laser-driven dynamics including explicitly all laser pulses    
 
-# Quantum dynamics 
-## Wavepacket dynamics 
-- Split-operator method 
+# Molecular quantum dynamics 
+- Wavepacket dynamics 
+-- Split-operator method 
 
-## Nonadiabatic dynamics 
+- Nonadiabatic dynamics 
 - Split-operator method 
 For the exact nonadiabatic dynamics of vibronic models in the diabatic representation. 
 
-## Semiclassical quantum trajectory method 
+# Semiclassical quantum trajectory method 
 
 # Quantum chemistry 
 
@@ -44,7 +43,7 @@ For the exact nonadiabatic dynamics of vibronic models in the diabatic represent
 - Floquet spectrum 
 
 # Others 
-## Schmidt decomposition 
+- Schmidt decomposition 
 
 
 
