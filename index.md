@@ -1,9 +1,3 @@
----
-layout: page
-title: Welcome to LIME
-use-site-title: true
----
-
 # Welcome to LIght-Matter Everything!
 
 The ultimate goal is to provide a simple-to-use package to study how light interacts with matter.  
@@ -50,8 +44,6 @@ For the exact nonadiabatic dynamics of vibronic models in the diabatic represent
 
 # Others 
 - Schmidt decomposition 
-
-
 
 
 
