@@ -2,17 +2,26 @@
 
 The ultimate goal is to provide a simple-to-use package to study how light interacts with matter.  
 
-Check http://binggu.me/lime for documentations! 
+Check manual.pdf for documentations! 
 
 Main modules
 
 # Nonlinear molecular spectroscopy 
-- sum-of-states for multilevel system 
+* sum-of-states for multilevel system
 
-- correlation function approach (for open quantum systems)
-Direct computing the many-point correlation functions with the quantum regression theorem 
+Pros: computationally cheap 
+Cons: decay is introduced phenomelogically; pure dephasing cannot be addressed 
 
-- non-perturbative approah (for all systems provided the dynamics can be solved) 
+* correlation function approach --  Direct computing the many-point correlation functions with the quantum regression theorem 
+
+
+Valid for open quantum systems where environment effects can be rigirously described with open quantum system techniques. 
+
+Visulize with double-sided Feynman diagrams instead of the time-loop diagrams. 
+
+
+* non-perturbative approah -- valid for ALL systems provided the quantum dynamics can be compuated 
+
 Simulating the laser-driven dynamics including explicitly all laser pulses    
 
 # Molecular quantum dynamics 
@@ -21,6 +30,7 @@ Simulating the laser-driven dynamics including explicitly all laser pulses
 
 - Nonadiabatic dynamics 
 - Split-operator method 
+
 For the exact nonadiabatic dynamics of vibronic models in the diabatic representation. 
 
 # Semiclassical quantum trajectory method 
