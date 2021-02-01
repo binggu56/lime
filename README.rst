@@ -20,18 +20,14 @@ Python Boilerplate contains all the boilerplate you need to create a Python pack
 
 
 * Free software: MIT license
-* Documentation: https://scitools.readthedocs.io.
+* Documentation: https://lime.readthedocs.io.
 
 
 Features
 --------
 
-* TODO
+Computational modules for research of light-matter interaction in nonlinear molecular spectroscopy, polariton chemistry, quantum light spectroscopy, laser-driven matter, etc.
 
 Credits
 -------
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
