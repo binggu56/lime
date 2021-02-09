@@ -1,5 +1,5 @@
 ========
-scitools
+lime
 ========
 
 
@@ -30,4 +30,7 @@ Computational modules for research of light-matter interaction in nonlinear mole
 
 Credits
 -------
+Bing Gu 
+
+email: bingg at uci dot edu 
 
