@@ -26,7 +26,15 @@ Python Boilerplate contains all the boilerplate you need to create a Python pack
 Features
 --------
 
-Computational modules for research of light-matter interaction in nonlinear molecular spectroscopy, polariton chemistry, quantum light spectroscopy, laser-driven matter, etc.
+Computational modules for research of light-matter interaction 
+
+nonlinear molecular spectroscopy
+
+polariton chemistry
+
+quantum light spectroscopy
+
+laser-driven matter, etc.
 
 Credits
 -------
