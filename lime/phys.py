@@ -13,8 +13,44 @@ sp = csr_matrix(np.array([[0.0, 0.0],[1.0,0.0]], dtype=np.complex128))
 sm = csr_matrix(np.array([[0.0, 1.0],[0.0,0.0]], dtype=np.complex128))
 
 
-#from lime.oqs import correlation_2p_1t, lindblad_solver, redfield
-#from lime.signal.sos import linear_absorption
+def sinc(x):
+    '''
+    sinc(x) = sin(x)/x
+
+    Parameters
+    ----------
+    x : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    '''
+    return np.sinc(x/np.pi)
+
+def norm2(f, dx=1, dy=1):
+    '''
+    L2 norm of the 2D array f
+
+    Parameters
+    ----------
+    f : TYPE
+        DESCRIPTION.
+    dx : TYPE
+        DESCRIPTION.
+    dy : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    '''
+    return np.trace(dag(f).dot(f))*dx*dy
+
 def get_index(array, value):
     '''
     get the index of element in array closest to value
@@ -42,7 +78,7 @@ def rgwp(x, x0=0., sigma=1.):
     None.
 
     '''
-    psi = np.sqrt(np.sqrt(1./np.pi/sigma**2)) * np.exp(-(x-x0)**2/2./sigma**2)
+    psi = 1./np.sqrt(np.sqrt(np.pi) * sigma) * np.exp(-(x-x0)**2/2./sigma**2)
     return psi
 
 def gwp(x, sigma=1., x0=0., p0=0.):
@@ -142,6 +178,7 @@ def destroy(N):
     a.setdiag(np.sqrt(np.arange(1, N)), 1)
 
     return a.tocsr()
+
 
 def rk4(rho, fun, dt, *args):
     """
@@ -404,7 +441,8 @@ def quantum_dynamics(ham, psi0, dt=0.001, Nt=1, obs_ops=None, nout=1,\
     nstates = len(psi0)
 
     #f = open(fname,'w')
-    fmt = '{} '* (len(obs_ops) + 1)  + '\n'
+    if obs_ops is not None:
+        fmt = '{} '* (len(obs_ops) + 1)  + '\n'
     fmt_dm = '{} '* (nstates + 1)  + '\n'
 
     f_dm = open('psi.dat', 'w') # wavefunction
@@ -621,6 +659,72 @@ def multi_spin(onsite, nsites):
     for i in range(1, nsites-1):
         lower += kron(tensor_power(s0, i), kron(sm, tensor_power(s0, nsites-i-1)))
 
+
+
+    return ham, lower
+
+def multiboson(omegas, nmodes, J=0, N=2, PBC=True):
+    """
+    construct the hamiltonian for a multi-spin system
+
+    Parameters
+    ----------
+    omegas : 1D array
+        resonance frequenies of the boson modes
+    nmodes : integer
+        number of boson modes
+    J : float
+        hopping constant
+    truncation : TYPE, optional
+        DESCRIPTION. The default is 2.
+
+    Returns
+    -------
+    ham : TYPE
+        DESCRIPTION.
+    lower : TYPE
+        DESCRIPTION.
+
+    """
+
+    h0 = boson(N)
+    idm = identity(N)
+    a = destroy(N)
+    adag = dag(a)
+    x = a  + adag
+
+    head = omegas[0] * kron(h0, tensor_power(idm, nmodes-1))
+    tail = omegas[-1] * kron(tensor_power(idm, nmodes-1), h0)
+    ham = head + tail
+
+    for i in range(1, nmodes-1):
+        ham += omegas[i] * kron(tensor_power(idm, i), \
+                                kron(h0, tensor_power(idm, nmodes-i-1)))
+    if nmodes == 2:
+        for i in range(nmodes-1):
+            ham += J * kron(x, x)
+
+    elif nmodes > 2:
+
+        hop_head = J * kron(kron(x, x), tensor_power(idm, nmodes-2))
+        hop_tail = J * kron(tensor_power(idm, nmodes-2), kron(x, x))
+
+        if PBC == True:
+            loop = J * kron(x, kron(tensor_power(idm, nmodes-2), x))
+            ham += hop_head + hop_tail + loop
+        else:
+            ham += hop_head + hop_tail
+
+        for i in range(1, nmodes-1):
+            ham += J * kron(tensor_power(idm, i), \
+                                kron(kron(x, x), tensor_power(idm, nmodes-i-1)))
+
+    # lower_head = kron(a, tensor_power(idm, nmodes-1))
+    # lower_tail = kron(tensor_power(idm, nmodes-1), a)
+    # lower = lower_head + lower_tail
+
+    # for i in range(1, nmodes-1):
+    #     lower += kron(tensor_power(idm, i), kron(a, tensor_power(idm, nmodes-i-1)))
 
 
     return ham, lower

@@ -27,9 +27,9 @@ class Spin_boson(object):
         reorg = self.reorg
         beta = self.beta
 
-        freqmax = 40 * omegac
-        N = 2**12
-        freq = np.linspace(1e-5, freqmax, N)
+        freqmax = 20.0
+        N = 2**11
+        freq = np.linspace(1e-4, freqmax, N)
 
         # parameters for spectral density Drude
         name = 'Drude'
@@ -44,7 +44,7 @@ class Spin_boson(object):
 
         # decoherence function
         dw = freq[1] - freq[0]
-        tmp = - np.sum(J * (1. - np.cos(freq * t)) / freq**2) * dw /np.pi * 4
+        tmp = - np.sum(J * (1. - np.cos(freq * t)) / freq**2) * dw
 
         return tmp
 
