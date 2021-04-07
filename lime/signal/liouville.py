@@ -126,6 +126,7 @@ def linear_absorption(omegas, ham, dip, rho0, c_ops=[], ntrans=1):
 
     return  -2. * signal.imag
 
+
 def sort(eigvals, eigvecs):
 
     idx = np.argsort(eigvals)
