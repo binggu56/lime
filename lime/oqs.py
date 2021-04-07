@@ -9,57 +9,62 @@ import numpy as np
 import numba
 import sys
 
-from .phys import anticommutator, comm, anticomm, dag, ket2dm, \
-    obs_dm, destroy, rk4, liouvillian
+from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
+    obs_dm, destroy, rk4
 
-from .units import au2fs
+from lime.superoperator import lindblad_dissipator, operator_to_superoperator
+
+from lime.units import au2fs, au2k
+from lime.mol import Mol
 
 from scipy.sparse import csr_matrix
+import scipy.sparse.linalg as la
+
+import lime.superoperator as superop
+
+class Redfield_solver:
+    def __init__(self, H, c_ops=None, e_ops=None):
+        self.H = None
+        self.c_ops = None
+        self.e_ops = None
+        return
+
+    def configure(self, H, c_ops, e_ops):
+        self.c_ops = c_ops
+        self.e_ops = e_ops
+        self.H = H
+        return
+
+    def evolve(self, rho0, dt, Nt, store_states=False, nout=1):
+        '''
+        propogate the open quantum dynamics
+
+        Parameters
+        ----------
+        rho0 : TYPE
+            DESCRIPTION.
+        dt : TYPE
+            DESCRIPTION.
+        Nt : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        '''
+
+        c_ops = self.c_ops
+        h0 = self.H
+        e_ops = self.e_ops
+
+        rho = _redfield(rho0, c_ops, h0, Nt, dt,e_ops, integrator='SOD')
+
+        return rho
 
 
-# class Redfield:
-#     def __init__(self):
-#         self.h_sys = None
-#         self.c_ops = None
-#         self.obs_ops = None
-#         return
-
-#     def configure(self, h_sys, c_ops, obs_ops):
-#         self.c_ops = c_ops
-#         self.obs_ops = obs_ops
-#         self.h_sys = h_sys
-#         return
-
-#     def run(self, rho0, dt, Nt, store_states=False, nout=1):
-#         '''
-#         propogate the dynamics
-
-#         Parameters
-#         ----------
-#         rho0 : TYPE
-#             DESCRIPTION.
-#         dt : TYPE
-#             DESCRIPTION.
-#         Nt : TYPE
-#             DESCRIPTION.
-
-#         Returns
-#         -------
-#         None.
-
-#         '''
-
-#         c_ops = self.c_ops
-#         h0 = self.h_sys
-#         obs_ops = self.obs_ops
-
-#         rho = _redfield(rho0, c_ops, h0, Nt, dt,obs_ops, integrator='SOD')
-
-#         return rho
-
-
-class Oqs:
-    def __init__(self, ham):
+class OQS(Mol):
+    def __init__(self, H, c_ops=None):
         '''
         open quantum systems class
 
@@ -68,73 +73,78 @@ class Oqs:
         None.
 
         '''
-        self.hamiltonian = ham
-        self.h_sys = ham
-        self.nstates = ham.shape[-1]
+        self.hamiltonian = H
+        self.h_sys = H
+        self.H = H
+        self.nstates = H.shape[-1]
         #self.rho = rho0
-        self.obs_ops = None
+        self.e_ops = None
+        self.c_ops = None
 
     def set_hamiltonian(self, h):
-        self.hamiltonian = h
+        self.H = H
+        return
+
+    def setH(self, h):
+        self.H = H
         return
 
     def set_c_ops(self, c_ops):
         self.c_ops = c_ops
         return
 
-    def set_obs_ops(self, obs_ops):
+    def set_e_ops(self, e_ops):
         """
         set observable operators
         """
-        self.obs_ops = obs_ops
+        self.e_ops = e_ops
         return
 
-    def configure(self, c_ops, obs_ops):
+    def configure(self, c_ops, e_ops):
         self.c_ops = c_ops
-        self.obs_ops = obs_ops
+        self.e_ops = e_ops
         return
 
-    def heom(self, env, nado=5, fname=None):
-        nt = self.nt
-        dt = self.dt
-        return heom(self.oqs, env, self.c_ops, nado, nt, dt, fname)
+    # def heom(self, env, nado=5, fname=None):
+    #     nt = self.nt
+    #     dt = self.dt
+    #     return _heom(self.oqs, env, self.c_ops, nado, nt, dt, fname)
 
-    def redfield(self, env, dt, Nt, integrator='SOD'):
-        nstates = self.nstates
-        rho0 = self.rho0
-        c_ops = self.c_ops
-        h0 = self.hamiltonian
-        obs_ops = self.obs_ops
+    # def redfield(self, env, dt, Nt, integrator='SOD'):
+    #     nstates = self.nstates
+    #     rho0 = self.rho0
+    #     c_ops = self.c_ops
+    #     h0 = self.hamiltonian
+    #     e_ops = self.e_ops
 
-        redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env, integrator='SOD')
+    #     redfield(nstates, rho0, c_ops, h0, Nt, dt,e_ops, env, integrator='SOD')
 
-    def tcl2(self, env, rho0, dt, Nt, integrator='SOD'):
-        nstates = self.nstates
-        c_ops = self.c_ops
-        h0 = self.hamiltonian
-        obs_ops = self.obs_ops
+    # def tcl2(self, env, rho0, dt, Nt, integrator='SOD'):
+    #     nstates = self.nstates
+    #     c_ops = self.c_ops
+    #     h0 = self.hamiltonian
+    #     e_ops = self.e_ops
 
-        redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env, integrator='SOD')
+    #     redfield(nstates, rho0, c_ops, h0, Nt, dt,e_ops, env, integrator='SOD')
 
-        return
+    #     return
 
-    def lindblad(self, rho0, dt, Nt):
-        """
-        lindblad quantum master equations
+    # def lindblad(self, rho0, dt, Nt):
+    #     """
+    #     lindblad quantum master equations
 
-        Parameters
-        ----------
-        rho0: 2D array
-            initial density matrix
-        """
-        c_ops = self.c_ops
-        obs_ops = self.obs_ops
-        h0 = self.hamiltonian
-        lindblad(rho0, h0, c_ops, Nt, dt, obs_ops)
-        return
+    #     Parameters
+    #     ----------
+    #     rho0: 2D array
+    #         initial density matrix
+    #     """
+    #     c_ops = self.c_ops
+    #     e_ops = self.e_ops
+    #     h0 = self.hamiltonian
+    #     lindblad(rho0, h0, c_ops, Nt, dt, e_ops)
+    #     return
 
-    def steady_state(self):
-        return
+
 
     def correlation_2p_1t(self, rho0, ops, dt, Nt, method='lindblad', output='cor.dat'):
         '''
@@ -164,8 +174,8 @@ class Oqs:
         H = self.hamiltonian
         c_ops = self.c_ops
 
-        correlation_2p_1t(H, rho0, ops=ops, c_ops=c_ops, dt=dt, Nt=Nt, \
-                          method=method, output=output)
+        correlation_2p_1t(H, rho0, ops=ops, c_ops=c_ops, dt=dt,\
+                          Nt=Nt, method=method, output=output)
 
         return
 
@@ -175,8 +185,26 @@ class Oqs:
     #     """
     #     pass
 
+def liouvillian(rho, H, c_ops):
+    """
+    lindblad quantum master eqution
+    """
+    rhs = -1j * comm(H, rho)
+    for c_op in c_ops:
+        rhs += lindbladian(c_op, rho)
+    return rhs
+
+def lindbladian(l, rho):
+    """
+    lindblad superoperator: l rho l^\dag - 1/2 * {l^\dag l, rho}
+    l is the operator corresponding to the disired physical process
+    e.g. l = a, for the cavity decay and
+    l = sm for polarization decay
+    """
+    return l.dot(rho.dot(dag(l))) - 0.5 * anticomm(dag(l).dot(l), rho)
+
 #@numba.jit
-def correlation_2p_1t(H, rho0, ops, c_ops, dt, Nt, method='lindblad', output='cor.dat'):
+def _correlation_2p_1t(H, rho0, ops, c_ops, dt, Nt, method='lindblad', output='cor.dat'):
     """
     compute the time-translation invariant two-point correlation function in the
     density matrix formalism using quantum regression theorem
@@ -215,8 +243,7 @@ def correlation_2p_1t(H, rho0, ops, c_ops, dt, Nt, method='lindblad', output='co
     # dynamics
 
     t = 0.0
-    # Nt = len(tlist)
-    # dt = tlist[1] - tlist[0]
+    cor = np.zeros(Nt, dtype=complex)
 
     # sparse matrix
     H = csr_matrix(H)
@@ -232,13 +259,13 @@ def correlation_2p_1t(H, rho0, ops, c_ops, dt, Nt, method='lindblad', output='co
 
             t += dt
 
-            rho = rk4(rho, lindblad, dt, H, c_ops_sparse)
+            rho = rk4(rho, liouvillian, dt, H, c_ops_sparse)
 
             # cor = A.dot(rho).diagonal().sum()
-            cor = obs_dm(rho, A)
-
+            tmp = obs_dm(rho, A)
+            cor[k] = tmp
             # store the reduced density matrix
-            f.write('{} {} \n'.format(t, cor))
+            f.write('{} {} \n'.format(t, tmp))
 
             # f_dm.write(fmt.format(t, *np.ravel(rho)))
 
@@ -251,7 +278,7 @@ def correlation_2p_1t(H, rho0, ops, c_ops, dt, Nt, method='lindblad', output='co
     f.close()
     # f_dm.close()
 
-    return
+    return cor
 
 class Env:
     def __init__(self, temperature, cutoff, reorg):
@@ -288,71 +315,7 @@ class Env:
         """
         pass
 
-def heom(oqs, env, c_ops, nado, nt, dt, fname):
-    '''
 
-    terminator : ado[:,:,nado] = 0
-
-    INPUT:
-        T: in units of energy, kB * T, temperature of the bath
-        reorg: reorganization energy
-        nado : auxiliary density operators, truncation of the hierachy
-        fname: file name for output
-
-    '''
-    nst = oqs.nstate
-    ado = np.zeros((nst, nst, nado), dtype=np.complex128)     # auxiliary density operators
-    ado[:,:,0] = oqs.rho0 # initial density matrix
-
-
-
-    gamma = env.cutoff # cutoff frequency of the environment, larger gamma --> more Makovian
-    T = env.temperature
-    reorg = env.reorg
-    print('Temperature of the environment = {}'.format(T))
-    print('High-Temperature check gamma/(kT) = {}'.format(gamma/T))
-
-    if gamma/T > 0.8:
-        print('WARNING: High-Temperature Approximation may fail.')
-
-    print('Reorganization energy = {}'.format(reorg))
-
-    # D(t) = (a + ib) * exp(- gamma * t)
-    a = np.pi * reorg * T  # initial value of the correlation function D(0) = pi * lambda * kB * T
-    b = 0.0
-    print('Amplitude of the fluctuations = {}'.format(a))
-
-    #sz = np.zeros((nstate, nstate), dtype=np.complex128)
-    sz = c_ops # collapse opeartor
-
-    #H = Hamiltonian()
-    H = oqs.hamiltonian
-
-    f = open(fname,'w')
-    fmt = '{} '* 5 + '\n'
-
-    # propagation time loop - HEOM
-    t = 0.0
-    for k in range(nt):
-
-        t += dt # time increments
-
-        ado[:,:,0] += -1j * commutator(H, ado[:,:,0]) * dt - \
-            commutator(sz, ado[:,:,1]) * dt
-
-        for n in range(nado-1):
-            ado[:,:,n] += -1j * commutator(H, ado[:,:,n]) * dt + \
-                        (- commutator(sz, ado[:,:,n+1]) - n * gamma * ado[:,:,n] + n * \
-                        (a * commutator(sz, ado[:,:,n-1]) + \
-                         1j * b * anticommutator(sz, ado[:,:,n-1]))) * dt
-
-        # store the reduced density matrix
-        f.write(fmt.format(t, ado[0,0,0], ado[0,1,0], ado[1,0,0], ado[1,1,0]))
-
-        #sz += -1j * commutator(sz, H) * dt
-
-    f.close()
-    return ado[:,:,0]
 
 @numba.jit
 def func(rho, h0, c_ops, l_ops):
@@ -446,9 +409,9 @@ def coherent(N, alpha):
 
     x = basis(N, 0)
     a = destroy(N)
-    D = np.expm(alpha * dag(a) - np.conj(alpha) * a)
+    D = la.expm(alpha * dag(a) - np.conj(alpha) * a)
 
-    return D * x
+    return D @ x
 
     # elif method == "analytic" or offset > 0:
 
@@ -525,107 +488,7 @@ shape = [3, 3], type = oper, isHerm = True
     # else:
     #     raise TypeError(
     #         "The method option can only take values 'operator' or 'analytic'")
-#def dipole_cor(Nt, dt):
-#    """
-#    compute the dipole auto-correlation function using quantum regression theorem
-#
-#    """
-#    ns = n_el * n_vt * n_vc * n_cav  # number of states in the system
-#
-#    # initialize the density matrix
-#    rho0 = np.zeros((ns, ns), dtype=np.complex128)
-#    rho0[0,0] = 1.0
-#
-#    d = np.zeros((ns, ns), dtype = np.complex128)
-#    d[0, 2] = d[2,0] = 1.0
-#    d[3, 0] = d[3,0] = 1.0
-#
-#    rho0 = np.matmul(d, rho0)
-#
-#
-#    # dissipative operators
-#    S1 = np.zeros((ns,ns), dtype=np.complex128)
-#    S2 = np.zeros((ns,ns), dtype = np.complex128)
-#
-#    S1[2,2] = 1.0
-#    S2[3,3] = 1.0
-#
-#    Lambda1 = getLambda(S1)
-#    Lambda2 = getLambda(S2)
-#
-#    # short time approximation
-#    # Lambda = 0.5 * reorg * T * ((hop - Delta)/cutfreq**2 * sigmay + 1./cutfreq * sigmaz)
-#
-#    h0 = Hamiltonian()
-#    print(h0)
-#
-#    f = open('cor.dat', 'w')
-#    f_dm = open('den_mat.dat', 'w')
-#
-#    t = 0.0
-#    dt2 = dt/2.0
-#
-#
-#    # first-step
-#    rho_half = rho0 + func(rho0, h0, S1, S2, Lambda1, Lambda2) * dt2
-#    rho1 = rho0 + func(rho_half, h0, S1, S2, Lambda1, Lambda2) * dt
-#
-#    rho_old = rho0
-#    rho = rho1
-#
-#
-#    for k in range(Nt):
-#
-#        t += dt
-#
-#        rho_new = rho_old + func(rho, h0, S1, S2, Lambda1, Lambda2) * 2. * dt
-#
-#        # update rho_old
-#        rho_old = rho
-#        rho = rho_new
-#
-#        cor = np.trace(np.matmul(d, rho))
-#        # store the reduced density matrix
-#        f.write('{} {} \n'.format(t, cor))
-#        f_dm.write('{} {} \n'.format(t, rho[2,0]))
-#
-#
-#    f.close()
-#    f_dm.close()
-#
-#    return
 
-def corr(t, temp, cutoff, reorg, SD='Drude'):
-    """
-    bath correlation function C(t) = <x(t)x>. For the Drude spectral density,
-    in the high-temperature limit, C(t) ~ pi * reorg * T * e^{-cutoff * t}
-    """
-    # numerical treatment
-    #NP = 1000
-    #maxfreq = 1.0
-    #omega = np.linspace(1e-4, maxfreq, NP)
-    #dfreq = omega[1] - omega[0]
-
-#    cor = sum(spec_den(omega) * (coth(omega/2./T) * np.cos(omega * t) - \
-#                       1j * np.sin(omega * t))) * dfreq
-
-    # test correlation function
-#    reorg = 500. # cm^{-1}
-#    reorg *= wavenumber2hartree
-
-#    T = 0.03 # eV
-#    T /= au2ev
-
-#    td = 10 # fs
-#    td /= au2fs
-
-    ### analytical
-
-    # Drude spectral density at high-temperature approximation
-    if SD == 'Drude':
-        cor = np.pi * temp * reorg * np.exp(- cutoff * t)
-
-    return cor
 
 
 def make_lambda(ns, h0, S, T, cutfreq, reorg):
@@ -666,7 +529,7 @@ def make_lambda(ns, h0, S, T, cutfreq, reorg):
 
 
 
-def redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env):
+def _redfield(nstates, rho0, c_ops, h0, Nt, dt,e_ops, env):
     """
     time propagation of the Redfield equation with second-order differencing
     input:
@@ -675,7 +538,7 @@ def redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env):
         Nt: total number of time steps
         dt: tiem step
         c_ops: list of collapse operators
-        obs_ops: list of observable operators
+        e_ops: list of observable operators
         rho0: initial density matrix
     """
     t = 0.0
@@ -691,7 +554,7 @@ def redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env):
     reorg = env.reorg
 
     #f = open(fname,'w')
-    fmt = '{} '* (len(obs_ops) + 1) + '\n'
+    fmt = '{} '* (len(e_ops) + 1) + '\n'
 
     # construct system-bath operators in H_SB
 
@@ -733,8 +596,8 @@ def redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env):
         f_dm.write('{} '* (nstates**2 + 1) + '\n'.format(t, *rho))
 
         # take a partial trace to obtain the rho_el
-        obs = np.zeros(len(obs_ops))
-        for i, obs_op in enumerate(obs_ops):
+        obs = np.zeros(len(e_ops))
+        for i, obs_op in enumerate(e_ops):
             obs[i] = observe(obs_op, rho)
 
         f_obs.write(fmt.format(t * au2fs, *obs))
@@ -752,8 +615,283 @@ def observe(A, rho):
     """
     return A.dot(rho).diagonal().sum()
 
+class Lindblad_solver():
+    def __init__(self, H=None, c_ops=None, e_ops=None):
+        self.c_ops = c_ops
+        self.e_ops = e_ops
+        self.H = H
+        return
 
-def lindblad(rho0, h0, c_ops, Nt, dt, obs_ops):
+    def set_c_ops(self, c_ops):
+        self.c_ops = c_ops
+        return
+
+    def set_e_ops(self, e_ops):
+        """
+        set observable operators
+        """
+        self.e_ops = e_ops
+        return
+
+    def setH(self, H):
+        self.H = H
+        return
+
+    def configure(self, c_ops, e_ops):
+        self.c_ops = c_ops
+        self.e_ops = e_ops
+        return
+    
+    def liouvillian(self):
+        H = self.H
+        c_ops = self.c_ops
+        return superop.liouvillian(H, c_ops)
+    
+    def evolve(self, rho0, dt, Nt, return_result):
+        return _lindblad(rho0, self.H, self.c_ops, e_ops=self.e_ops, \
+                  Nt=Nt, dt=dt, return_result=return_result)
+
+    def correlation_2p_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
+        '''
+        two-point correlation function <A(t)B>
+
+        Parameters
+        ----------
+        rho0 : TYPE
+            DESCRIPTION.
+        ops : TYPE
+            DESCRIPTION.
+        dt : TYPE
+            DESCRIPTION.
+        Nt : TYPE
+            DESCRIPTION.
+        method : TYPE, optional
+            DESCRIPTION. The default is 'lindblad'.
+        output : TYPE, optional
+            DESCRIPTION. The default is 'cor.dat'.
+
+        Returns
+        -------
+        None.
+
+        '''
+
+        c_ops = self.c_ops
+        H = self.H
+
+        return _correlation_2p_1t(H, rho0, ops=[a_op, b_op], c_ops=c_ops, dt=dt,\
+                          Nt=Nt, output=output)
+
+
+    def correlation_3op_2t(self, rho0, ops, dt, Nt, Ntau):
+        """
+        Internal function for calculating the three-operator two-time
+        correlation function:
+        <A(t)B(t+tau)C(t)>
+        using the Linblad master equation solver.
+        """
+
+        # the solvers only work for positive time differences and the correlators
+        # require positive tau
+        # if state0 is None:
+        #     rho0 = steadystate(H, c_ops)
+        #     tlist = [0]
+        # elif isket(state0):
+        #     rho0 = ket2dm(state0)
+        # else:
+        #     rho0 = state0
+        H = self.H
+        c_ops = self.c_ops
+        rho_t = _lindblad(H, rho0, c_ops, dt=dt, Nt=Nt, return_result=True).rholist
+
+        a_op, b_op, c_op = ops
+
+        corr_mat = np.zeros([Nt, Ntau], dtype=complex)
+
+        for t_idx, rho in enumerate(rho_t):
+
+            corr_mat[t_idx, :] = _lindblad(H, rho0=c_op @ rho @ a_op, \
+                                           dt=dt, Nt=Ntau, c_ops=c_ops,\
+                e_ops=[b_op], return_result=True).observables[:,0]
+
+        return corr_mat
+
+    def correlation_4op_2t(self, rho0, ops, dt, nt, ntau):
+        """
+        Internal function for calculating the four-operator two-time
+        correlation function:
+        <A(t)B(t+tau)C(t+tau)D>
+        using the Linblad master equation solver.
+        """
+
+        if len(ops) != 4:
+            raise ValueError('Number of operators is not 4.')
+        else:
+            a, b, c, d = ops
+
+        corr = self.correlation_3op_2t(rho0, [a, b@c, d], dt, nt, ntau)
+        return corr
+
+class Result:
+    def __init__(self, description=None, rho0=None, dt=None, Nt=None):
+        self.description = description
+        self.dt = dt
+        self.timesteps = Nt
+        self.observables = None
+        self.rholist = None
+        self.rho0 = rho0
+        return
+
+    def expect(self):
+        return self.observables
+
+    def times(self):
+        if dt is not None & Nt is not None:
+            return np.arange(self.Nt) * self.dt
+        else:
+            sys.exit("ERROR: Either dt or Nt is None.")
+
+class HEOMSolverDL():
+    def __init__(self, H=None, c_ops=None, e_ops=None):
+        self.c_ops = c_ops
+        self.e_ops = e_ops
+        self.e_ops = e_ops
+        self.H = H
+        return
+
+    def set_c_ops(self, c_ops):
+        self.c_ops = c_ops
+        return
+
+    def set_e_ops(self, e_ops):
+        """
+        set observable operators
+        """
+        self.e_ops = e_ops
+        return
+
+    def set_e_ops(self, e_ops):
+        """
+        set observable operators
+        """
+        self.e_ops = e_ops
+        return
+    def setH(self, H):
+        self.H = H
+        return
+
+    def configure(self, c_ops, e_ops):
+        self.c_ops = c_ops
+        self.e_ops = e_ops
+        return
+
+    def solve(self, rho0, dt, Nt, return_result):
+        return _lindblad(self.H, rho0, self.c_ops, e_ops=self.e_ops, \
+                  Nt=Nt, dt=dt, return_result=return_result)
+
+    def correlation_2p_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
+        '''
+        two-point correlation function <A(t)B>
+
+        Parameters
+        ----------
+        rho0 : TYPE
+            DESCRIPTION.
+        ops : TYPE
+            DESCRIPTION.
+        dt : TYPE
+            DESCRIPTION.
+        Nt : TYPE
+            DESCRIPTION.
+        method : TYPE, optional
+            DESCRIPTION. The default is 'lindblad'.
+        output : TYPE, optional
+            DESCRIPTION. The default is 'cor.dat'.
+
+        Returns
+        -------
+        None.
+
+        '''
+
+        c_ops = self.c_ops
+        H = self.H
+
+        return _correlation_2p_1t(H, rho0, ops=[a_op, b_op], c_ops=c_ops, dt=dt,\
+                          Nt=Nt, output=output)
+
+
+    def correlation_3op_2t(self, rho0, ops, dt, Nt, Ntau):
+        """
+        Internal function for calculating the three-operator two-time
+        correlation function:
+        <A(t)B(t+tau)C(t)>
+        using the Linblad master equation solver.
+        """
+
+        # the solvers only work for positive time differences and the correlators
+        # require positive tau
+        # if state0 is None:
+        #     rho0 = steadystate(H, c_ops)
+        #     tlist = [0]
+        # elif isket(state0):
+        #     rho0 = ket2dm(state0)
+        # else:
+        #     rho0 = state0
+        H = self.H
+        c_ops = self.c_ops
+        rho_t = _lindblad(H, rho0, c_ops, dt=dt, Nt=Nt, return_result=True).rholist
+
+        a_op, b_op, c_op = ops
+
+        corr_mat = np.zeros([Nt, Ntau], dtype=complex)
+
+        for t_idx, rho in enumerate(rho_t):
+
+            corr_mat[t_idx, :] = _lindblad(H, rho0=c_op @ rho @ a_op, \
+                                           dt=dt, Nt=Ntau, c_ops=c_ops,\
+                e_ops=[b_op], return_result=True).observables[:,0]
+
+        return corr_mat
+# exponential series solvers
+
+# def _correlation_es_2t(H, state0, tlist, taulist, c_ops, a_op, b_op, c_op):
+#     """
+#     Internal function for calculating the three-operator two-time
+#     correlation function:
+#     <A(t)B(t+tau)C(t)>
+#     using an exponential series solver.
+#     """
+
+#     # the solvers only work for positive time differences and the correlators
+#     # require positive tau
+#     if state0 is None:
+#         rho0 = steadystate(H, c_ops)
+#         tlist = [0]
+#     elif isket(state0):
+#         rho0 = ket2dm(state0)
+#     else:
+#         rho0 = state0
+
+#     if debug:
+#         print(inspect.stack()[0][3])
+
+#     # contruct the Liouvillian
+#     L = liouvillian(H, c_ops)
+
+#     corr_mat = np.zeros([np.size(tlist), np.size(taulist)], dtype=complex)
+#     solES_t = ode2es(L, rho0)
+
+#     # evaluate the correlation function
+#     for t_idx in range(len(tlist)):
+#         rho_t = esval(solES_t, [tlist[t_idx]])
+#         solES_tau = ode2es(L, c_op * rho_t * a_op)
+#         corr_mat[t_idx, :] = esval(expect(b_op, solES_tau), taulist)
+
+#     return corr_mat
+
+def _lindblad(H, rho0, c_ops, Nt, dt, e_ops=[], return_result=True):
+
     """
     time propagation of the lindblad quantum master equation
     with second-order differencing
@@ -766,7 +904,7 @@ def lindblad(rho0, h0, c_ops, Nt, dt, obs_ops):
 
     dt: time step
         c_ops: list of collapse operators
-        obs_ops: list of observable operators
+        e_ops: list of observable operators
         rho0: initial density matrix
 
     Returns
@@ -775,58 +913,163 @@ def lindblad(rho0, h0, c_ops, Nt, dt, obs_ops):
         density matrix at time t = Nt * dt
     """
 
-    nstates = h0.shape[-1]
+    nstates = H.shape[-1]
     # initialize the density matrix
     rho = rho0
 
-    f_dm = open('den_mat.dat', 'w')
-    fmt_dm = '{} ' * (nstates**2 + 1) + '\n'
-
-    f_obs = open('obs.dat', 'w')
-    fmt = '{} '* (len(obs_ops) + 1) + '\n'
-
-
     t = 0.0
-    dt2 = dt/2.0
-
     # first-step
     # rho_half = rho0 + liouvillian(rho0, h0, c_ops) * dt2
     # rho1 = rho0 + liouvillian(rho_half, h0, c_ops) * dt
 
     # rho_old = rho0
     # rho = rho1
+    if return_result == False:
 
-    for k in range(Nt):
+        f_dm = open('den_mat.dat', 'w')
+        fmt_dm = '{} ' * (nstates**2 + 1) + '\n'
 
-        t += dt
+        f_obs = open('obs.dat', 'w')
+        fmt = '{} '* (len(e_ops) + 1) + '\n'
 
-        # rho_new = rho_old + liouvillian(rho, h0, c_ops) * 2. * dt
-        # # update rho_old
-        # rho_old = rho
-        # rho = rho_new
+        for k in range(Nt):
 
-        rho = rk4(rho, liouvillian, dt, h0, c_ops)
+            t += dt
 
-        # dipole-dipole auto-corrlation function
-        #cor = np.trace(np.matmul(d, rho))
+            # rho_new = rho_old + liouvillian(rho, h0, c_ops) * 2. * dt
+            # # update rho_old
+            # rho_old = rho
+            # rho = rho_new
+
+            rho = rk4(rho, liouvillian, dt, H, c_ops)
+
+            # dipole-dipole auto-corrlation function
+            #cor = np.trace(np.matmul(d, rho))
+
+            # take a partial trace to obtain the rho_el
+            # compute observables
+            observables = np.zeros(len(e_ops), dtype=complex)
+
+            for i, obs_op in enumerate(e_ops):
+                observables[i] = obs_dm(rho, obs_op)
+
+            f_obs.write(fmt.format(t, *observables))
+
+
+        f_obs.close()
+        f_dm.close()
+
+        return rho
+
+    else:
+
+        rholist = [] # store density matries
+
+        result = Result(dt=dt, Nt=Nt, rho0=rho0)
+
+        observables = np.zeros((Nt, len(e_ops)), dtype=complex)
+
+        for k in range(Nt):
+
+            t += dt
+            rho = rk4(rho, liouvillian, dt, H, c_ops)
+
+            rholist.append(rho)
+
+            observables[k, :] = [obs_dm(rho, op) for op in e_ops]
+
+        result.observables = observables
+        result.rholist = rholist
+
+        return result
+
+def _heom_dl(H, rho0, c_ops, e_ops, temperature, cutoff, reorganization,\
+             nado, dt, nt, fname=None, return_result=True):
+    '''
+
+    terminator : ado[:,:,nado] = 0
+
+    INPUT:
+        T: in units of energy, kB * T, temperature of the bath
+        reorg: reorganization energy
+        nado : auxiliary density operators, truncation of the hierachy
+        fname: file name for output
+
+    '''
+    nst = H.shape[0]
+    ado = np.zeros((nst, nst, nado), dtype=np.complex128)     # auxiliary density operators
+    ado[:,:,0] = rho0 # initial density matrix
+
+
+
+    gamma = cutoff # cutoff frequency of the environment, larger gamma --> more Makovian
+    T = temperature/au2k
+    reorg = reorganization
+    print('Temperature of the environment = {}'.format(T))
+    print('High-Temperature check gamma/(kT) = {}'.format(gamma/T))
+
+    if gamma/T > 0.8:
+        print('WARNING: High-Temperature Approximation may fail.')
+
+    print('Reorganization energy = {}'.format(reorg))
+
+    # D(t) = (a + ib) * exp(- gamma * t)
+    a = np.pi * reorg * T  # initial value of the correlation function D(0) = pi * lambda * kB * T
+    b = 0.0
+    print('Amplitude of the fluctuations = {}'.format(a))
+
+    #sz = np.zeros((nstate, nstate), dtype=np.complex128)
+    sz = c_ops # collapse opeartor
+
+
+    f = open(fname,'w')
+    fmt = '{} '* 5 + '\n'
+
+    # propagation time loop - HEOM
+    t = 0.0
+    for k in range(nt):
+
+        t += dt # time increments
+
+        ado[:,:,0] += -1j * commutator(H, ado[:,:,0]) * dt - \
+            commutator(sz, ado[:,:,1]) * dt
+
+        for n in range(nado-1):
+            ado[:,:,n] += -1j * commutator(H, ado[:,:,n]) * dt + \
+                        (- commutator(sz, ado[:,:,n+1]) - n * gamma * ado[:,:,n] + n * \
+                        (a * commutator(sz, ado[:,:,n-1]) + \
+                         1j * b * anticommutator(sz, ado[:,:,n-1]))) * dt
 
         # store the reduced density matrix
-        f_dm.write(fmt_dm.format(t, *rho.toarray().ravel()))
+        f.write(fmt.format(t, ado[0,0,0], ado[0,1,0], ado[1,0,0], ado[1,1,0]))
 
-        # take a partial trace to obtain the rho_el
-        # compute observables
-        observables = np.zeros(len(obs_ops), dtype=complex)
+        #sz += -1j * commutator(sz, H) * dt
 
-        for i, obs_op in enumerate(obs_ops):
-            observables[i] = obs_dm(rho, obs_op)
+    f.close()
+    return ado[:,:,0]
 
-        f_obs.write(fmt.format(t, *observables))
+if __name__ == '__main__':
 
+    from lime.phys import pauli
+    s0, sx, sy, sz = pauli()
 
-    f_obs.close()
-    f_dm.close()
+    H = 2 * np.pi * 0.1 * sx
 
-    return rho
+    psi0 = basis(2, 0)
+    rho0 = ket2dm(psi0)
 
+    mesolver = Lindblad_solver(H, c_ops=[0.2 * sx], e_ops = [sz])
+    Nt = 200
+    dt = 0.05
+    
+    L = mesolver.liouvillian()
+    
+    #result = mesolver.evolve(rho0, dt, Nt=Nt, return_result=True)
+    #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
+    
 
-
+    
+    # from lime.style import subplots
+    # fig, ax = subplots()
+    # times = np.arange(Nt) * dt
+    # ax.imshow(corr.real)

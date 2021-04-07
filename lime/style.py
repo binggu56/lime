@@ -1,6 +1,9 @@
 from matplotlib import rc, ticker
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap, BoundaryNorm
+import numpy as np
 
 def subplots(nrows=1, ncols=1, figsize = (4, 3), sharex=True, \
              sharey=True, **kwargs):
@@ -64,15 +67,15 @@ def set_style(fontsize=12):
     #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 
 
-#    plt.rcParams['text.latex.preamble'] = [
-###    r'\usepackage{time}',
-#    r'\usepackage{tgheros}',    # helvetica font
-#    r'\usepackage[]{amsmath}',   # math-font matching  helvetica
-#    r'\usepackage{bm}',
-##    r'\sansmath'                # actually tell tex to use it!
-#    r'\usepackage{siunitx}',    # micro symbols
-#    r'\sisetup{detect-all}',    # force siunitx to use the fonts
-#    ]
+#     plt.rcParams['text.latex.preamble'] = [
+# ##    r'\usepackage{time}',
+#     r'\usepackage{tgheros}',    # helvetica font
+#     r'\usepackage[]{amsmath}',   # math-font matching  helvetica
+#     r'\usepackage{bm}',
+# #    r'\sansmath'                # actually tell tex to use it!
+#     r'\usepackage{siunitx}',    # micro symbols
+#     r'\sisetup{detect-all}',    # force siunitx to use the fonts
+#     ]
 
     #rc('text.latex', preamble=r'\usepackage{cmbright}')
 
@@ -164,6 +167,31 @@ def matplot(x, y, f, vmin=None, vmax=None, output='output.pdf', xlabel='X', \
 
     return fig, ax
 
+def color_code(x, y, z, fig, ax, cbar=False):
+    # Create a set of line segments so that we can color them individually
+    # This creates the points as a N x 1 x 2 array so that we can stack points
+    # together easily to get the segments. The segments array for line collection
+    # needs to be (numlines) x (points per line) x 2 (for x and y)
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    # Create a continuous norm to map from data points to colors
+    norm = plt.Normalize(0, 1)
+    lc = LineCollection(segments, cmap='viridis', norm=norm)
+    # Set the values used for colormapping
+    lc.set_array(z)
+    lc.set_linewidth(2)
+    line = ax.add_collection(lc)
+
+    # if cbar:
+    #     cbar = fig.colorbar(line, orientation='horizontal')
+    #     cbar.set_ticks([0., 1.])
+    #     cbar.set_ticklabels(['matter', 'photon'])
+
+    # ax.set_xlim(-6,4)
+    # ax.set_ylim(3.,8.0)
+
+    return line
 
 
 

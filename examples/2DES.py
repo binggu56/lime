@@ -30,7 +30,7 @@ from lime.optics import Pulse
 from lime.mol import Mol
 
 from lime.signal.sos import linear_absorption, GSB, SE, ESA, DQC_R1, DQC_R2
-import lime.signal.superoperator as so 
+import lime.signal.liouville as so
 
 
 

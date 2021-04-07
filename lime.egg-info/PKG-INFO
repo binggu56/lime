@@ -1,14 +1,13 @@
 Metadata-Version: 1.1
-Name: scitools
+Name: lime
 Version: 0.1.0
 Summary: Python Boilerplate contains all the boilerplate you need to create a Python package.
-Home-page: https://github.com/audreyr/scitools
+Home-page: https://github.com/binggu56/lime
 Author: Bing Gu
 Author-email: binggu56@gmail.com
 License: MIT license
-Description-Content-Type: UNKNOWN
 Description: ========
-        scitools
+        lime
         ========
         
         
@@ -29,21 +28,28 @@ Description: ========
         
         
         * Free software: MIT license
-        * Documentation: https://scitools.readthedocs.io.
+        * Documentation: docs/manual.pdf
         
         
         Features
         --------
         
-        * TODO
+        Computational modules for research of light-matter interaction 
+        
+        nonlinear molecular spectroscopy
+        
+        polariton chemistry
+        
+        quantum light spectroscopy
+        
+        laser-driven matter, etc.
         
         Credits
         -------
+        Bing Gu 
         
-        This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+        email: bingg at uci dot edu 
         
-        .. _Cookiecutter: https://github.com/audreyr/cookiecutter
-        .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
         
         
         =======
@@ -55,7 +61,7 @@ Description: ========
         
         * First release on PyPI.
         
-Keywords: scitools
+Keywords: lime
 Platform: UNKNOWN
 Classifier: Development Status :: 2 - Pre-Alpha
 Classifier: Intended Audience :: Developers

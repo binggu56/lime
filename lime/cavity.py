@@ -74,10 +74,21 @@ class Composite(Mol):
         """
         if subspace == 'A':
             return kron(o, self.B.idm)
+
         elif subspace == 'B':
             return kron(self.A.idm, o)
         else:
-            sys.exit('Error: The operator does not belong to any subspace.')
+            raise ValueError('The subspace option can only be A or B.')
+
+    def promote_ops(self, ops, subspaces=None):
+        if subspaces is None:
+            subspaces = ['A'] * len(ops)
+
+        new_ops = []
+        for i, op in enumerate(ops):
+            new_ops.append(self.promote(op, subspaces[i]))
+
+        return new_ops
 
     def spectrum(self):
         if self.H == None:
@@ -188,7 +199,7 @@ class Pulse:
 
 
 class Cavity():
-    def __init__(self, freq, n_cav, kappa=None):
+    def __init__(self, freq, n_cav, Q=None):
         self.freq = freq
         self.resonance = freq
         self.n_cav = n_cav
@@ -199,7 +210,9 @@ class Cavity():
 
         self.annihilate = self.get_annihilate()
         self.H = self.getH()
-        self.kappa = kappa
+        if Q is not None:
+            self.kappa = freq/2./Q
+
 #    @property
 #    def hamiltonian(self):
 #        return self._hamiltonian
@@ -373,6 +386,23 @@ class Polariton:
     def eigenstates(self, nstates=1, sparse=True):
         """
         compute the polaritonic spectrum
+
+        Parameters
+        ----------
+        nstates : int, optional
+            number of eigenstates. The default is 1.
+        sparse : TYPE, optional
+            if the Hamiltonian is sparse. The default is True.
+
+        Returns
+        -------
+        evals : TYPE
+            DESCRIPTION.
+        evecs : TYPE
+            DESCRIPTION.
+        n_ph : TYPE
+            photonic fractions in polaritons.
+
         """
 
         if self.H == None:

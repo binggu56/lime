@@ -5,7 +5,7 @@ Created on Thu Jun 25 22:01:00 2020
 
 @author: Bing
 
-Modules for computing signals with superoperator formalism
+Modules for computing signals with superoperator formalism in Liouville space
 
 Instead of performing open quantum dynamics, the Liouvillian is directly diagonalized
 
@@ -14,50 +14,76 @@ Possible improvements:
 """
 import numpy as np
 import matplotlib.pyplot as plt
-
-#from scipy.linalg import kron, identity
 from scipy.sparse import kron, identity
 from scipy.sparse.linalg import eigs
 
 
 from lime.phys import dag, pauli
+from qutip import Qobj as Basic
 
-# from qutip import Qobj as Basic
-from Qobj import Qobj
 
-# class Qobj(Basic):
-#     def __init__(self, data=None, dims=None):
-#         """
-#         Class for quantum operators: is this useful?
+def liouvillian(H, c_ops):
+    '''
+    Construct the Liouvillian out of the Hamiltonian and collapse operators
 
-#         Parameters
-#         ----------
-#         n : int
-#             size of Hilbert space.
+    Parameters
+    ----------
+    H : TYPE
+        DESCRIPTION.
+    c_ops : TYPE
+        DESCRIPTION.
 
-#         Returns
-#         -------
-#         None.
+    Returns
+    -------
+    l : TYPE
+        DESCRIPTION.
 
-#         """
-#         Basic.__init__(self, dims=dims, inpt=data)
-#         return
+    '''
+    dissipator = 0.
+    for c_op in c_ops:
+        dissipator = dissipator + lindblad_dissipator(c_op)
 
-#     def dot(self, b):
+    l = operator_to_superoperator(H) + 1j * dissipator
 
-#         return Qobj(np.dot(self.data, b.data))
+    return l
 
-#     def to_vector(self):
-#         return operator_to_vector(self.data)
+class Qobj(Basic):
+    def __init__(self, data=None, dims=None):
+        """
+        Class for quantum operators: is this useful?
 
-#     def to_super(self, type='commutator'):
+        Parameters
+        ----------
+        n : int
+            size of Hilbert space.
 
-#         return operator_to_superoperator(self.data, type=type)
+        Returns
+        -------
+        None.
 
-#     def to_linblad(self, gamma=1.):
-#         l = self.data
-#         return gamma * (kron(l, l.conj()) - \
-#                 operator_to_superoperator(dag(l).dot(l), type='anticommutator'))
+        """
+        Basic.__init__(self, dims=dims, inpt=data)
+        # self.ndim = data.shape[-1]
+        return
+
+    def dot(self, b):
+
+        return Qobj(np.dot(self.data, b.data))
+
+    def conjugate(self):
+        return np.conjugate(self.data)
+
+    def to_vector(self):
+        return operator_to_vector(self.data)
+
+    def to_super(self, type='commutator'):
+
+        return operator_to_superoperator(self.data, type=type)
+
+    def to_linblad(self, gamma=1.):
+        l = self.data
+        return gamma * (kron(l, l.conj()) - \
+                operator_to_superoperator(dag(l).dot(l), type='anticommutator'))
 
 
 def liouville_space(N):
@@ -97,7 +123,7 @@ def operator_to_superoperator(a, type='commutator'):
 
     """
 
-    N = np.shape(a.toarray())[-1]
+    N = a.shape[-1]
 
     idm = identity(N)
 
@@ -128,6 +154,12 @@ def operator_to_superoperator(a, type='commutator'):
     else:
 
         raise ValueError('Error: superoperator {} does not exist.'.format(type))
+
+
+def lindblad_dissipator(l, gamma=1.):
+    return gamma * (kron(l, l.conj()) - \
+            operator_to_superoperator(dag(l).dot(l), type='anticommutator'))
+
 
 def left(a):
 
@@ -170,26 +202,6 @@ def correlation_2p_1t(omegas, rho0, ops, L):
     return out
 
 
-s0, sx, sy, sz = pauli()
-
-sx = Qobj(sx)
-
-nstates = 10
-
-h = Qobj(np.diagflat(np.arange(10)))
-
-dip = np.zeros(h.shape)
-dip[0,:] = dip[:,0] = np.random.rand(nstates)
-
-dip =  Qobj(dip)
-c_op = dip
-
-l = h.to_super() + 1j * c_op.to_linblad(gamma=0.02)
-
-
-ntrans = 3 * nstates # number of transitions
-eigvals1, U1 = eigs(l, k=ntrans, which='LR')
-
 def sort(eigvals, eigvecs):
 
     idx = np.argsort(eigvals)
@@ -199,42 +211,132 @@ def sort(eigvals, eigvecs):
 
     return eigvals, eigvecs
 
-eigvals1, U1 = sort(eigvals1, U1)
 
-print(eigvals1.real)
+def absorption(mol, omegas, c_ops):
+    """
+    superoperator formalism for absorption spectrum
 
-omegas = np.linspace(0.1 , 10.5, 200)
+    Parameters
+    ----------
+    mol : TYPE
+        DESCRIPTION.
+    omegas: vector
+        detection window of the spectrum
+    c_ops : TYPE
+        list of collapse operators
 
-rho0  =  Qobj(dims=[10,10])
-rho0.data[0,0] = 1.0
+    Returns
+    -------
+    None.
 
-ops = [sz, sz]
+    """
 
-# out = correlation_2p_1t(omegas, rho0, ops, L)
-# print(eigvecs)
-eigvals2, U2 = eigs(dag(l), k=ntrans, which='LR')
+    gamma = 0.02
 
-
-eigvals2, U2 = sort(eigvals2, U2)
-
-#idx = np.where(eigvals2.real > 0.2)[0]
-#print(idx)
-
-
-norm = [np.vdot(U2[:,n], U1[:,n]) for n in range(ntrans)]
-
-la = np.zeros(len(omegas), dtype=complex) # linear absorption
-for j, omega in enumerate(omegas):
-
-    for n in range(ntrans):
-
-        la[j] += np.vdot(dip.to_vector(), U1[:,n]) * \
-             np.vdot(U2[:,n], dip.dot(rho0).to_vector()) \
-             /(omega - eigvals1[n]) / norm[n]
+    l = h.to_super() + 1j * c_op.to_linblad(gamma=gamma)
 
 
-fig, ax = plt.subplots()
-# ax.scatter(eigvals1.real, eigvals1.imag)
-ax.plot(omegas, -2 * la.imag)
+    ntrans = 3 * nstates # number of transitions
+    eigvals1, U1 = eigs(l, k=ntrans, which='LR')
+
+    eigvals1, U1 = sort(eigvals1, U1)
+
+    print(eigvals1.real)
+
+    omegas = np.linspace(0.1 , 10.5, 200)
+
+    rho0 = Qobj(dims=[10,10])
+    rho0.data[0,0] = 1.0
+
+    ops = [sz, sz]
+
+    # out = correlation_2p_1t(omegas, rho0, ops, L)
+    # print(eigvecs)
+    eigvals2, U2 = eigs(dag(l), k=ntrans, which='LR')
 
 
+    eigvals2, U2 = sort(eigvals2, U2)
+
+    #idx = np.where(eigvals2.real > 0.2)[0]
+    #print(idx)
+
+
+    norm = [np.vdot(U2[:,n], U1[:,n]) for n in range(ntrans)]
+
+    la = np.zeros(len(omegas), dtype=complex) # linear absorption
+    for j, omega in enumerate(omegas):
+
+        for n in range(ntrans):
+
+            la[j] += np.vdot(dip.to_vector(), U1[:,n]) * \
+                 np.vdot(U2[:,n], dip.dot(rho0).to_vector()) \
+                 /(omega - eigvals1[n]) / norm[n]
+
+
+    fig, ax = plt.subplots()
+    # ax.scatter(eigvals1.real, eigvals1.imag)
+    ax.plot(omegas, -2 * la.imag)
+
+    return
+
+if __name__ == '__main__':
+    s0, sx, sy, sz = pauli()
+
+    sx = Qobj(sx)
+
+    nstates = 10
+
+    h = Qobj(np.diagflat(np.arange(10)))
+    #h = np.diagflat(np.arange(10))
+
+    dip = np.zeros(h.shape)
+    dip[0,:] = dip[:,0] = np.random.rand(nstates)
+
+    dip =  Qobj(dip)
+    c_op = dip
+    gamma = 0.02
+
+    l = h.to_super() + 1j * c_op.to_linblad(gamma=gamma)
+
+
+    ntrans = 3 * nstates # number of transitions
+    eigvals1, U1 = eigs(l, k=ntrans, which='LR')
+
+    eigvals1, U1 = sort(eigvals1, U1)
+
+    print(eigvals1.real)
+
+    omegas = np.linspace(0.1 , 10.5, 200)
+
+    rho0  =  Qobj(dims=[10,10])
+    rho0.data[0,0] = 1.0
+
+    ops = [sz, sz]
+
+    # out = correlation_2p_1t(omegas, rho0, ops, L)
+    # print(eigvecs)
+    eigvals2, U2 = eigs(dag(l), k=ntrans, which='LR')
+
+
+    eigvals2, U2 = sort(eigvals2, U2)
+
+    #idx = np.where(eigvals2.real > 0.2)[0]
+    #print(idx)
+
+
+    norm = [np.vdot(U2[:,n], U1[:,n]) for n in range(ntrans)]
+
+    la = np.zeros(len(omegas), dtype=complex) # linear absorption
+    for j, omega in enumerate(omegas):
+
+        for n in range(ntrans):
+
+            la[j] += np.vdot(dip.to_vector(), U1[:,n]) * \
+                 np.vdot(U2[:,n], dip.dot(rho0).to_vector()) \
+                 /(omega - eigvals1[n]) / norm[n]
+
+
+    fig, ax = plt.subplots()
+    # ax.scatter(eigvals1.real, eigvals1.imag)
+    ax.plot(omegas, -2 * la.imag)
+    plt.show()

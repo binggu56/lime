@@ -5,14 +5,84 @@ SOS formula for computing the nonlinear signals
 import numpy as np
 import matplotlib.pyplot as plt
 from numba import jit
-
 import sys
-sys.path.append(r'C:\Users\Bing\Google Drive\lime')
-sys.path.append(r'/Users/bing/Google Drive/lime')
+
 
 from lime.phys import lorentzian
 from lime.units import au2ev
 
+def isdiag(M):
+    return np.all(M == np.diag(np.diagonal(M)))
+
+def absorption(omegas, mol, fname=None, normalize=False, scale=1.):
+    '''
+    SOS for linear absorption signal S = 2 pi |mu_{fg}|^2 delta(omega - omega_{fg}).
+    The delta function is replaced with a Lorentzian function.
+
+    Parameters
+    ----------
+    omegas : 1d array
+        detection frequency window for the signal
+    H : 2D array
+        Hamiltonian
+    edip : 2d array
+        electric dipole moment
+    output : TYPE, optional
+        DESCRIPTION. The default is None.
+    gamma : float, optional
+        Lifetime broadening. The default is 1./au2ev.
+    normalize : TYPE, optional
+        Normalize the maximum intensity of the signal as 1. The default is False.
+
+    Returns
+    -------
+    signal : 1d array
+        linear absorption signal at omegas
+
+    '''
+
+
+    H = mol.H
+    edip = mol.edip
+    gamma = mol.gamma
+
+    if isdiag(H):
+        eigenergies = H.diagonal()
+    else:
+        sys.exit('The Hamiltonian is not a diagonal matrix.')
+
+    # set the ground state energy to 0
+    eigenergies = eigenergies - eigenergies[0]
+
+    # assume the initial state is from the ground state 0
+    signal = 0.0
+    for j, e in enumerate(eigenergies):
+        signal += edip[0, j]**2 * lorentzian(omegas, e, gamma[j])
+
+    if normalize:
+        signal /= max(signal)
+
+    if fname is not None:
+
+        fig, ax = plt.subplots(figsize=(4,3))
+
+        ax.plot(omegas * au2ev, signal)
+
+        for j, e in enumerate(eigenergies):
+            ax.axvline(e * au2ev, 0., edip[0, j]**2 * scale, color='grey')
+
+
+        ax.set_xlim(min(omegas) * au2ev, max(omegas) * au2ev)
+        ax.set_xlabel('Energy (eV)')
+        ax.set_ylabel('Absorption')
+        #ax.set_yscale('log')
+        # ax.set_ylim(0, 1)
+
+        fig.subplots_adjust(wspace=0, hspace=0, bottom=0.15, \
+                            left=0.17, top=0.96, right=0.96)
+        fig.savefig(fname, dpi=1200, transparent=True)
+
+    return signal
 
 def linear_absorption(omegas, transition_energies, dip, output=None, \
                       gamma=1./au2ev, normalize=False):
@@ -26,8 +96,8 @@ def linear_absorption(omegas, transition_energies, dip, output=None, \
         the frequency range for the signal
     transition_energies : TYPE
         DESCRIPTION.
-    dip : 2d array
-        dipole matrix
+    edip : 1d array
+        transtion dipole moment
     output : TYPE, optional
         DESCRIPTION. The default is None.
     gamma : float, optional
@@ -59,10 +129,10 @@ def linear_absorption(omegas, transition_energies, dip, output=None, \
 
         ax.plot(omegas * au2ev, signal)
 
-        scale = 1./np.sum(dip**2)
+        #scale = 1./np.sum(dip**2)
 
-        for transition_energy in transition_energies:
-            ax.axvline(transition_energy * au2ev, 0., dip[j]**2 * scale, color='grey')
+        for j, transition_energy in enumerate(transition_energies):
+            ax.axvline(transition_energy * au2ev, 0., dip[j]**2, color='grey')
 
 
         ax.set_xlim(min(omegas) * au2ev, max(omegas) * au2ev)

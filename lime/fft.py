@@ -2,7 +2,7 @@
 
 
 import numpy as np
-import numba
+#import numba
 
 def fft(x, f):
     """

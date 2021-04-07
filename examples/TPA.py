@@ -31,7 +31,7 @@ from lime.optics import Pulse
 from lime.mol import Mol
 
 from lime.signal.sos import linear_absorption, TPA2D_time_order, TPA2D 
-import lime.signal.superoperator as so 
+import lime.signal.liouville as so
 
 
 

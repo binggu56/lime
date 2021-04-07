@@ -9,8 +9,33 @@ import sys
 
 from lime.units import au2fs, au2ev
 
-sp = csr_matrix(np.array([[0.0, 0.0],[1.0,0.0]], dtype=np.complex128))
-sm = csr_matrix(np.array([[0.0, 1.0],[0.0,0.0]], dtype=np.complex128))
+
+def lowering(dims=2):
+    if dims == 2:
+        sm = csr_matrix(np.array([[0.0, 1.0],[0.0,0.0]], dtype=np.complex128))
+    else:
+        raise ValueError('dims can only be 2.')
+    return sm
+
+
+def raising(dims=2):
+    """
+    raising operator for spin-1/2
+    Parameters
+    ----------
+    dims: integer
+        Hilbert space dimension
+
+    Returns
+    -------
+    sp: 2x2 array
+        raising operator
+    """
+    if dims == 2:
+        sp = csr_matrix(np.array([[0.0, 0.0], [1.0, 0.0]], dtype=np.complex128))
+    else:
+        raise ValueError('dims can only be 2.')
+    return sp
 
 
 def sinc(x):
@@ -59,6 +84,7 @@ def get_index(array, value):
         print('Warning: the value is out of the range of the array!')
 
     return np.argmin(np.abs(array-value))
+
 
 def rgwp(x, x0=0., sigma=1.):
     '''
@@ -261,9 +287,8 @@ def basis_transform(A, v):
         Anew: matrix A in the new basis
     """
     Anew = dag(v).dot(A.dot(v))
-    Anew = csr_matrix(A)
 
-    return Anew
+    return csr_matrix(Anew)
 
 def heaviside(x):
     return 0.5 * (np.sign(x) + 1)
@@ -342,6 +367,23 @@ def boson(omega, n, ZPE=False):
         h.setdiag(np.arange(n) * omega)
     return h
 
+def quadrature(n):
+    """
+    Quadrature operator of a photon mode
+
+    Parameters
+    ----------
+    n : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    a = destroy(n)
+    return 1./np.sqrt(2) * (a + dag(a))
 
 def obs_dm(rho, d):
     """
@@ -409,7 +451,7 @@ def tdse(wf, h):
     return -1j * h.dot(wf)
 
 def quantum_dynamics(ham, psi0, dt=0.001, Nt=1, obs_ops=None, nout=1,\
-                    t0=0.0):
+                    t0=0.0, output='obs.dat'):
     '''
     Laser-driven dynamics in the presence of laser pulses
 
@@ -438,15 +480,15 @@ def quantum_dynamics(ham, psi0, dt=0.001, Nt=1, obs_ops=None, nout=1,\
     #wf = csr_matrix(wf0).transpose()
     psi = psi0
 
-    nstates = len(psi0)
+    #nstates = len(psi0)
 
     #f = open(fname,'w')
     if obs_ops is not None:
         fmt = '{} '* (len(obs_ops) + 1)  + '\n'
-    fmt_dm = '{} '* (nstates + 1)  + '\n'
+    #fmt_dm = '{} '* (nstates + 1)  + '\n'
 
-    f_dm = open('psi.dat', 'w') # wavefunction
-    f_obs = open('obs.dat', 'w') # observables
+    #f_dm = open('psi.dat', 'w') # wavefunction
+    f_obs = open(output, 'w') # observables
 
     t = t0
 
@@ -467,10 +509,11 @@ def quantum_dynamics(ham, psi0, dt=0.001, Nt=1, obs_ops=None, nout=1,\
 
         #print(Aave)
 
-        f_dm.write(fmt_dm.format(t, *psi))
+#        f_dm.write(fmt_dm.format(t, *psi))
         f_obs.write(fmt.format(t, *Aave))
 
-    f_dm.close()
+    np.savez('psi', psi)
+    #f_dm.close()
     f_obs.close()
 
     return
@@ -577,60 +620,6 @@ def driven_dissipative_dynamics(ham, dip, rho0, pulse, dt=0.001, Nt=1, \
     '''
     return
 
-def lindblad_superoperator(l, gamma=1.):
-    return gamma * (kron(l, l.conj()) - \
-            operator_to_superoperator(dag(l).dot(l), type='anticommutator'))
-
-def operator_to_superoperator(a, type='commutator'):
-    """
-    promote an operator/density matrix to an superoperator in Liouville space
-
-    Parameters
-    ----------
-    A : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-
-    """
-
-    N = a.shape[-1]
-
-    idm = identity(N)
-
-    if type == 'commutator':
-
-        return kron(a, idm) - kron(idm, a.T)
-
-    elif type == 'left':
-
-        # elementwise operator for defining the commutator
-
-        # for n in range(N2):
-        #     i, j = divmod(n, N)
-        #     for m in range(N2):
-        #         k, l = divmod(m, N)
-        #         am[n, m] = a[i, k] * idm[j,l]
-
-        return kron(a, idm)
-
-    elif type == 'right':
-
-        return kron(idm, a.T)
-
-    elif type == 'anticommutator':
-
-        return kron(a, idm) + kron(idm, a.T)
-
-    else:
-
-        raise ValueError('Error: superoperator {} does not exist.'.format(type))
-
-
-
-
 
 ####################
 # spin chains
@@ -663,7 +652,7 @@ def multi_spin(onsite, nsites):
 
     return ham, lower
 
-def multiboson(omegas, nmodes, J=0, N=2, PBC=True):
+def multiboson(omega, nmodes, J=0, truncate=2):
     """
     construct the hamiltonian for a multi-spin system
 
@@ -687,37 +676,43 @@ def multiboson(omegas, nmodes, J=0, N=2, PBC=True):
 
     """
 
-    h0 = boson(N)
+    N = truncate
+    h0 = boson(omega, N)
     idm = identity(N)
     a = destroy(N)
     adag = dag(a)
-    x = a  + adag
+    x = csr_matrix(a  + adag)
 
-    head = omegas[0] * kron(h0, tensor_power(idm, nmodes-1))
-    tail = omegas[-1] * kron(tensor_power(idm, nmodes-1), h0)
-    ham = head + tail
 
-    for i in range(1, nmodes-1):
-        ham += omegas[i] * kron(tensor_power(idm, i), \
-                                kron(h0, tensor_power(idm, nmodes-i-1)))
-    if nmodes == 2:
-        for i in range(nmodes-1):
-            ham += J * kron(x, x)
+    if nmodes == 1:
+
+        return h0
+
+    elif nmodes == 2:
+
+        ham = kron(idm, h0) + kron(h0, idm) + J * kron(x, x)
+        return ham
 
     elif nmodes > 2:
+
+        head = kron(h0, tensor_power(idm, nmodes-1))
+        tail = kron(tensor_power(idm, nmodes-1), h0)
+        ham = head + tail
+
+        for i in range(1, nmodes-1):
+             ham += kron(tensor_power(idm, i), \
+                                     kron(h0, tensor_power(idm, nmodes-i-1)))
 
         hop_head = J * kron(kron(x, x), tensor_power(idm, nmodes-2))
         hop_tail = J * kron(tensor_power(idm, nmodes-2), kron(x, x))
 
-        if PBC == True:
-            loop = J * kron(x, kron(tensor_power(idm, nmodes-2), x))
-            ham += hop_head + hop_tail + loop
-        else:
-            ham += hop_head + hop_tail
+        ham += hop_head + hop_tail
 
-        for i in range(1, nmodes-1):
+        for i in range(1, nmodes-2):
             ham += J * kron(tensor_power(idm, i), \
-                                kron(kron(x, x), tensor_power(idm, nmodes-i-1)))
+                                kron(kron(x, x), tensor_power(idm, nmodes-i-2)))
+
+        # connect the last mode to the first mode
 
     # lower_head = kron(a, tensor_power(idm, nmodes-1))
     # lower_tail = kron(tensor_power(idm, nmodes-1), a)
@@ -727,14 +722,14 @@ def multiboson(omegas, nmodes, J=0, N=2, PBC=True):
     #     lower += kron(tensor_power(idm, i), kron(a, tensor_power(idm, nmodes-i-1)))
 
 
-    return ham, lower
+        return ham
 
 def tensor_power(a, n:int):
     """
     kron(a, kron(a, ...))
     """
     if n == 1:
-        return a
+        return csr_matrix(a)
     else:
         tmp = a
         for i in range(n-1):
