@@ -646,7 +646,10 @@ class Lindblad_solver():
         H = self.H
         c_ops = self.c_ops
         return superop.liouvillian(H, c_ops)
-    
+
+    def steady_states(self):
+        pass
+
     def evolve(self, rho0, dt, Nt, return_result):
         return _lindblad(rho0, self.H, self.c_ops, e_ops=self.e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
