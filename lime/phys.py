@@ -427,24 +427,27 @@ def resolvent(omega, Ulist, dt):
     return sum(np.exp(1j * omega * t) * Ulist)
 
 
-def propagator(h, Nt, dt):
+def basis(N, j):
     """
-    compute the resolvent for the multi-point correlation function signals
-    U(t) = e^{-i H t}
+    Parameters
+    ----------
+    N: int
+        Size of Hilbert space for a multi-level system.
+    j: int
+        The j-th basis function.
+
+    Returns
+    -------
+    1d complex array
+        j-th basis function for the Hilbert space.
     """
+    b = np.zeros(N, dtype=complex)
+    if N < j:
+        sys.exit('Increase the size of the Hilbert space.')
+    else:
+        b[j] = 1.0
 
-    # propagator
-    U = identity(h.shape[-1], dtype=complex)
-
-    # set the ground state energy to 0
-    print('Computing the propagator ...\n Please make sure that the ground-state energy is 0.')
-    Ulist = [U]
-
-    for k in range(Nt):
-        U = rk4(U, tdse, dt, h)
-        Ulist.append(U)
-
-    return Ulist
+    return b
 
 
 def tdse(wf, h):

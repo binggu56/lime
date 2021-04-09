@@ -15,12 +15,14 @@ from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
 from lime.superoperator import lindblad_dissipator, operator_to_superoperator
 
 from lime.units import au2fs, au2k
-from lime.mol import Mol
+from lime.mol import Mol, Result
 
 from scipy.sparse import csr_matrix
 import scipy.sparse.linalg as la
 
 import lime.superoperator as superop
+
+
 
 class Redfield_solver:
     def __init__(self, H, c_ops=None, e_ops=None):
@@ -332,27 +334,7 @@ def func(rho, h0, c_ops, l_ops):
 
 
 
-def basis(N, j):
-    """
-    Parameters
-    ----------
-    N: int
-        Size of Hilbert space for a multi-level system.
-    j: int
-        The j-th basis function.
 
-    Returns
-    -------
-    1d complex array
-        j-th basis function for the Hilbert space.
-    """
-    b = np.zeros(N, dtype=complex)
-    if N < j:
-        sys.exit('Increase the size of the Hilbert space.')
-    else:
-        b[j] = 1.0
-
-    return b
 
 def coherent(N, alpha):
     """Generates a coherent state with eigenvalue alpha.
@@ -685,7 +667,6 @@ class Lindblad_solver():
         return _correlation_2p_1t(H, rho0, ops=[a_op, b_op], c_ops=c_ops, dt=dt,\
                           Nt=Nt, output=output)
 
-
     def correlation_3op_2t(self, rho0, ops, dt, Nt, Ntau):
         """
         Internal function for calculating the three-operator two-time
@@ -735,24 +716,7 @@ class Lindblad_solver():
         corr = self.correlation_3op_2t(rho0, [a, b@c, d], dt, nt, ntau)
         return corr
 
-class Result:
-    def __init__(self, description=None, rho0=None, dt=None, Nt=None):
-        self.description = description
-        self.dt = dt
-        self.timesteps = Nt
-        self.observables = None
-        self.rholist = None
-        self.rho0 = rho0
-        return
 
-    def expect(self):
-        return self.observables
-
-    def times(self):
-        if dt is not None & Nt is not None:
-            return np.arange(self.Nt) * self.dt
-        else:
-            sys.exit("ERROR: Either dt or Nt is None.")
 
 class HEOMSolverDL():
     def __init__(self, H=None, c_ops=None, e_ops=None):

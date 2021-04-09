@@ -228,7 +228,7 @@ class Polariton:
         return kron(self.mol.dip, self.cav.idm)
     
     def get_dm(self):
-        return kron(self.mol.dm, self.cav.get_dm())
+        return kron(self.mol.dm, self.cav.vacuum_dm())
     
     def get_cav_leak(self):
         """

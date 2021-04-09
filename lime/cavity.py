@@ -12,9 +12,9 @@ import scipy
 import sys
 
 
-from .units import au2fs, au2k, au2ev
-from .phys import dag, coth, ket2dm, comm, anticomm, pauli
-from .mol import Mol
+from lime.units import au2fs, au2k, au2ev
+from lime.phys import dag, coth, ket2dm, comm, anticomm, pauli, destroy
+from lime.mol import Mol
 
 class Composite(Mol):
     def __init__(self, A, B):
@@ -22,7 +22,7 @@ class Composite(Mol):
 
         Parameters
         ----------
-        A : object
+        A : mol object
             Quantum system.
         B : object
             Quantum system.
@@ -39,15 +39,25 @@ class Composite(Mol):
         self.ida = A.idm
         self.idb = B.idm
         self.H = None
+        self.rdm_a = None
+        self.rdm_b = None
+        self.dim = A.dim * B.dim
+        self.dims = [A.dim, B.dim]
 
     def getH(self, a_ops=None, b_ops=None, g=0):
         """
-
+        The interaction between A and B are
+            V_AB = sum_i g[i] * a_ops[i] * b_ops[i]
+        Parameters
+        ----------
+        a_ops: list of arrays
+            coupling operators for subsystem A
+        b_ops: list of arrays
+            coupling operators for subsystem B
+        g: coupling constants
 
         Returns
         -------
-        2d array
-            Hamiltonian of the full system.
 
         """
 
@@ -90,21 +100,94 @@ class Composite(Mol):
 
         return new_ops
 
+
+    def eigenstates(self, k=6):
+        """
+        compute the polaritonic spectrum
+
+        Parameters
+        ----------
+        k : int, optional
+            number of eigenstates. The default is 1.
+        sparse : TYPE, optional
+            if the Hamiltonian is sparse. The default is True.
+
+        Returns
+        -------
+        evals : TYPE
+            DESCRIPTION.
+        evecs : TYPE
+            DESCRIPTION.
+        n_ph : TYPE
+            photonic fractions in polaritons.
+
+        """
+
+        if self.H is None:
+            sys.exit('Please call getH to compute the Hamiltonian first.')
+
+        if k < self.dim:
+
+            evals, evecs = linalg.eigsh(self.H, k, which='SA')
+            return evals, evecs
+
+        else:
+
+            # compute the full polariton states
+            h = self.H.toarray()
+            evals, evecs = scipy.linalg.eigh(self.H.toarray())
+
+            return evals, evecs
+
     def spectrum(self):
-        if self.H == None:
-            sys.exit('Call getH to contrust the full Hamiltonian first.')
+        if self.H is None:
+            sys.exit('Call getH() to compute the full Hamiltonian first.')
         else:
             eigvals, eigvecs = np.linalg.eigh(self.H.toarray())
 
             return eigvals, eigvecs
 
+    def rdm(self, psi, which='A'):
+        """
+        compute the reduced density matrix of A/B from a pure state
+
+        Parameters
+        ----------
+        psi: array
+            pure state
+        which: str
+            indicator of which rdm A or B. Default 'A'.
+
+        Returns
+        -------
+
+        """
+        na = self.A.dim
+        nb = self.B.dim
+        psi_reshaped = psi.reshape((na, nb))
+        if which == 'A':
+
+            rdm = psi_reshaped @ dag(psi_reshaped)
+            return rdm
+
+        elif which == 'B':
+            rdm = psi_reshaped.T @ psi_reshaped.conj()
+            return rdm
+        else:
+            raise ValueError('which option can only be A or B.')
+
+    def purity(self, psi):
+        rdm = self.rdm(psi)
+
+        return np.trace(rdm @ rdm)
+
 def ham_ho(freq, N, ZPE=False):
     """
     input:
-        freq: fundemental frequency in units of Energy
+        freq: fundamental frequency in units of Energy
         n : size of matrix
     output:
-        h: hamiltonian of the harmonic oscilator
+        h: hamiltonian of the harmonic oscillator
     """
 
     if ZPE:
@@ -199,19 +282,18 @@ class Pulse:
 
 
 class Cavity():
-    def __init__(self, freq, n_cav, Q=None):
+    def __init__(self, freq, ncav, Q=None):
         self.freq = freq
         self.resonance = freq
-        self.n_cav = n_cav
-        self.n = n_cav
+        self.n_cav = ncav
+        self.n = ncav
+        self.dim = ncav # dimension of Fock space
 
-        self.idm = identity(n_cav)
-        self.create = self.get_create()
-
-        self.annihilate = self.get_annihilate()
+        self.idm = identity(ncav)
+        # self.create = self.get_create()
+        # self.annihilate = destroy(ncav)
         self.H = self.getH()
-        if Q is not None:
-            self.kappa = freq/2./Q
+        self.quality_factor = Q
 
 #    @property
 #    def hamiltonian(self):
@@ -223,10 +305,17 @@ class Cavity():
 
     def get_ham(self, zpe=False):
         return self.getH(zpe)
+    #
+    # def H(self, ZPE=False):
+    #     self._H = ham_ho(self.freq, self.dim, ZPE=ZPE)
+    #     return self._H
 
-    def getH(self, zpe=False):
-        self.H = ham_ho(self.freq, self.n_cav)
+    def getH(self, ZPE=False):
+        self.H = ham_ho(self.freq, self.n_cav, ZPE=ZPE)
         return self.H
+
+    def setQ(self, Q):
+        self.quality_factor = Q
 
     def get_nonhermitianH(self):
         '''
@@ -242,10 +331,15 @@ class Cavity():
 
         '''
         ncav = self.n_cav
-        return ham_ho(self.freq, ncav) - 1j * self.kappa * np.identity(ncav)
+        if self.quality_factor is not None:
+            kappa = self.freq/2./self.quality_factor
+        else:
+            raise ValueError('The quality factor cannot be None.')
+
+        return self.H - 1j * kappa * np.identity(ncav)
 
     def ham(self, ZPE=False):
-        return ham_ho(self.freq, self.n_cav)
+        return ham_ho(self.freq, self.n_cav, ZPE=ZPE)
 
     def get_create(self):
         n_cav = self.n_cav
@@ -260,7 +354,28 @@ class Cavity():
 
         return a.tocsr()
 
-    def get_dm(self):
+    def create(self):
+        n_cav = self.n_cav
+        c = lil_matrix((n_cav, n_cav))
+        c.setdiag(np.sqrt(np.arange(1, n_cav)), -1)
+        return c.tocsr()
+
+    def annihilate(self):
+        n_cav = self.n_cav
+        a = lil_matrix((n_cav, n_cav))
+        a.setdiag(np.sqrt(np.arange(1, n_cav)), 1)
+
+        return a.tocsr()
+
+    def vacuum(self):
+        """
+        get initial density matrix for cavity vacuum state
+        """
+        vac = np.zeros(self.n_cav)
+        vac[0] = 1.
+        return csr_matrix(vac)
+
+    def vacuum_dm(self):
         """
         get initial density matrix for cavity vacuum state
         """
@@ -291,16 +406,20 @@ class Cavity():
         return a.tocsr()
 
 
-class Polariton:
-    def __init__(self, mol, cav, RWA=False):
-        #self.g = g
+class Polariton(Composite):
+    def __init__(self, mol, cav):
+
+        super(Polariton, self).__init__(mol, cav)
+
         self.mol = mol
         self.cav = cav
         self._ham = None
         self.dip = None
         self.cav_leak = None
         self.H = None
-        self.size = mol.nstates * cav.n_cav
+        self.dims = [mol.dim, cav.n_cav]
+        self.dim = mol.dim * cav.n_cav
+
 
         #self.dm = kron(mol.dm, cav.get_dm())
 
@@ -372,7 +491,7 @@ class Polariton:
         return kron(self.mol.dip, self.cav.idm)
 
     def get_dm(self):
-        return kron(self.mol.dm, self.cav.get_dm())
+        return kron(self.mol.dm, self.cav.vacuum_dm())
 
     def get_cav_leak(self):
         """
@@ -383,13 +502,13 @@ class Polariton:
 
         return self.cav_leak
 
-    def eigenstates(self, nstates=1, sparse=True):
+    def eigenstates(self, k=6):
         """
         compute the polaritonic spectrum
 
         Parameters
         ----------
-        nstates : int, optional
+        k : int, optional
             number of eigenstates. The default is 1.
         sparse : TYPE, optional
             if the Hamiltonian is sparse. The default is True.
@@ -408,17 +527,16 @@ class Polariton:
         if self.H == None:
             sys.exit('Please call getH to compute the Hamiltonian first.')
 
-        if sparse:
+        if k < self.dim:
 
-            evals, evecs = linalg.eigsh(self.H, nstates, which='SA')
+            evals, evecs = linalg.eigsh(self.H, k, which='SA')
+
             # number of photons in polariton states
             num_op = self.cav.num()
             num_op = kron(self.mol.idm, num_op)
 
-            #print(num_op.shape, evecs.shape)
-
-            n_ph = np.zeros(nstates)
-            for j in range(nstates):
+            n_ph = np.zeros(k)
+            for j in range(k):
                 n_ph[j] = np.real(evecs[:, j].conj().dot(
                     num_op.dot(evecs[:, j])))
 
@@ -427,16 +545,16 @@ class Polariton:
         else:
 
             """
-            compute the full polaritonic spectrum with numpy
+            compute the full polariton states with numpy
             """
             h = self.H.toarray()
-            evals, evecs = scipy.linalg.eigh(h, subset_by_index=[0, nstates])
+            evals, evecs = scipy.linalg.eigh(h, subset_by_index=[0, k])
             # number of photons in polariton states
             num_op = self.cav.num()
             num_op = kron(self.mol.idm, num_op)
 
-            n_ph = np.zeros(nstates)
-            for j in range(nstates):
+            n_ph = np.zeros(k)
+            for j in range(k):
                 n_ph[j] = np.real(evecs[:, j].conj().dot(
                     num_op.dot(evecs[:, j])))
 
@@ -477,4 +595,19 @@ def QRM(omega0, omegac, ncav=2):
 
 
 if __name__ == '__main__':
-    mol = QRM(1, 1)
+
+    #mol = QRM(1, 1)
+    from lime.phys import quadrature
+    s0, sx, sy, sz = pauli()
+
+    hmol = 0.5 * (-sz + s0)
+
+    mol = Mol(hmol, sx)  # atom
+    cav = Cavity(1, 2)  # cavity
+    print(cav.H)
+
+    # pol = Composite(mol, cav)
+    # pol.getH([sx], [cav.annihilate() + cav.create()], [0.1])
+    # evals, evecs = pol.eigenstates()
+    # print(pol.purity(evecs[:,2]))
+
