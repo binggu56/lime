@@ -9,10 +9,10 @@ import sys
 
 
 from lime.phys import lorentzian
+from lime.fft import fft2
 from lime.units import au2ev
+from lime.optics import heaviside
 
-def isdiag(M):
-    return np.all(M == np.diag(np.diagonal(M)))
 
 def absorption(omegas, mol, fname=None, normalize=False, scale=1.):
     '''
@@ -694,48 +694,125 @@ def DQC_R2(evals, dip, omega1=None, omega2=[], omega3=None, tau1=None, tau3=None
 
 #     return signal
 
+def etpa(omegaps, mol, epp, g_idx, e_idx, f_idx):
+    """
+    ETPA signal with temporal modes (TMs).
+    The JSA is reconstructed with the TMs first.
+
+    Parameters
+    ----------
+    omegaps : TYPE
+        DESCRIPTION.
+    g_idx : TYPE
+        DESCRIPTION.
+    e_idx : TYPE
+        DESCRIPTION.
+    f_idx : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    signal : TYPE
+        DESCRIPTION.
+
+    """
+    g = g_idx
+
+    Es = mol.eigenenergies()
+    edip = mol.edip
+
+    # joint temporal amplitude
+    t1, t2, jta = epp.get_jta()
+    # setup the temporal grid
+    T1, T2 = np.meshgrid(t1, t2)
+
+    # discrete heaviside function
+    theta = heaviside(T2 - T1)
+
+    signal = np.zeros(len(omegaps), dtype=complex)
+    for j, omegap in enumerate(omegaps): # loop over pump frequencies
+
+        omega1 = omega2 = omegap/2.
+
+        for f in f_idx: # loop over final states
+            for e in e_idx:
+
+                detuning2 = Es[f] - Es[e] - omega2
+                detuning1 = Es[e] - Es[g] - omega1
+
+                D = edip[e, g] * edip[f, e]
+
+                signal[j] += D * np.sum(theta * np.exp(1j * detuning2 * T2 +
+                                                    1j * detuning1 * T1) * jta)
+
+                detuning2 = Es[f] - Es[e] - omega1
+                detuning1 = Es[e] - Es[g] - omega2
+                signal[j] += D * np.sum(theta * np.exp(1j * detuning2 * T2 +
+                                                    1j * detuning1 * T1) * jta.T)
+
+    return signal
+
+if __name__ == '__main__':
+
+    from lime.units import au2fs
+    from lime.style import subplots
+    fig, ax = plt.subplots(figsize=(4.2,3.2))
+    E = np.array([0., 0.5, 1.1, 1.3])/au2ev
+    gamma = [0, 0.02, 0.02]
+    H = np.diag(E)
+
+    from lime.mol import Mol
+    from lime.optics import Biphoton
+
+    from matplotlib import cm
+
+    dip =np.zeros((len(E), len(E)))
+    dip[1,2] = dip[2,1] = 1.
+    dip[1,3] = dip[3,1] = 1.
+
+    dip[0,1] = dip[1, 0] = 1.
+    # dip[0,2] = dip[2,0] = 1.
+
+    mol = Mol(H, dip)
+    epp = Biphoton(0, 0.04/au2ev, Te=10./au2fs)
+    p = np.linspace(-4, 4, 256)/au2ev
+    q = p
+    epp.set_grid(p, q)
+
+    epp.get_jsa()
+    epp.plt_jsa()
+
+    pump = np.linspace(0.5, 1.5, 100)/au2ev
+    # probe = np.linspace(0.8, 1.2, 100)
+    # omega_min = min(pump)
+    # omega_max = max(pump)
+
+    signal = etpa(pump, mol, epp, [0], [1], [2, 3])
+
+    fig, ax = subplots()
+    ax.plot(pump*au2ev, np.abs(signal)**2)
+    plt.show()
+    # SPE = SE(E, dip, omega1=-pump, omega3=probe, tau2=1e-3, g_idx=[0], e_idx= [1,2],\
+    #           gamma=gamma)
 
 
-# fig, ax = plt.subplots(figsize=(4.2,3.2))
-# E = [0., 1., 1.1]
-# gamma = [0, 0.02, 0.02]
-
-# from lime.phys import paulix
-# from matplotlib import cm
-# dip =np.zeros((3,3))
-# dip[1,2] = dip[2,1] = 1.
-# dip[0,1] = dip[1, 0] = 1.
-# dip[0,2] = dip[2,0] = 1.
-
-# pump = np.linspace(0.8, 1.2, 100)
-# probe = np.linspace(0.8, 1.2, 100)
-# omega_min = min(pump)
-# omega_max = max(pump)
-
-
-# SPE = SE(E, dip, omega1=-pump, omega3=probe, tau2=1e-3, g_idx=[0], e_idx= [1,2],\
-#           gamma=gamma)
-
-
-# im = ax.imshow(SPE.real/abs(SPE).max(), interpolation='bilinear', cmap=cm.RdBu,
-#                origin='lower', extent=[omega_min, omega_max, omega_min, omega_max],
-#                vmax=1, vmin=-1, aspect=1) #-abs(SPE).max())
-
-# ax.axhline(y=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-# ax.axhline(y=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-
-# ax.axvline(x=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-# ax.axvline(x=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-# #im = ax.contour(SPE,
-# #               origin='lower', extent=[0.8, omega_max, omega_min, omega_max],
-# #               vmax=1, vmin=0) #-abs(SPE).max())
-
-# ax.set_xlabel(r'$-\Omega_1/\omega_\mathrm{c}$')
-# ax.set_ylabel(r'$\Omega_3/\omega_\mathrm{c}$')
-# #ax.set_title(r'$T_2 = $' + str(t2))
-
-# plt.colorbar(im)
-
-# fig.subplots_adjust(hspace=0.0,wspace=0.0,bottom=0.14,left=0.0,top=0.95,right=0.98)
-
-# #plt.savefig(fname[:-4]+'.pdf', transparent=True)
+    # im = ax.imshow(SPE.real/abs(SPE).max(), interpolation='bilinear', cmap=cm.RdBu,
+    #                origin='lower', extent=[omega_min, omega_max, omega_min, omega_max],
+    #                vmax=1, vmin=-1, aspect=1) #-abs(SPE).max())
+    #
+    # ax.axhline(y=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+    # ax.axhline(y=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+    #
+    # ax.axvline(x=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+    # ax.axvline(x=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+    # #im = ax.contour(SPE,
+    # #               origin='lower', extent=[0.8, omega_max, omega_min, omega_max],
+    # #               vmax=1, vmin=0) #-abs(SPE).max())
+    #
+    # ax.set_xlabel(r'$-\Omega_1/\omega_\mathrm{c}$')
+    # ax.set_ylabel(r'$\Omega_3/\omega_\mathrm{c}$')
+    # #ax.set_title(r'$T_2 = $' + str(t2))
+    #
+    # plt.colorbar(im)
+    #
+    # fig.subplots_adjust(hspace=0.0,wspace=0.0,bottom=0.14,left=0.0,top=0.95,right=0.98)

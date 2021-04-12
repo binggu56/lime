@@ -68,6 +68,9 @@ class Biphoton:
                           Te=self.entanglement_time)
         return self.__jsa
 
+    def jta(self):
+
+
     def detect(self):
         """
         two-photon detection amplitude in a temporal grid defined by
@@ -122,7 +125,7 @@ def _jsa(p, q, pump_bw, model='sinc', Te=None):
     Parameters
     ----------
     p : 1d array
-        signal frequency
+        signal frequency (detuning from the center frequency)
     q : 1d array
         idler frequency
     pump_bw : float

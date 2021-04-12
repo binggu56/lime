@@ -193,10 +193,41 @@ def color_code(x, y, z, fig, ax, cbar=False):
 
     return line
 
+def level_scheme(E, fname=None):
+    """
+    plot the energy levels
+    Parameters
+    ----------
+    E
+
+    Returns
+    -------
+
+    """
+    from matplotlib.lines import Line2D
+
+    fig, ax = plt.subplots(figsize=(2,4))
+    ax.set_frame_on(False)     # Alternate way to turn frame off
+
+    ax.hlines(E, xmin=0.0, xmax=0.1)
+    ax.set_ylabel('Energy (eV)')
+
+    ax.axes.get_xaxis().set_visible(False)  # xticks off
+
+    xmin, xmax = ax.get_xaxis().get_view_interval()
+    ymin, ymax = ax.get_yaxis().get_view_interval()
+    ax.add_artist(Line2D((xmin, xmin), (ymin, ymax), color='black', linewidth=2))
+
+    if fname is not None:
+        fig.savefig(fname)
+
+    plt.show()
+    return ax
+
+if __name__ == '__main__':
+    fig, ax = subplots(ncols=1, nrows=2)
+    import numpy as np
+    x = np.linspace(0,10)
+    level_scheme(x)
 
 
-# if __name__ == '__main__':
-#     fig, ax = subplots(ncols=1, nrows=2)
-#     import numpy as np
-#     x = np.linspace(0,10)
-#     ax[1].plot(x, np.sin(x))

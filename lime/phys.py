@@ -318,13 +318,13 @@ def dag(a):
 def coth(x):
     return 1./np.tanh(x)
 
-def pauliz():
+def sigmaz():
      return np.array([[1.0,0.0],[0.0,-1.0]], dtype=np.complex128)
 
-def paulix():
+def sigmax():
     return np.array([[0.0,1.0],[1.0,0.0]], dtype=np.complex128)
 
-def pauliy():
+def sigmay():
     return np.array([[0.0,-1j],[1j,0.0]], dtype=np.complex128)
 
 def pauli():
@@ -798,3 +798,14 @@ def tensor_power(a, n:int):
 #    ax.set_ylim(0, 0.5)
 #
 #    fig.savefig('polariton_spectrum.eps', transparent=True)
+
+
+def isherm(a):
+    return np.allclose(a, dag(a))
+
+def isdiag(M):
+    return np.all(M == np.diag(np.diagonal(M)))
+
+if __name__ == '__main__':
+    a = sigmaz() - 1j * sigmax()
+    print(isherm(a))

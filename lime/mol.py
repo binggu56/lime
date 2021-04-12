@@ -34,7 +34,9 @@ class Result:
         self._psilist = None
         self.rho0 = rho0
         self.psi0 = psi0
+        self.times = np.arange(Nt)*dt
         return
+
     @property
     def psilist(self):
         return self._psilist
@@ -408,7 +410,7 @@ class Mol:
 
 
 class SESolver:
-    def __init__(self, H):
+    def __init__(self, H, isherm=True):
         """
         Basic class for time-dependent Schrodinger equation.
 
@@ -423,6 +425,7 @@ class SESolver:
 
         """
         self.H = H
+        self._isherm = isherm
         return
 
     def evolve(self, psi0, dt=0.001, Nt=1,
@@ -497,7 +500,6 @@ class SESolver:
         corr_vec = np.zeros(Nt, dtype=complex)
 
         psi_ket = _quantum_dynamics(H, c_op @ psi0, dt=dt, Nt=Nt).psilist
-
         psi_bra = _quantum_dynamics(H, dag(a_op) @ psi0, dt=dt, Nt=Nt).psilist
 
         for j in range(Nt):
@@ -632,7 +634,6 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
 
     t = t0
     
-    psilist = []
 
     # f_obs.close()
         
@@ -641,8 +642,12 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
         result = Result(dt=dt, Nt=Nt, psi0=psi0)
 
         observables = np.zeros((Nt//nout, len(e_ops)), dtype=complex)
+        psilist = [psi0.copy()]
 
-        for k1 in range(Nt//nout):
+        # compute observables for t0
+        observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
+
+        for k1 in range(1, Nt//nout):
 
             for k2 in range(nout):
                 psi = rk4(psi, tdse, dt, H)
@@ -652,7 +657,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
             # compute observables
             observables[k1, :] = [obs(psi, e_op) for e_op in e_ops]
             # f_obs.write(fmt.format(t, *e_list))
-        
+
             psilist.append(psi.copy())
 
         # f_obs.close()

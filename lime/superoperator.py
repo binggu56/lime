@@ -108,9 +108,11 @@ def operator_to_vector(rho):
     """
     return rho.toarray().flatten()
 
+
 def operator_to_superoperator(a, type='commutator'):
     """
-    promote an operator/density matrix to an superoperator in Liouville space
+    promote an operator/density matrix to an superoperator in
+    Liouville space
 
     Parameters
     ----------
@@ -157,8 +159,8 @@ def operator_to_superoperator(a, type='commutator'):
 
 
 def lindblad_dissipator(l, gamma=1.):
-    return gamma * (kron(l, l.conj()) - \
-            operator_to_superoperator(dag(l).dot(l), type='anticommutator'))
+    return gamma * (kron(l, l.conj()) -
+                    operator_to_superoperator(dag(l).dot(l), type='anticommutator'))
 
 
 def left(a):
