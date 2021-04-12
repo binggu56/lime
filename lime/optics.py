@@ -81,6 +81,8 @@ class Biphoton:
             pump carrier frequency
         bw: float
             pump bandwidth
+        p: signal grid
+        q: idler grid
         phase_matching: str
             type of phase matching. Default is 'sinc'.
         """
@@ -137,9 +139,9 @@ class Biphoton:
         Compute the joint temporal amplitude
         Returns
         -------
-        t1: 1d array
+        ts: 1d array
             signal time grid
-        t2: 1d array
+        ti: 1d array
             idler temporal grid
         jta: 2d array
             joint temporal amplitude
@@ -150,9 +152,9 @@ class Biphoton:
         dq = q[1] - q[0]
         if self.jsa is not None:
 
-            t1, t2, jta = fft2(self.jsa, dp, dq)
+            ts, ti, jta = fft2(self.jsa, dp, dq)
             self.jta = jta
-            return t1, t2, jta
+            return ts, ti, jta
 
         else:
             raise ValueError('jsa is None. Call get_jsa() first.')
