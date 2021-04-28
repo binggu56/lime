@@ -806,6 +806,16 @@ def isherm(a):
 def isdiag(M):
     return np.all(M == np.diag(np.diagonal(M)))
 
+
+def pdf_normal(x, mu=0, sigma=1.):
+    return 1. / (sigma * np.sqrt(2 * np.pi)) * \
+            np.exp(- (x - mu) ** 2 / (2 * sigma ** 2))
+
 if __name__ == '__main__':
     a = sigmaz() - 1j * sigmax()
     print(isherm(a))
+
+    import matplotlib.pyplot as plt
+    x = np.linspace(-1, 1)
+    plt.plot(x, pdf_normal(x))
+    plt.show()

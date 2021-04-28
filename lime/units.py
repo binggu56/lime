@@ -16,6 +16,7 @@ au2angstrom = bohr2angstrom = 0.529177249 # Bohr to angstrom
 
 #hartree2nanometer =
 
-ev2nm = electronvolt2nanometer = 1239.847 # 1 eV = 1239.847 nm
+ev2nm = electronvolt2nanometer = 1239.84193
+ # 1 eV = 1239.847 nm
 
-alpha =  0.0072973525693 # fine structure constant
+alpha = 0.0072973525693 # fine structure constant

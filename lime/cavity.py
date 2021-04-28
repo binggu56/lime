@@ -3,7 +3,8 @@
 """
 Created on Tue Mar 26 17:26:02 2019
 
-@author: binggu
+
+@author: Bing
 """
 
 import numpy as np
@@ -367,13 +368,16 @@ class Cavity():
 
         return a.tocsr()
 
-    def vacuum(self):
+    def vacuum(self, sparse=True):
         """
         get initial density matrix for cavity vacuum state
         """
         vac = np.zeros(self.n_cav)
         vac[0] = 1.
-        return csr_matrix(vac)
+        if sparse:
+            return csr_matrix(vac)
+        else:
+            return vac
 
     def vacuum_dm(self):
         """
@@ -419,8 +423,6 @@ class Polariton(Composite):
         self.H = None
         self.dims = [mol.dim, cav.n_cav]
         self.dim = mol.dim * cav.n_cav
-
-
         #self.dm = kron(mol.dm, cav.get_dm())
 
     def getH(self, g, RWA=False):
@@ -428,13 +430,13 @@ class Polariton(Composite):
         mol = self.mol
         cav = self.cav
 
-        hmol = mol.get_ham()
-        hcav = cav.get_ham()
+        hmol = mol.getH()
+        hcav = cav.getH()
 
         Icav = cav.idm
         Imol = mol.idm
 
-        if RWA == True:
+        if RWA:
 
             hint = g * (kron(mol.raising(), cav.get_annihilate()) +
                         kron(mol.lowering(), cav.get_create()))
@@ -458,7 +460,7 @@ class Polariton(Composite):
         Icav = cav.idm
         Imol = mol.idm
 
-        if RWA == True:
+        if RWA:
 
             hint = g * (kron(mol.raising(), cav.get_annihilate()) +
                         kron(mol.lowering(), cav.get_create()))
@@ -603,10 +605,19 @@ if __name__ == '__main__':
     hmol = 0.5 * (-sz + s0)
 
     mol = Mol(hmol, sx)  # atom
-    cav = Cavity(1, 2)  # cavity
-    print(cav.H)
+    cav = Cavity(1, 2, Q=100)  # cavity
 
-    # pol = Composite(mol, cav)
+    pol = Polariton(mol, cav)
+    H = pol.get_nonhermitianH(g=0.1)
+    
+    # set up the initial state
+    psi0 = basis(2, 0)
+    rho0 = ket2dm(psi0)
+
+    mesolver = Lindblad_solver(H, c_ops=[0.2 * sx], e_ops = [sz])
+    Nt = 200
+    dt = 0.05
+    
     # pol.getH([sx], [cav.annihilate() + cav.create()], [0.1])
     # evals, evecs = pol.eigenstates()
     # print(pol.purity(evecs[:,2]))

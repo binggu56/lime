@@ -12,6 +12,7 @@ from __future__ import absolute_import
 from typing import Union, Iterable
 
 import numpy as np
+import scipy.integrate
 from numpy.core._multiarray_umath import ndarray
 from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg
 
@@ -20,7 +21,7 @@ import sys
 
 from lime.units import au2fs, au2ev
 from lime.signal import sos
-from lime.phys import dag, driven_dynamics, quantum_dynamics,\
+from lime.phys import dag, driven_dynamics, quantum_dynamics, \
     obs, rk4, tdse, basis
 
 
@@ -34,7 +35,7 @@ class Result:
         self._psilist = None
         self.rho0 = rho0
         self.psi0 = psi0
-        self.times = np.arange(Nt)*dt
+        self.times = None
         return
 
     @property
@@ -48,11 +49,12 @@ class Result:
     def expect(self):
         return self.observables
 
-    def times(self):
-        if dt is not None & Nt is not None:
-            return np.arange(self.Nt) * self.dt
-        else:
-            sys.exit("ERROR: Either dt or Nt is None.")
+    # def times(self):
+    #     if dt is not None & Nt is not None:
+    #         return np.arange(self.Nt) * self.dt
+    #     else:
+    #         sys.exit("ERROR: Either dt or Nt is None.")
+
 
 class Mol:
     def __init__(self, ham, edip=None, gamma=None):
@@ -148,7 +150,10 @@ class Mol:
 
     def get_nonhermitianH(self):
         H = self.H
-        return H - 1j * np.diagflat(self.gamma)
+        if self.gamma is not None:
+            return H - 1j * np.diagflat(self.gamma)
+        else:
+            return H
 
     def get_dip(self):
         return self.dip
@@ -625,7 +630,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
 
     """
 
-    psi = psi0
+    psi = psi0.copy()
 
     if e_ops is not None:
         fmt = '{} ' * (len(e_ops) + 1) + '\n'
@@ -633,21 +638,20 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
     f_obs = open(output, 'w')  # observables
 
     t = t0
-    
 
     # f_obs.close()
-        
+
     if store_states:
 
         result = Result(dt=dt, Nt=Nt, psi0=psi0)
 
-        observables = np.zeros((Nt//nout, len(e_ops)), dtype=complex)
+        observables = np.zeros((Nt // nout, len(e_ops)), dtype=complex)
         psilist = [psi0.copy()]
 
         # compute observables for t0
         observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
 
-        for k1 in range(1, Nt//nout):
+        for k1 in range(1, Nt // nout):
 
             for k2 in range(nout):
                 psi = rk4(psi, tdse, dt, H)
@@ -681,6 +685,85 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
         f_obs.close()
 
         return psi
+
+
+def _ode_solver(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
+                nout=1, store_states=True, output='obs.dat'):
+    """
+    Integrate the TDSE for a multilevel system using Scipy.
+
+    Parameters
+    ----------
+    e_ops: list of arrays
+        expectation values to compute.
+    H : 2d array
+        Hamiltonian of the molecule
+    psi0: 1d array
+        initial wavefunction
+    dt : float
+        time step.
+    Nt : int
+        timesteps.
+    e_ops: list
+        observable operators to compute
+    nout: int
+        Store data every nout steps
+
+    Returns
+    -------
+    None.
+
+    """
+
+    psi = psi0.copy()
+    t_eval = np.arange(Nt // nout) * dt * nout
+
+    def fun(t, psi): return -1j * H.dot(psi)
+
+    tf = t0 + Nt * dt
+    t_span = (t0, tf)
+    sol = scipy.integrate.solve_ivp(fun, t_span=t_span, y0=psi,
+                                    t_eval=t_eval)
+
+    result = Result(dt=dt, Nt=Nt, psi0=psi0)
+    result.times = sol.t
+    print(sol.nfev)
+
+    observables = np.zeros((Nt // nout, len(e_ops)), dtype=complex)
+    for i in range(len(t_eval)):
+        psi = sol.y[:, i]
+        observables[i, :] = [obs(psi, e_op) for e_op in e_ops]
+
+    result.observables = observables
+    # if store_states:
+    #
+    #     result = Result(dt=dt, Nt=Nt, psi0=psi0)
+    #
+    #     observables = np.zeros((Nt // nout, len(e_ops)), dtype=complex)
+    #     psilist = [psi0.copy()]
+    #
+    #     # compute observables for t0
+    #     observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
+    #
+    #     for k1 in range(1, Nt // nout):
+    #
+    #         for k2 in range(nout):
+    #             psi = rk4(psi, tdse, dt, H)
+    #
+    #         t += dt * nout
+    #
+    #         # compute observables
+    #         observables[k1, :] = [obs(psi, e_op) for e_op in e_ops]
+    #         # f_obs.write(fmt.format(t, *e_list))
+    #
+    #         psilist.append(psi.copy())
+    #
+    #     # f_obs.close()
+    #
+    #     result.psilist = psilist
+    #     result.observables = observables
+
+    return result
 
 
 def driven_dynamics(ham, dip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
@@ -754,23 +837,37 @@ def driven_dynamics(ham, dip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
 
 if __name__ == '__main__':
     from lime.phys import pauli
+    import time
 
     s0, sx, sy, sz = pauli()
-    H = -0.5 * sz
+    H = (-0.05) * sz - 0. * sx
 
     solver = SESolver(H)
-    Nt = 100
-    psi0 = (basis(2, 0) + basis(2, 1))/np.sqrt(2)
+    Nt = 1000
+    dt = 4
+    psi0 = (basis(2, 0) + basis(2, 1)) / np.sqrt(2)
+    start_time = time.time()
 
-    result = solver.evolve(psi0, dt=0.05, Nt=Nt, e_ops=[sx])
+    result = solver.evolve(psi0, dt=dt, Nt=Nt, e_ops=[sx])
+    print("--- %s seconds ---" % (time.time() - start_time))
 
-    corr = solver.correlation_3p_1t(psi0=psi0, oplist=[s0, sx, sx],
-                                    dt=0.05, Nt=Nt)
+    start_time = time.time()
 
-    times = np.arange(Nt)
+    times = np.arange(Nt) * dt
+    r = _ode_solver(H, psi0, dt=dt, Nt=Nt, nout=2, e_ops=[sx])
 
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    # test correlation functions
+    # corr = solver.correlation_3p_1t(psi0=psi0, oplist=[s0, sx, sx],
+    #                                 dt=0.05, Nt=Nt)
+    #
+    # times = np.arange(Nt)
+    #
     import matplotlib.pyplot as plt
+
     fig, ax = plt.subplots()
-    #ax.plot(times, result.observables[:,0])
-    ax.plot(times, corr.real)
+    ax.plot(times, result.observables[:, 0])
+    ax.plot(r.times, r.observables[:, 0], '--')
+    # ax.plot(times, corr.real)
     plt.show()

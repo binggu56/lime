@@ -10,7 +10,7 @@ import numba
 import sys
 
 from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
-    obs_dm, destroy, rk4
+    obs_dm, destroy, rk4, basis
 
 from lime.superoperator import lindblad_dissipator, operator_to_superoperator
 
@@ -632,7 +632,7 @@ class Lindblad_solver():
     def steady_states(self):
         pass
 
-    def evolve(self, rho0, dt, Nt, return_result):
+    def evolve(self, rho0, dt, Nt, return_result=True):
         return _lindblad(rho0, self.H, self.c_ops, e_ops=self.e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
 
@@ -881,9 +881,10 @@ def _lindblad(H, rho0, c_ops, Nt, dt, e_ops=[], return_result=True):
     """
 
     nstates = H.shape[-1]
+    
     # initialize the density matrix
-    rho = rho0
-
+    rho = rho0.astype(complex)
+    
     t = 0.0
     # first-step
     # rho_half = rho0 + liouvillian(rho0, h0, c_ops) * dt2
@@ -1020,6 +1021,7 @@ if __name__ == '__main__':
     from lime.phys import pauli
     s0, sx, sy, sz = pauli()
 
+    # set up the molecule
     H = 2 * np.pi * 0.1 * sx
 
     psi0 = basis(2, 0)
@@ -1031,7 +1033,7 @@ if __name__ == '__main__':
     
     L = mesolver.liouvillian()
     
-    #result = mesolver.evolve(rho0, dt, Nt=Nt, return_result=True)
+    result = mesolver.evolve(rho0, dt, Nt=Nt, return_result=True)
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
     
 
