@@ -633,7 +633,7 @@ class Lindblad_solver():
         pass
 
     def evolve(self, rho0, dt, Nt, return_result=True):
-        return _lindblad(rho0, self.H, self.c_ops, e_ops=self.e_ops, \
+        return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=self.e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
 
     def correlation_2p_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
@@ -857,7 +857,7 @@ class HEOMSolverDL():
 
 #     return corr_mat
 
-def _lindblad(H, rho0, c_ops, Nt, dt, e_ops=[], return_result=True):
+def _lindblad(H, rho0, c_ops, e_ops=[], Nt=1, dt=0.005, return_result=True):
 
     """
     time propagation of the lindblad quantum master equation
@@ -883,7 +883,8 @@ def _lindblad(H, rho0, c_ops, Nt, dt, e_ops=[], return_result=True):
     nstates = H.shape[-1]
     
     # initialize the density matrix
-    rho = rho0.astype(complex)
+    rho = rho0.copy()
+    rho = rho.astype(complex)
     
     t = 0.0
     # first-step
@@ -910,7 +911,7 @@ def _lindblad(H, rho0, c_ops, Nt, dt, e_ops=[], return_result=True):
             # rho = rho_new
 
             rho = rk4(rho, liouvillian, dt, H, c_ops)
-
+            
             # dipole-dipole auto-corrlation function
             #cor = np.trace(np.matmul(d, rho))
 
@@ -942,9 +943,11 @@ def _lindblad(H, rho0, c_ops, Nt, dt, e_ops=[], return_result=True):
             t += dt
             rho = rk4(rho, liouvillian, dt, H, c_ops)
 
-            rholist.append(rho)
-
+            rholist.append(rho.copy())
+            
+            
             observables[k, :] = [obs_dm(rho, op) for op in e_ops]
+            
 
         result.observables = observables
         result.rholist = rholist
@@ -1027,18 +1030,18 @@ if __name__ == '__main__':
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0)
 
-    mesolver = Lindblad_solver(H, c_ops=[0.2 * sx], e_ops = [sz])
-    Nt = 200
+    mesolver = Lindblad_solver(H, c_ops=[0.1 * sz], e_ops = [sz])
+    Nt = 100
     dt = 0.05
     
-    L = mesolver.liouvillian()
+    # L = mesolver.liouvillian()
     
-    result = mesolver.evolve(rho0, dt, Nt=Nt, return_result=True)
+    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, return_result=True)
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
-    
+
 
     
-    # from lime.style import subplots
-    # fig, ax = subplots()
-    # times = np.arange(Nt) * dt
-    # ax.imshow(corr.real)
+    from lime.style import subplots
+    fig, ax = subplots()
+    times = np.arange(Nt) * dt
+    ax.plot(times, result.observables[:,0])

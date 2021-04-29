@@ -8,7 +8,7 @@ Created on Tue Mar 26 17:26:02 2019
 """
 
 import numpy as np
-from scipy.sparse import lil_matrix, csr_matrix, kron, identity, linalg
+from scipy.sparse import lil_matrix, csr_matrix, kron, identity, linalg, issparse
 import scipy
 import sys
 
@@ -17,6 +17,8 @@ from lime.units import au2fs, au2k, au2ev
 from lime.phys import dag, coth, ket2dm, comm, anticomm, pauli, destroy
 from lime.mol import Mol
 
+
+ 
 class Composite(Mol):
     def __init__(self, A, B):
         """
@@ -283,7 +285,7 @@ class Pulse:
 
 
 class Cavity():
-    def __init__(self, freq, ncav, Q=None):
+    def __init__(self, freq, ncav, Q=None, polarization=None):
         self.freq = freq
         self.resonance = freq
         self.n_cav = ncav
@@ -295,6 +297,7 @@ class Cavity():
         # self.annihilate = destroy(ncav)
         self.H = self.getH()
         self.quality_factor = Q
+        self.polarization = polarization
 
 #    @property
 #    def hamiltonian(self):
@@ -426,6 +429,22 @@ class Polariton(Composite):
         #self.dm = kron(mol.dm, cav.get_dm())
 
     def getH(self, g, RWA=False):
+        """
+        
+
+        Parameters
+        ----------
+        g : float
+            single photon electric field strength sqrt(hbar * omegac / 2 episilon_0 V)
+        RWA : TYPE, optional
+            DESCRIPTION. The default is False.
+
+        Returns
+        -------
+        TYPE
+            Hamiltonian.
+
+        """
 
         mol = self.mol
         cav = self.cav
@@ -443,7 +462,7 @@ class Polariton(Composite):
 
         else:
 
-            hint = g * kron(mol.dip, cav.get_create() + cav.get_annihilate())
+            hint = g * kron(mol.dip, cav.create() + cav.annihilate())
 
         self.H = kron(hmol, Icav) + kron(Imol, hcav) + hint
 
@@ -605,10 +624,10 @@ if __name__ == '__main__':
     hmol = 0.5 * (-sz + s0)
 
     mol = Mol(hmol, sx)  # atom
-    cav = Cavity(1, 2, Q=100)  # cavity
+    cav = Cavity(1, 2, Q=100, polarization=[1, 0, 0])  # cavity
 
     pol = Polariton(mol, cav)
-    H = pol.get_nonhermitianH(g=0.1)
+    H = pol.getH(g=0.1)
     
     # set up the initial state
     psi0 = basis(2, 0)

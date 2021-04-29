@@ -2,14 +2,53 @@ from __future__ import absolute_import
 
 import numpy as np
 from numpy import exp
-from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg, spdiags
+from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg,\
+                        spdiags, issparse
 
 import numba
 import sys
 
 from lime.units import au2fs, au2ev
 
+def ptrace(rho, dims, which='B'):
+    """
+    partial trace of subsystems in a density matrix defined in a composite space
 
+    Parameters
+    ----------
+    rho : ndarray
+        DESCRIPTION.
+    which : TYPE, optional
+        DESCRIPTION. The default is 'B'.
+
+    Returns
+    -------
+    rhoA : TYPE
+        DESCRIPTION.
+
+    """
+    dimA, dimB = dims 
+    
+    if rho.shape[0] != dimA * dimB:
+        raise ValueError('Size of density matrix does not match dimensions.')
+    
+    if issparse(rho):
+        rho = rho.toarray()
+        
+    rho_reshaped = np.reshape(rho, (dimA, dimB, dimA, dimB))
+    
+    if which=='B':
+        rhoA = np.einsum('injn -> ij', rho_reshaped)
+        return rhoA
+    
+    elif which == 'A':
+        
+        rhoB = np.einsum('inim -> nm', rho_reshaped)
+    
+        return rhoB
+    else:
+        raise ValueError('which can only be A or B.')
+        
 def lowering(dims=2):
     if dims == 2:
         sm = csr_matrix(np.array([[0.0, 1.0],[0.0,0.0]], dtype=np.complex128))
@@ -166,7 +205,21 @@ def lindbladian(l, rho):
     return l.dot(rho.dot(dag(l))) - 0.5 * anticomm(dag(l).dot(l), rho)
 
 def ket2dm(psi):
-    return np.einsum("i, j -> ij", psi.conj(), psi)
+    """
+    convert a ket into a density matrix
+
+    Parameters
+    ----------
+    psi : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    return np.einsum("i, j -> ij", psi, psi.conj())
 
 def norm(psi):
     '''

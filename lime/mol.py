@@ -57,7 +57,8 @@ class Result:
 
 
 class Mol:
-    def __init__(self, ham, edip=None, gamma=None):
+    def __init__(self, ham, edip=None, edip_x=None, edip_y=None, \
+                 edip_z=None, gamma=None):
         """
         Class for multi-level systems.
 
@@ -81,6 +82,9 @@ class Mol:
         #        self.initial_state = psi0
         self.edip = edip
         self.dip = self.edip
+        self.edip_x = edip_x 
+        self.edip_y = edip_y
+        self.edip_z = edip_z
         self.nstates = ham.shape[0]
         #        self.ex = np.tril(dip)
         #        self.deex = np.triu(dip)
@@ -91,6 +95,7 @@ class Mol:
         #     self.lifetime = tau
         #     self.decay = 1./tau
         self.gamma = gamma
+        self.mdip = None
 
     def set_dip(self, dip):
         self.dip = dip
@@ -103,7 +108,11 @@ class Mol:
     def set_edip(self, edip):
         self.edip = edip
         return
-
+    
+    def set_mdip(self, mdip):
+        self.mdip = mdip
+        return
+    
     def setH(self, H):
         '''
         Set model Hamiltonian
