@@ -8,6 +8,7 @@ modules for open quantum systems
 import numpy as np
 import numba
 import sys
+import scipy
 
 from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
     obs_dm, destroy, rk4, basis
@@ -632,10 +633,19 @@ class Lindblad_solver():
     def steady_states(self):
         pass
 
-    def evolve(self, rho0, dt, Nt, return_result=True):
-        return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=self.e_ops, \
-                  Nt=Nt, dt=dt, return_result=return_result)
+    def evolve(self, rho0, dt, Nt, t0=0., return_result=True):
+        
+        if isinstance(H, list):
+            
+            return _lindblad_driven(self.H, rho0=rho0, c_ops=self.c_ops, 
+                                    e_ops=self.e_ops,
+                                    Nt=Nt, dt=dt, t0=t0)
+        
+        else:
 
+            return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=self.e_ops, \
+                  Nt=Nt, dt=dt, return_result=return_result)
+                
     def correlation_2p_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
         '''
         two-point correlation function <A(t)B>
@@ -954,6 +964,118 @@ def _lindblad(H, rho0, c_ops, e_ops=[], Nt=1, dt=0.005, return_result=True):
 
         return result
 
+
+def _lindblad_driven(H, rho0, c_ops=None, e_ops=None, Nt=1, dt=0.005, t0=0., 
+                     return_result=True):
+
+    """
+    time propagation of the lindblad quantum master equation with time-dependent Hamiltonian 
+    H = H0 - f(t) * H1 - ...
+
+    Input
+    -------
+    H:  list [H0, [H1, f1(t)]]
+            system Hamiltonian
+    pulse: Pulse object
+        externel pulse
+    Nt: total number of time steps
+
+    dt: time step
+    c_ops: list of collapse operators
+    e_ops: list of observable operators
+    rho0: initial density matrix
+
+    Returns
+    =========
+    rho: 2D array
+        density matrix at time t = Nt * dt
+    """
+
+    def calculateH(t):
+        
+        Ht = H[0]
+    
+        for i in range(1, len(H)):
+            Ht += + H[i][1](t) * H[i][0]
+        
+        return Ht
+
+    nstates = H[0].shape[-1]
+    
+    if c_ops is None:
+        c_ops = [] 
+    if e_ops is None:
+        e_ops = []
+        
+    
+    # initialize the density matrix
+    rho = rho0.copy()
+    rho = rho.astype(complex)
+    
+
+    
+    t = t0
+
+    if return_result == False:
+
+        f_dm = open('den_mat.dat', 'w')
+        fmt_dm = '{} ' * (nstates**2 + 1) + '\n'
+
+        f_obs = open('obs.dat', 'w')
+        fmt = '{} '* (len(e_ops) + 1) + '\n'
+
+        for k in range(Nt):
+
+            t += dt
+            
+            Ht = calculateH(t)
+            
+            rho = rk4(rho, liouvillian, dt, Ht, c_ops)
+            
+            # dipole-dipole auto-corrlation function
+            #cor = np.trace(np.matmul(d, rho))
+
+            # take a partial trace to obtain the rho_el
+            # compute observables
+            observables = np.zeros(len(e_ops), dtype=complex)
+
+            for i, obs_op in enumerate(e_ops):
+                observables[i] = obs_dm(rho, obs_op)
+
+            f_obs.write(fmt.format(t, *observables))
+
+
+        f_obs.close()
+        f_dm.close()
+
+        return rho
+
+    else:
+
+        rholist = [] # store density matries
+
+        result = Result(dt=dt, Nt=Nt, rho0=rho0)
+
+        observables = np.zeros((Nt, len(e_ops)), dtype=complex)
+
+        for k in range(Nt):
+
+            t += dt
+            
+            Ht = calculateH(t)
+            
+            rho = rk4(rho, liouvillian, dt, Ht, c_ops)
+
+            rholist.append(rho.copy())
+            
+            observables[k, :] = [obs_dm(rho, op) for op in e_ops]
+            
+
+        result.observables = observables
+        result.rholist = rholist
+
+        return result
+    
 def _heom_dl(H, rho0, c_ops, e_ops, temperature, cutoff, reorganization,\
              nado, dt, nt, fname=None, return_result=True):
     '''
@@ -1022,26 +1144,45 @@ def _heom_dl(H, rho0, c_ops, e_ops, temperature, cutoff, reorganization,\
 if __name__ == '__main__':
 
     from lime.phys import pauli
+    from lime.optics import Pulse
+    from lime.units import au2ev
+    
     s0, sx, sy, sz = pauli()
 
     # set up the molecule
-    H = 2 * np.pi * 0.1 * sx
+    H0 =  1/au2ev * 0.5 * (s0 - sz)
+    H1 = sx 
 
+    # def coeff1(t):
+    #     return np.exp(-t**2)*np.cos(1./au2ev * t)
+    
+    pulse = Pulse(0, 2/au2fs, 1./au2ev, amplitude=0.05)
+
+    
+    H = [H0, [H1, pulse.field]]
+    #H = H0
+    
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0)
 
-    mesolver = Lindblad_solver(H, c_ops=[0.1 * sz], e_ops = [sz])
-    Nt = 100
-    dt = 0.05
+    mesolver = Lindblad_solver(H, c_ops=None, e_ops = [sx])
+    Nt = 6000
+    dt = 0.08
     
     # L = mesolver.liouvillian()
-    
-    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, return_result=True)
+    t0=-10/au2fs
+    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, return_result=True, t0=t0)
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
 
 
     
     from lime.style import subplots
     fig, ax = subplots()
-    times = np.arange(Nt) * dt
+    times = np.arange(Nt) * dt + t0
     ax.plot(times, result.observables[:,0])
+
+
+    fig, ax = subplots()
+    ax.plot(times, pulse.field(times))
+    ax.set_ylabel('E(t)')
+    
