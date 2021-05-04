@@ -14,8 +14,10 @@ import sys
 
 
 from lime.units import au2fs, au2k, au2ev
-from lime.phys import dag, coth, ket2dm, comm, anticomm, pauli, destroy
+from lime.phys import dag, coth, ket2dm, comm, anticomm, pauli, destroy,\
+    basis, isherm
 from lime.mol import Mol
+from lime.oqs import Lindblad_solver
 
 
  
@@ -42,6 +44,7 @@ class Composite(Mol):
         self.ida = A.idm
         self.idb = B.idm
         self.H = None
+        self.nonhermH = None
         self.rdm_a = None
         self.rdm_b = None
         self.dim = A.dim * B.dim
@@ -49,6 +52,8 @@ class Composite(Mol):
 
     def getH(self, a_ops=None, b_ops=None, g=0):
         """
+        Compute the Hamiltonian for the composite A + B system.
+        
         The interaction between A and B are
             V_AB = sum_i g[i] * a_ops[i] * b_ops[i]
         Parameters
@@ -70,15 +75,65 @@ class Composite(Mol):
 
             print('Warning: there is no coupling between the two subsystems.')
 
-            self.H = H
-            return H
-        else:
+
+        
+        elif isinstance(a_ops, list):
+            
             for i, a_op in enumerate(a_ops):
                 b_op = b_ops[i]
                 H += g[i] * kron(a_op, b_op)
 
-            self.H = H
-            return H
+        
+        elif isinstance(a_ops, np.ndarray):
+            
+            H += g * a_ops @ b_ops
+
+        self.H = H
+                    
+        return H
+    
+    def get_nonhermH(self, a_ops=None, b_ops=None, g=0):
+        """
+        The interaction between A and B are
+            V_AB = sum_i g[i] * a_ops[i] * b_ops[i]
+        Parameters
+        ----------
+        a_ops: list of arrays
+            coupling operators for subsystem A
+        b_ops: list of arrays
+            coupling operators for subsystem B
+        g: coupling constants
+
+        Returns
+        -------
+
+        """
+        if self.A.nonhermH is None:
+            raise ValueError('Call get_nonhermH() for subsystem A first.')
+        
+        if self.B.nonhermH is None:
+            raise ValueError('Call get_nonhermH() for subsystem B first.')
+
+        H = kron(self.A.nonhermH, self.idb) + kron(self.ida, self.B.nonhermH)
+
+        if a_ops == None:
+
+            print('Warning: there is no coupling between the two subsystems.')
+
+        elif isinstance(a_ops, list):
+            
+            for i, a_op in enumerate(a_ops):
+                b_op = b_ops[i]
+                H += g[i] * kron(a_op, b_op)
+
+        
+        elif isinstance(a_ops, np.ndarray):
+            
+            H += g * a_ops @ b_ops
+
+        self.nonhermH = H
+                    
+        return H
 
     def promote(self, o, subspace='A'):
         """
@@ -137,9 +192,9 @@ class Composite(Mol):
         else:
 
             # compute the full polariton states
-            h = self.H.toarray()
+            # if issparse(self.H):
             evals, evecs = scipy.linalg.eigh(self.H.toarray())
-
+            
             return evals, evecs
 
     def spectrum(self):
@@ -296,7 +351,10 @@ class Cavity():
         # self.create = self.get_create()
         # self.annihilate = destroy(ncav)
         self.H = self.getH()
+        self.nonhermH = None
+        
         self.quality_factor = Q
+        self.decay = freq/2./Q
         self.polarization = polarization
 
 #    @property
@@ -340,8 +398,12 @@ class Cavity():
         else:
             raise ValueError('The quality factor cannot be None.')
 
-        return self.H - 1j * kappa * np.identity(ncav)
-
+        self.nonhermH = self.H - 1j * kappa * np.identity(ncav)
+        return self.nonhermH
+    
+    def get_nonhermH(self):
+        return self.get_nonhermitianH()
+    
     def ham(self, ZPE=False):
         return ham_ho(self.freq, self.n_cav, ZPE=ZPE)
 
@@ -624,20 +686,29 @@ if __name__ == '__main__':
     hmol = 0.5 * (-sz + s0)
 
     mol = Mol(hmol, sx)  # atom
-    cav = Cavity(1, 2, Q=100, polarization=[1, 0, 0])  # cavity
+    mol.set_decay_for_all(0.05)
+    mol.get_nonhermH()
+    
+    cav = Cavity(1, 2, Q=100)  # cavity
+    cav.get_nonhermH()
 
     pol = Polariton(mol, cav)
-    H = pol.getH(g=0.1)
+    H = pol.get_nonhermH(g=0.1)
+    
+    print(isherm(H.toarray()))
     
     # set up the initial state
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0)
 
-    mesolver = Lindblad_solver(H, c_ops=[0.2 * sx], e_ops = [sz])
+    # mesolver = Lindblad_solver(H, c_ops=[0.2 * sx], e_ops = [sz])
     Nt = 200
     dt = 0.05
     
+    # results = mesolver.evolve(rho0, dt=dt, Nt=Nt)
     # pol.getH([sx], [cav.annihilate() + cav.create()], [0.1])
     # evals, evecs = pol.eigenstates()
     # print(pol.purity(evecs[:,2]))
 
+    # fig, ax = subplots()
+    # ax.plot(times, )
