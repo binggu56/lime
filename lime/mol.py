@@ -21,7 +21,7 @@ import sys
 
 from lime.units import au2fs, au2ev
 from lime.signal import sos
-from lime.phys import dag, driven_dynamics, quantum_dynamics, \
+from lime.phys import dag, quantum_dynamics, \
     obs, rk4, tdse, basis
 
 
@@ -57,8 +57,7 @@ class Result:
 
 
 class Mol:
-    def __init__(self, ham, edip=None, edip_x=None, edip_y=None, \
-                 edip_z=None, gamma=None):
+    def __init__(self, ham, edip=None, gamma=None):
         """
         Class for multi-level systems.
 
@@ -78,13 +77,14 @@ class Mol:
 
         """
         self.H = ham
+        self.nonhermH = None
         self.h = ham
         #        self.initial_state = psi0
         self.edip = edip
         self.dip = self.edip
-        self.edip_x = edip_x 
-        self.edip_y = edip_y
-        self.edip_z = edip_z
+        # self.edip_x = edip_x 
+        # self.edip_y = edip_y
+        # self.edip_z = edip_z
         self.nstates = ham.shape[0]
         #        self.ex = np.tril(dip)
         #        self.deex = np.triu(dip)
@@ -153,17 +153,35 @@ class Mol:
 
     def get_ham(self):
         return self.H
-
+    
+     
     def getH(self):
         return self.H
 
     def get_nonhermitianH(self):
         H = self.H
+        
         if self.gamma is not None:
-            return H - 1j * np.diagflat(self.gamma)
+            
+            self.nonhermH = H - 1j * np.diagflat(self.gamma)
+            
         else:
-            return H
+            raise ValueError('Please set gamma first.')
+            
+        return self.nonhermH
 
+    def get_nonhermH(self):
+        H = self.H
+        
+        if self.gamma is not None:
+            
+            self.nonhermH = H - 1j * np.diagflat(self.gamma)
+            
+        else:
+            raise ValueError('Please set gamma first.')
+            
+        return self.nonhermH
+    
     def get_dip(self):
         return self.dip
 
@@ -490,10 +508,10 @@ class SESolver:
         H = self.H
         return _propagator(H, dt, Nt)
 
-    def correlation_2p_1t(self):
+    def correlation_2op_1t(self):
         pass
 
-    def correlation_3p_1t(self, psi0, oplist, dt, Nt):
+    def correlation_3op_1t(self, psi0, oplist, dt, Nt):
         """
         <AB(t)C>
 
@@ -521,7 +539,7 @@ class SESolver:
 
         return corr_vec
 
-    def correlation_3p_2t(self, psi0, oplist, dt, Nt, Ntau):
+    def correlation_3op_2t(self, psi0, oplist, dt, Nt, Ntau):
         """
         <A(t)B(t+tau)C(t)>
         Parameters
@@ -556,7 +574,7 @@ class SESolver:
 
         return corr_mat
 
-    def correlation_4p_1t(self, psi0, oplist, dt=0.005, Nt=1):
+    def correlation_4op_1t(self, psi0, oplist, dt=0.005, Nt=1):
         """
         <AB(t)C(t)D>
 
@@ -572,9 +590,9 @@ class SESolver:
 
         """
         a_op, b_op, c_op, d_op = oplist
-        return self.correlation_3p_1t(psi0, [a_op, b_op @ c_op, d_op], dt, Nt)
+        return self.correlation_3op_1t(psi0, [a_op, b_op @ c_op, d_op], dt, Nt)
 
-    def correlation_4p_2t(self, psi0, oplist, dt=0.005, Nt=1, Ntau=1):
+    def correlation_4op_2t(self, psi0, oplist, dt=0.005, Nt=1, Ntau=1):
         """
 
         Parameters
@@ -584,7 +602,7 @@ class SESolver:
         oplist : list of arrays
         """
         a_op, b_op, c_op, d_op = oplist
-        return self.correlation_3p_2t(psi0, [a_op, b_op @ c_op, d_op], dt, Nt, Ntau)
+        return self.correlation_3op_2t(psi0, [a_op, b_op @ c_op, d_op], dt, Nt, Ntau)
 
 
 def _propagator(H, dt, Nt):
@@ -775,8 +793,8 @@ def _ode_solver(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
     return result
 
 
-def driven_dynamics(ham, dip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
-                    t0=0.0):
+def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
+                    t0=0.0, return_result=True):
     '''
     Laser-driven dynamics in the presence of laser pulses
 
@@ -807,41 +825,78 @@ def driven_dynamics(ham, dip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
 
     # initialize the density matrix
     # wf = csr_matrix(wf0).transpose()
-    psi = psi0
+    psi = psi0.astype(complex)
 
     nstates = len(psi0)
 
     # f = open(fname,'w')
-    fmt = '{} ' * (len(e_ops) + 1) + '\n'
-    fmt_dm = '{} ' * (nstates + 1) + '\n'
-
-    f_dm = open('psi.dat', 'w')  # wavefunction
-    f_obs = open('obs.dat', 'w')  # observables
+    
+    if e_ops is None:
+        e_ops = []
 
     t = t0
 
     # f_dip = open('dipole'+'{:f}'.format(pulse.delay * au2fs)+'.dat', 'w')
+    if return_result:
 
-    for k1 in range(int(Nt / nout)):
+        result = Result(dt=dt, Nt=Nt, psi0=psi0)
 
-        for k2 in range(nout):
-            ht = pulse.field(t) * dip + ham
-            psi = rk4(psi, tdse, dt, ht)
+        observables = np.zeros((Nt // nout, len(e_ops)), dtype=complex)
+        psilist = [psi0.copy()]
 
-        t += dt * nout
+        # compute observables for t0
+        observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
 
-        # compute observables
-        Aave = np.zeros(len(e_ops), dtype=complex)
-        for j, A in enumerate(e_ops):
-            Aave[j] = obs(psi, A)
+        for k1 in range(1, Nt // nout):
 
-        f_dm.write(fmt_dm.format(t, *psi))
-        f_obs.write(fmt.format(t, *Aave))
+            for k2 in range(nout):
+                
+                ht = -pulse.field(t) * edip + H
+                psi = rk4(psi, tdse, dt, ht)
 
-    f_dm.close()
-    f_obs.close()
+            t += dt * nout
 
-    return
+            # compute observables
+            observables[k1, :] = [obs(psi, e_op) for e_op in e_ops]
+            # f_obs.write(fmt.format(t, *e_list))
+
+            psilist.append(psi.copy())
+
+        # f_obs.close()
+
+        result.psilist = psilist
+        result.observables = observables
+
+        return result
+    
+    else:
+        
+        fmt = '{} ' * (len(e_ops) + 1) + '\n'
+        fmt_dm = '{} ' * (nstates + 1) + '\n'
+    
+        f_dm = open('psi.dat', 'w')  # wavefunction
+        f_obs = open('obs.dat', 'w')  # observables
+            
+        for k1 in range(int(Nt / nout)):
+    
+            for k2 in range(nout):
+                ht = pulse.field(t) * dip + ham
+                psi = rk4(psi, tdse, dt, ht)
+    
+            t += dt * nout
+    
+            # compute observables
+            Aave = np.zeros(len(e_ops), dtype=complex)
+            for j, A in enumerate(e_ops):
+                Aave[j] = obs(psi, A)
+    
+            f_dm.write(fmt_dm.format(t, *psi))
+            f_obs.write(fmt.format(t, *Aave))
+    
+        f_dm.close()
+        f_obs.close()
+
+        return
 
 
 if __name__ == '__main__':
