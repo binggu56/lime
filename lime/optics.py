@@ -12,10 +12,10 @@ from numpy import sqrt, exp, pi
 import matplotlib.pyplot as plt
 from lime.units import au2k, au2ev
 from lime.fft import fft2
-from lime.phys import sinc
+from lime.phys import sinc, dag
 from lime.style import set_style
 
-
+from numba import jit
 
 class Pulse:
     def __init__(self, delay, sigma, omegac, amplitude=0.01, cep=0.):
@@ -96,6 +96,7 @@ class Biphoton:
         self.jta = None
         self.p = p
         self.q = q
+        self.grid = [p, q]
 
     def pump(self, bandwidth):
         """
@@ -259,10 +260,117 @@ def _jsa(p, q, pump_bw, model='sinc', Te=None):
     return jsa
 
 
+def interval(x):
+    return x[1] - x[0]
+
+
+def hom(p, q, f, tau):
+    """
+    HOM coincidence probability
+
+    Parameters
+    ----------
+    p
+    q
+    f
+    tau
+    method: str
+        "brute": directly integrating the JSA over the frequency grid
+        "schmidt": compute the signal using the Schmidt modes of the
+            entangled light
+    nmodes
+
+    Returns
+    -------
+    prob: 1d array
+        coincidence probability
+
+    """
+    dp = interval(p)
+    dq = interval(q)
+
+    P, Q = np.meshgrid(p, q)
+
+    prob = np.zeros(len(tau))
+
+    for j in range(len(tau)):
+        t = tau[j]
+        prob[j] = 0.5 - 0.5 * np.sum(f.conj() * f.T *
+                                     np.exp(1j * (P - Q) * t)).real * dq*dp
+
+    return prob
+
+
+def hom_schmidt(p, q, f, method='rdm', nmodes=5):
+    """
+    HOM signal with Schmidt modes
+
+    Parameters
+    ----------
+    p
+    q
+    f
+    nmodes
+
+    Returns
+    -------
+
+    """
+    dp = interval(p)
+    dq = interval(q)
+
+    # schmidt decompose the JSA
+    s, phi, chi = schmidt_decompose(f, dp, dq, method=method,
+                                    nmodes=nmodes)
+
+    prob = np.zeros(len(tau))
+
+    for j in range(len(tau)):
+        t = tau[j]
+
+        for a in range(nmodes):
+            for b in range(nmodes):
+
+                tmp1 = (phi[:,a].conj() * chi[:, b] * np.exp(1j * p * t)).sum() * dp
+                tmp2 = (phi[:,b] * chi[:, a].conj() * np.exp(-1j * q * t)).sum() * dq
+
+                prob[j] += -2. * np.real(s[a] * s[b] * tmp1 * tmp2)
+
+    prob = 0.5 + prob/4.
+    return prob
+
+
+def schmidt_decompose(f, dp, dq, nmodes=5, method='rdm'):
+    """
+    kernel method
+    f: 2D array,
+        input function to be decomposed
+    nmodes: int
+        number of modes to be kept
+    method: str
+        rdm or svd
+    """
+    if method == 'rdm':
+        kernel1 = f.dot(dag(f)) * dq * dp
+        kernel2 = f.T.dot(f.conj()) * dp * dq
+
+
+        print('c: Schmidt coefficients')
+        s, phi = np.linalg.eig(kernel1)
+        s1, psi = np.linalg.eig(kernel2)
+
+        phi /= np.sqrt(dp)
+        psi /= np.sqrt(dq)
+    elif method == 'svd':
+        raise NotImplementedError
+
+    return np.sqrt(s[:nmodes]), phi[:, :nmodes], psi[:, :nmodes]
+
 def _detection_amplitude(jsa, omega1, omega2, dp, dq):
     '''
-    Detection amplitude <0|E(t)E(t')|Phi>, t, t' are defined on a 2D grid used
-    in the FFT, E(t) = Es(t) + Ei(t) is the total electric field operator.
+    Detection amplitude <0|E(t)E(t')|Phi>
+    t, t' are defined on a 2D grid used in the FFT,
+    E(t) = Es(t) + Ei(t) is the total electric field operator.
     This contains two amplitudes corresponding to two different
     ordering of photon interactions
         <0|T Ei(t)Es(t')|Phi> + <0|T Es(t)Ei(t')|Phi>
@@ -312,10 +420,18 @@ if __name__ == '__main__':
 
     p = np.linspace(-2, 2, 128) / au2ev
     q = p
-    epp = Biphoton(omegap=3 / au2ev, bw=0.2 / au2ev, Te=10 / au2fs)
-    epp.set_grid(p, q)
+    epp = Biphoton(omegap=3 / au2ev, bw=0.2 / au2ev, Te=10/au2fs,
+                   p=p, q=q)
+
     JSA = epp.get_jsa()
 
     # epp.plt_jsa()
     # t1, t2, d = epp.detect()
-    # print(d.shape)
+    tau = np.linspace(-10, 10)/au2fs
+
+    prob = hom(p, q, JSA, tau)
+
+    fig, ax = plt.subplots()
+    ax.plot(tau, prob)
+
+    plt.show()

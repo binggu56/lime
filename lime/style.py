@@ -12,8 +12,8 @@ def subplots(nrows=1, ncols=1, figsize = (4, 3), sharex=True, \
 
         fig, ax = plt.subplots(figsize=figsize, constrained_layout=True, **kwargs)
 
-        ax.xaxis.set_minor_locator(ticker.AutoMinorLocator(2))
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator(2))
+        ax.xaxis.set_minor_locator(ticker.AutoMinorLocator(5))
+        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator(5))
         ax.tick_params(direction='in', length=6)
 
         return fig, ax
@@ -24,8 +24,8 @@ def subplots(nrows=1, ncols=1, figsize = (4, 3), sharex=True, \
                                 sharey=sharey, **kwargs)
 
         for ax in axs:
-            ax.xaxis.set_minor_locator(ticker.AutoMinorLocator(2))
-            ax.yaxis.set_minor_locator(ticker.AutoMinorLocator(2))
+            ax.xaxis.set_minor_locator(ticker.AutoMinorLocator(4))
+            ax.yaxis.set_minor_locator(ticker.AutoMinorLocator(4))
             ax.tick_params(direction='in', length=6, labelsize=20)
 
 
@@ -141,16 +141,16 @@ def matplot(x, y, f, vmin=None, vmax=None, output='output.pdf', xlabel='X', \
 
     set_style()
 
-    # if diverge:
-    #     cmap = "RdBu_r"
-    # else:
-    #     cmap = 'viridis'
+    if diverge:
+        cmap = "RdBu_r"
+    else:
+        cmap = 'viridis'
 
     xmin, xmax = min(x), max(x)
     ymin, ymax = min(y), max(y)
 
     extent = [xmin, xmax, ymin, ymax]
-    cntr = ax.matshow(f.T, aspect='auto', cmap=cmap, extent=extent, \
+    cntr = ax.imshow(f.T, aspect='auto', cmap=cmap, extent=extent, \
                       vmin=vmin, vmax=vmax, **kwargs)
 
     ax.set_aspect('auto')

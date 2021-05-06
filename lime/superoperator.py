@@ -19,7 +19,7 @@ from scipy.sparse.linalg import eigs
 
 
 from lime.phys import dag, pauli
-from qutip import Qobj as Basic
+# from qutip import Qobj as Basic
 
 
 def liouvillian(H, c_ops):
@@ -47,7 +47,7 @@ def liouvillian(H, c_ops):
 
     return l
 
-class Qobj(Basic):
+class Qobj():
     def __init__(self, data=None, dims=None):
         """
         Class for quantum operators: is this useful?
@@ -62,10 +62,16 @@ class Qobj(Basic):
         None.
 
         """
-        Basic.__init__(self, dims=dims, inpt=data)
-        # self.ndim = data.shape[-1]
+        # Basic.__init__(self, dims=dims, inpt=data)
+        self.dims = dims 
+        self.data = data
+        
+        if data is None:
+            self.data = np.random.randn(*dims)
+            
+        self.shape = self.data.shape
         return
-
+    
     def dot(self, b):
 
         return Qobj(np.dot(self.data, b.data))
@@ -106,7 +112,10 @@ def operator_to_vector(rho):
     None.
 
     """
-    return rho.toarray().flatten()
+    if isinstance(rho, np.ndarray):
+        return rho.flatten()
+    else:
+        return rho.toarray().flatten()
 
 
 def operator_to_superoperator(a, type='commutator'):

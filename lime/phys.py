@@ -5,11 +5,51 @@ from numpy import exp
 from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg,\
                         spdiags, issparse
 
+import scipy as sp
 import numba
 import sys
 
 from lime.units import au2fs, au2ev
 
+
+def tensor(*args):
+    """Calculates the tensor product of input operators.
+    
+    Build from QuTip. 
+
+    Parameters
+    ----------
+    args : array_like
+        ``list`` or ``array`` of quantum objects for tensor product.
+
+    Returns
+    -------
+
+
+    """
+
+    if not args:
+        raise TypeError("Requires at least one input argument")
+
+    if len(args) == 1 and isinstance(args[0], (list, np.ndarray)):
+        # this is the case when tensor is called on the form:
+        # tensor([q1, q2, q3, ...])
+        qlist = args[0]
+
+    else:
+        # this is the case when tensor is called on the form:
+        # tensor(q1, q2, q3, ...)
+        qlist = args
+
+    for n, q in enumerate(qlist):
+        if n == 0:
+            out = q
+        else:
+            out = sp.kron(out, q, format='csr')
+
+    return out
+
+        
 def ptrace(rho, dims, which='B'):
     """
     partial trace of subsystems in a density matrix defined in a composite space
@@ -737,7 +777,7 @@ def multiboson(omega, nmodes, J=0, truncate=2):
     idm = identity(N)
     a = destroy(N)
     adag = dag(a)
-    x = csr_matrix(a  + adag)
+    x = a  + adag
 
 
     if nmodes == 1:
@@ -779,6 +819,24 @@ def multiboson(omega, nmodes, J=0, truncate=2):
 
 
         return ham
+
+def project(P, a):
+    """
+    reduce the representation of operators to a subspace defined by the 
+    projection operator P
+
+    Parameters
+    ----------
+    P : TYPE
+        DESCRIPTION.
+    a : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
 
 def tensor_power(a, n:int):
     """

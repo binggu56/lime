@@ -341,8 +341,7 @@ class Pulse:
 
 class Cavity():
     def __init__(self, freq, ncav, Q=None, polarization=None):
-        self.freq = freq
-        self.resonance = freq
+        self.frequency = self.freq = self.resonance = freq
         self.n_cav = ncav
         self.n = ncav
         self.dim = ncav # dimension of Fock space

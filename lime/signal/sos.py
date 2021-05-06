@@ -14,6 +14,7 @@ from lime.units import au2ev
 from lime.optics import heaviside
 
 
+
 def absorption(omegas, mol, fname=None, normalize=False, scale=1.):
     '''
     SOS for linear absorption signal S = 2 pi |mu_{fg}|^2 delta(omega - omega_{fg}).
@@ -694,6 +695,7 @@ def DQC_R2(evals, dip, omega1=None, omega2=[], omega3=None, tau1=None, tau3=None
 
 #     return signal
 
+
 def etpa(omegaps, mol, epp, g_idx, e_idx, f_idx):
     """
     ETPA signal with temporal modes (TMs).
@@ -716,13 +718,38 @@ def etpa(omegaps, mol, epp, g_idx, e_idx, f_idx):
         DESCRIPTION.
 
     """
-    g = g_idx
 
     Es = mol.eigenenergies()
     edip = mol.edip
 
     # joint temporal amplitude
     t1, t2, jta = epp.get_jta()
+    return _etpa(omegaps, Es, edip, jta, t1, t2, g_idx, e_idx, f_idx)
+
+
+@jit
+def _etpa(omegaps, Es, edip, jta, t1, t2, g_idx, e_idx, f_idx):
+    """
+    internal function to compute the ETPA signal.
+
+    Parameters
+    ----------
+    omegaps: pump center frequencies
+    Es: eigenenergies
+    edip: electric dipole operator
+    jta: 2d array
+        joint temporal amplitude
+    t1: 1d array
+    t2: 1d array
+    g_idx: ground-state manifold
+    e_idx: intermediate states
+    f_idx: final states
+
+    Returns
+    -------
+    signal: 1d array
+
+    """
     # setup the temporal grid
     T1, T2 = np.meshgrid(t1, t2)
 
@@ -730,6 +757,7 @@ def etpa(omegaps, mol, epp, g_idx, e_idx, f_idx):
     theta = heaviside(T2 - T1)
 
     signal = np.zeros(len(omegaps), dtype=complex)
+    g = g_idx
     for j, omegap in enumerate(omegaps): # loop over pump frequencies
 
         omega1 = omega2 = omegap/2.
@@ -752,11 +780,13 @@ def etpa(omegaps, mol, epp, g_idx, e_idx, f_idx):
 
     return signal
 
+
 if __name__ == '__main__':
 
     from lime.units import au2fs
     from lime.style import subplots
-    fig, ax = plt.subplots(figsize=(4.2,3.2))
+
+    fig, ax = plt.subplots(figsize=(4.2, 3.2))
     E = np.array([0., 0.5, 1.1, 1.3])/au2ev
     gamma = [0, 0.02, 0.02]
     H = np.diag(E)
@@ -766,12 +796,13 @@ if __name__ == '__main__':
 
     from matplotlib import cm
 
-    dip =np.zeros((len(E), len(E)))
+    dip = np.zeros((len(E), len(E)))
     dip[1,2] = dip[2,1] = 1.
     dip[1,3] = dip[3,1] = 1.
 
     dip[0,1] = dip[1, 0] = 1.
-    # dip[0,2] = dip[2,0] = 1.
+    dip[3, 3] = 1.
+    dip[0, 3] = dip[3,0] = 1.
 
     mol = Mol(H, dip)
     epp = Biphoton(0, 0.04/au2ev, Te=10./au2fs)
@@ -780,18 +811,19 @@ if __name__ == '__main__':
     epp.set_grid(p, q)
 
     epp.get_jsa()
-    epp.plt_jsa()
+    # epp.plt_jsa()
 
     pump = np.linspace(0.5, 1.5, 100)/au2ev
-    # probe = np.linspace(0.8, 1.2, 100)
-    # omega_min = min(pump)
-    # omega_max = max(pump)
-
-    signal = etpa(pump, mol, epp, [0], [1], [2, 3])
+    signal = etpa(pump, mol, epp, [0], [1, 2, 3], [2, 3])
 
     fig, ax = subplots()
     ax.plot(pump*au2ev, np.abs(signal)**2)
     plt.show()
+
+    # pump = np.linspace(0.5, 1.5, 100)/au2ev
+    # probe = np.linspace(0.8, 1.2, 100)
+    # omega_min = min(pump)
+    # omega_max = max(pump)
     # SPE = SE(E, dip, omega1=-pump, omega3=probe, tau2=1e-3, g_idx=[0], e_idx= [1,2],\
     #           gamma=gamma)
 

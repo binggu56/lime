@@ -633,20 +633,20 @@ class Lindblad_solver():
     def steady_states(self):
         pass
 
-    def evolve(self, rho0, dt, Nt, t0=0., return_result=True):
+    def evolve(self, rho0, dt, Nt, t0=0., e_ops=None, return_result=True):
         
-        if isinstance(H, list):
+        if isinstance(self.H, list):
             
             return _lindblad_driven(self.H, rho0=rho0, c_ops=self.c_ops, 
-                                    e_ops=self.e_ops,
+                                    e_ops=e_ops,
                                     Nt=Nt, dt=dt, t0=t0)
         
         else:
 
-            return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=self.e_ops, \
+            return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
                 
-    def correlation_2p_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
+    def correlation_2op_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
         '''
         two-point correlation function <A(t)B>
 
@@ -676,7 +676,48 @@ class Lindblad_solver():
 
         return _correlation_2p_1t(H, rho0, ops=[a_op, b_op], c_ops=c_ops, dt=dt,\
                           Nt=Nt, output=output)
+    
+    def correlation_3op_1t(self, rho0, oplist, dt=0.005, Nt=1):
+        """
+        <AB(t)C>
 
+        Parameters
+        ----------
+        psi0
+        oplist
+        dt
+        Nt
+
+        Returns
+        -------
+        cor: 1D array
+        """
+        a_op, b_op, c_op = oplist
+        cor = _lindblad(self.H, rho0 = c_op @ rho0 @ a_op, c_ops=self.c_ops, \
+                        e_ops=[b_op], dt=dt, Nt=Nt).observables[:,0]
+        
+        return cor
+    
+    def correlation_4op_1t(self, rho0, oplist, dt=0.005, Nt=1):
+        """
+        <AB(t)C(t)D>
+
+        Parameters
+        ----------
+        psi0
+        oplist
+        dt
+        Nt
+
+        Returns
+        -------
+
+        """
+        a_op, b_op, c_op, d_op = oplist
+        return self.correlation_3p_1t(rho0=rho0, oplist=[a_op, b_op @ c_op, d_op],\
+                                      dt=dt, Nt=Nt)
+    
+    
     def correlation_3op_2t(self, rho0, ops, dt, Nt, Ntau):
         """
         Internal function for calculating the three-operator two-time
@@ -710,11 +751,27 @@ class Lindblad_solver():
 
         return corr_mat
 
+    def correlation_4op_1t(self, rho0, ops, dt, nt):
+        """
+        Internal function for calculating the four-operator two-time
+        correlation function:
+        <A B(t)C(t) D>
+        using the Linblad master equation solver.
+        """
+
+        if len(ops) != 4:
+            raise ValueError('Number of operators is not 4.')
+        else:
+            a, b, c, d = ops
+
+        corr = self.correlation_3op_1t(rho0, [a, b@c, d], dt, nt, ntau)
+        return corr
+
     def correlation_4op_2t(self, rho0, ops, dt, nt, ntau):
         """
         Internal function for calculating the four-operator two-time
         correlation function:
-        <A(t)B(t+tau)C(t+tau)D>
+        <A(t)B(t+tau)C(t+tau)D(t)>
         using the Linblad master equation solver.
         """
 
@@ -745,14 +802,9 @@ class HEOMSolverDL():
         set observable operators
         """
         self.e_ops = e_ops
+        
         return
-
-    def set_e_ops(self, e_ops):
-        """
-        set observable operators
-        """
-        self.e_ops = e_ops
-        return
+    
     def setH(self, H):
         self.H = H
         return
@@ -867,7 +919,7 @@ class HEOMSolverDL():
 
 #     return corr_mat
 
-def _lindblad(H, rho0, c_ops, e_ops=[], Nt=1, dt=0.005, return_result=True):
+def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
 
     """
     time propagation of the lindblad quantum master equation
@@ -889,12 +941,13 @@ def _lindblad(H, rho0, c_ops, e_ops=[], Nt=1, dt=0.005, return_result=True):
     rho: 2D array
         density matrix at time t = Nt * dt
     """
-
-    nstates = H.shape[-1]
     
     # initialize the density matrix
     rho = rho0.copy()
     rho = rho.astype(complex)
+    
+    if e_ops is None:
+        e_ops = []
     
     t = 0.0
     # first-step
@@ -905,8 +958,8 @@ def _lindblad(H, rho0, c_ops, e_ops=[], Nt=1, dt=0.005, return_result=True):
     # rho = rho1
     if return_result == False:
 
-        f_dm = open('den_mat.dat', 'w')
-        fmt_dm = '{} ' * (nstates**2 + 1) + '\n'
+        # f_dm = open('den_mat.dat', 'w')
+        # fmt_dm = '{} ' * (nstates**2 + 1) + '\n'
 
         f_obs = open('obs.dat', 'w')
         fmt = '{} '* (len(e_ops) + 1) + '\n'
@@ -936,7 +989,7 @@ def _lindblad(H, rho0, c_ops, e_ops=[], Nt=1, dt=0.005, return_result=True):
 
 
         f_obs.close()
-        f_dm.close()
+        # f_dm.close()
 
         return rho
 
@@ -1160,12 +1213,12 @@ if __name__ == '__main__':
 
     
     H = [H0, [H1, pulse.field]]
-    #H = H0
+    # H = H0
     
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0)
 
-    mesolver = Lindblad_solver(H, c_ops=None, e_ops = [sx])
+    mesolver = Lindblad_solver(H, e_ops = [sx])
     Nt = 6000
     dt = 0.08
     
@@ -1174,8 +1227,6 @@ if __name__ == '__main__':
     result = mesolver.evolve(rho0, dt=dt, Nt=Nt, return_result=True, t0=t0)
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
 
-
-    
     from lime.style import subplots
     fig, ax = subplots()
     times = np.arange(Nt) * dt + t0

@@ -1,0 +1,93 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+
+\begin{document}
+
+\author{Bing Gu}
+\title{User manual for LIME} 
+\date{Nov 2019}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+%\include{chapter01}
+%\include{./TeX_files/chapter02}
+
+
+% bibliography, glossary and index would go here.
+
+
+\chapter{Quantum dynamics} 
+
+\section{ Adiabatic Nuclear Quantum Dynamics}
+
+Exact methods:
+
+\subsection{Split-operator method} 
+Discrete variable representation
+Semiclassical methods:
+
+\subsection{Quantum trajectory method} 
+b. Non-adiabatic molecular dynamics
+
+Exact nonadiabatic quantum dynamic with multiple electronic surfaces.
+
+Split-operator method in the diabatic representation
+Mixed quantum-classical methods
+
+Surface-hopping method
+\chapter{Quantum chemistry} 
+Quantum chemistry solves the electronic structure given the nuclear geometry. This has been an active field of research for many decades, and sophisticated programs like Gaussian, Qchem, Psi4, Pyscf, Molpro have been widely used in the scientific community. We will take advantage of these remarkable developments. On one hand, we will apply existing methods to interesting molecules and materials. On the other hand, we will develop new techniques based on these programs as well since many functions and modules such as Coulomb integrals are the same irrespective of what your method is.
+
+Currently, we primarily use Pyscf and Molpro for Quantum Chemistry computations.
+
+3. Polaritonic dynamics
+Quantum dynamics of molecules coupled to the electromagnetic photon modes confined inside an optical cavity.
+
+4. Stochastic Schrödinger equation
+Generate white and colored noise to simulate stochastic dynamics, e.g., stochastic Schrödinger equations.
+
+5. Band structure of solids
+Compute band structure from tight-binding Hamiltonians.
+
+\chapter{Open quantum systems} 
+Quantum systems are rarely isolated from their surrounding environment. For an isolated quantum system, dynamics can be described by the time-dependent Schrödinger equation (TDSE). One straightforward approach simulating the open quantum system dynamics is to include the environment degrees of freedom directly into the TDSE. While conceptually simple, this is not always the optimal choice when the environment is complex. Alternatively, we can solve a quantum master equation describing the equation of motion for the reduced density matrix.
+
+The following methods are currently implemented
+
+\section{Redfield equations} 
+
+\section{Lindblad quantum master equations} 
+\section{Hierarchical equation of motion} 
+\section{second-order time-convolutionless equation} 
+
+\chapter{Periodically driven quantum systems} 
+Quasienergy levels of a periodically driven quantum system using Floquet theorem
+
+
+\chapter{Nonlinear molecular spectroscopy} 
+Time-independent approach to optical signals via sum-over-states expressions
+
+Absorption
+\section{Transient absorption spectroscopy} 
+Photo echo
+Time-dependent approach to coherent signals via explicitly solving the dynamics of matter interacting with laser pulses employed in the spectroscopic experiment. For example, pump and probe pulses in pump-probe experiments.
+
+\section{Transient absorption} 
+
+\chapter{ Quantum transport} 
+This module is to compute the current of nano-structures under a finite bias using the non-equilibrium Green's function (NEGF) method.
+
+\section{NEGF for time-independent transport} 
+
+
+\chapter{Uncategorized}
+
+\section{Schmdit decomposition}
+
+
+\backmatter
+\end{document}
