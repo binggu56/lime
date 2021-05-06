@@ -623,7 +623,7 @@ def _propagator(H, dt, Nt):
           'Please make sure that the ground-state energy is 0.')
     Ulist = []
     for k in range(Nt):
-        Ulist.append(U)
+        Ulist.append(U.copy())
         U = rk4(U, tdse, dt, H)
 
     return Ulist
