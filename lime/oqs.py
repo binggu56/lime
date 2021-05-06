@@ -818,7 +818,7 @@ class HEOMSolverDL():
         return _lindblad(self.H, rho0, self.c_ops, e_ops=self.e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
 
-    def correlation_2p_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
+    def correlation_2op_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
         '''
         two-point correlation function <A(t)B>
 
@@ -1218,15 +1218,16 @@ if __name__ == '__main__':
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0)
 
-    mesolver = Lindblad_solver(H, e_ops = [sx])
-    Nt = 6000
+    mesolver = Lindblad_solver(H, c_ops=[sz])
+    Nt = 1000
     dt = 0.08
     
     # L = mesolver.liouvillian()
     t0=-10/au2fs
-    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, return_result=True, t0=t0)
+    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, e_ops = [sx], return_result=True, t0=t0)
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
 
+    print(result.observables)
     from lime.style import subplots
     fig, ax = subplots()
     times = np.arange(Nt) * dt + t0
