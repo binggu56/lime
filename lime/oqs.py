@@ -6,7 +6,7 @@ modules for open quantum systems
 '''
 
 import numpy as np
-import numba
+from numba import jit, njit
 import sys
 import scipy
 
@@ -188,6 +188,7 @@ class OQS(Mol):
     #     """
     #     pass
 
+# @jit
 def liouvillian(rho, H, c_ops):
     """
     lindblad quantum master eqution
@@ -197,6 +198,7 @@ def liouvillian(rho, H, c_ops):
         rhs += lindbladian(c_op, rho)
     return rhs
 
+# @jit
 def lindbladian(l, rho):
     """
     lindblad superoperator: l rho l^\dag - 1/2 * {l^\dag l, rho}
@@ -204,7 +206,7 @@ def lindbladian(l, rho):
     e.g. l = a, for the cavity decay and
     l = sm for polarization decay
     """
-    return l.dot(rho.dot(dag(l))) - 0.5 * anticomm(dag(l).dot(l), rho)
+    return np.dot(l, np.dot(rho, dag(l))) - 0.5 * anticomm(np.dot(dag(l), l), rho)
 
 #@numba.jit
 def _correlation_2p_1t(H, rho0, ops, c_ops, dt, Nt, method='lindblad', output='cor.dat'):
@@ -320,7 +322,7 @@ class Env:
 
 
 
-@numba.jit
+@jit
 def func(rho, h0, c_ops, l_ops):
     """
     right-hand side of the master equation
@@ -591,7 +593,7 @@ def _redfield(nstates, rho0, c_ops, h0, Nt, dt,e_ops, env):
 
     return rho
 
-@numba.jit
+@jit
 def observe(A, rho):
     """
     compute expectation value of the operator A
@@ -645,6 +647,10 @@ class Lindblad_solver():
 
             return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
+    
+    def evolve_fast(self, rho0, dt, Nt, t0=0., e_ops=None, return_result=True, fast=True):
+            return _fast_lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=e_ops, \
+                   Nt=Nt, dt=dt)
                 
     def correlation_2op_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
         '''
@@ -764,7 +770,7 @@ class Lindblad_solver():
         else:
             a, b, c, d = ops
 
-        corr = self.correlation_3op_1t(rho0, [a, b@c, d], dt, nt, ntau)
+        corr = self.correlation_3op_1t(rho0, [a, b@c, d], dt, nt)
         return corr
 
     def correlation_4op_2t(self, rho0, ops, dt, nt, ntau):
@@ -919,6 +925,127 @@ class HEOMSolverDL():
 
 #     return corr_mat
 
+# @jit 
+# def _rk4(rho, fun, dt, H, c_ops):
+#     """
+#     Runge-Kutta method
+#     """
+#     dt2 = dt/2.0
+
+#     k1 = fun(rho,  H, c_ops )
+#     k2 = fun(rho + k1*dt2,  H, c_ops)
+#     k3 = fun(rho + k2*dt2,  H, c_ops)
+#     k4 = fun(rho + k3*dt,  H, c_ops)
+
+#     rho += (k1 + 2*k2 + 2*k3 + k4)/6. * dt
+
+#     return rho
+
+@njit
+def _fast_lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005):
+
+    """
+    fast time propagation of the lindblad quantum master equation
+    
+    (not completed yet.)
+    
+    Input
+    -------
+    h0: 2d array
+            system Hamiltonian
+    Nt: total number of time steps
+
+    dt: time step
+        c_ops: list of collapse operators
+        e_ops: list of observable operators
+        rho0: initial density matrix
+
+    Returns
+    =========
+    rho: 2D array
+        density matrix at time t = Nt * dt
+    """
+    
+    # initialize the density matrix
+    rho = rho0
+    
+    # if e_ops is None:
+    #     e_ops = []
+    
+    t = 0.0
+    dt2 = dt/2.
+    # first-step
+    # rho_half = rho0 + liouvillian(rho0, h0, c_ops) * dt2
+    # rho1 = rho0 + liouvillian(rho_half, h0, c_ops) * dt
+
+    # rho_old = rho0
+    # rho = rho1
+
+        # f_dm = open('den_mat.dat', 'w')
+        # fmt_dm = '{} ' * (nstates**2 + 1) + '\n'
+
+        # f_obs = open('obs.dat', 'w')
+        # fmt = '{} '* (len(e_ops) + 1) + '\n'
+
+    for k in range(Nt):
+
+        t += dt
+
+        # rho_new = rho_old + liouvillian(rho, h0, c_ops) * 2. * dt
+        # # update rho_old
+        # rho_old = rho
+        # rho = rho_new
+
+        # rho = rk4(rho, liouvillian, dt, H, c_ops)
+        k1 = liouvillian(rho, H, c_ops )
+        k2 = liouvillian(rho + k1*dt2,  H, c_ops)
+        k3 = liouvillian(rho + k2*dt2,  H, c_ops)
+        k4 = liouvillian(rho + k3*dt,  H, c_ops)
+
+        rho += (k1 + 2*k2 + 2*k3 + k4)/6. * dt
+
+        # dipole-dipole auto-corrlation function
+        #cor = np.trace(np.matmul(d, rho))
+
+        # take a partial trace to obtain the rho_el
+        # compute observables
+        observables = np.zeros(len(e_ops), dtype=complex)
+
+        # for i, obs_op in enumerate(e_ops):
+        #     observables[i] = obs_dm(rho, obs_op)
+
+        # f_obs.write(fmt.format(t, *observables))
+
+
+    # f_obs.close()
+    # f_dm.close()
+
+    return rho
+
+    # else:
+
+    #     rholist = [] # store density matries
+
+    #     result = Result(dt=dt, Nt=Nt, rho0=rho0)
+
+    #     observables = np.zeros((Nt, len(e_ops)), dtype=complex)
+
+    #     for k in range(Nt):
+
+    #         t += dt
+    #         rho = rk4(rho, liouvillian, dt, H, c_ops)
+
+    #         rholist.append(rho.copy())
+            
+            
+    #         observables[k, :] = [obs_dm(rho, op) for op in e_ops]
+            
+
+    #     result.observables = observables
+    #     result.rholist = rholist
+
+    #     return result
+    
 def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
 
     """
@@ -966,6 +1093,12 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
 
         for k in range(Nt):
 
+            # compute observables
+            observables = np.zeros(len(e_ops), dtype=complex)
+
+            for i, obs_op in enumerate(e_ops):
+                observables[i] = obs_dm(rho, obs_op)
+                
             t += dt
 
             # rho_new = rho_old + liouvillian(rho, h0, c_ops) * 2. * dt
@@ -979,11 +1112,7 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
             #cor = np.trace(np.matmul(d, rho))
 
             # take a partial trace to obtain the rho_el
-            # compute observables
-            observables = np.zeros(len(e_ops), dtype=complex)
 
-            for i, obs_op in enumerate(e_ops):
-                observables[i] = obs_dm(rho, obs_op)
 
             f_obs.write(fmt.format(t, *observables))
 
@@ -1203,8 +1332,8 @@ if __name__ == '__main__':
     s0, sx, sy, sz = pauli()
 
     # set up the molecule
-    H0 =  1/au2ev * 0.5 * (s0 - sz)
-    H1 = sx 
+    H0 =  1./au2ev * 0.5 * (s0 - sz)
+    H1 = sx.astype(complex)
 
     # def coeff1(t):
     #     return np.exp(-t**2)*np.cos(1./au2ev * t)
@@ -1212,27 +1341,30 @@ if __name__ == '__main__':
     pulse = Pulse(0, 2/au2fs, 1./au2ev, amplitude=0.05)
 
     
-    H = [H0, [H1, pulse.field]]
-    # H = H0
+    # H = [H0, [H1, pulse.field]]
+    H = H0.astype(complex)
     
     psi0 = basis(2, 0)
-    rho0 = ket2dm(psi0)
+    rho0 = ket2dm(psi0).astype(complex)
 
-    mesolver = Lindblad_solver(H, c_ops=[sz])
-    Nt = 1000
+    mesolver = Lindblad_solver(H, c_ops=[sz.astype(complex)])
+    Nt = 2000
     dt = 0.08
     
+    import time 
+    start_time = time.time()
     # L = mesolver.liouvillian()
     t0=-10/au2fs
-    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, e_ops = [sx], return_result=True, t0=t0)
+    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, e_ops = [H1], return_result=True, t0=t0)
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
 
-    print(result.observables)
+    # print(result.observables)
     from lime.style import subplots
     fig, ax = subplots()
     times = np.arange(Nt) * dt + t0
     ax.plot(times, result.observables[:,0])
 
+    print('Execution time = {} s'.format(time.time() - start_time))
 
     fig, ax = subplots()
     ax.plot(times, pulse.field(times))
