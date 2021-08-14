@@ -20,3 +20,7 @@ ev2nm = electronvolt2nanometer = 1239.84193
  # 1 eV = 1239.847 nm
 
 alpha = 0.0072973525693 # fine structure constant
+
+eps0 = epsilon_0 = 8.85418781762e-12 # Farad m^-1
+c0 = speed_of_light = 299792458.0 #m s^-1
+imp0 =  376.730313668 # impedence of free space, Ohm
