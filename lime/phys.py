@@ -7,15 +7,38 @@ from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg,\
 
 import scipy as sp
 import numba
+from numba import jit
 import sys
 
 from lime.units import au2fs, au2ev
 
+def rect(x):
+    return np.heaviside(x+0.5, 0.5) - np.heaviside(x - 0.5, 0.5)
+
+def interval(x):
+    return x[1] - x[0]
+
+def fftfreq(times):
+    """
+    get the spectral range corresponding to the temporal grid (a.u.)
+
+    Parameters
+    ----------
+    times : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    return np.fft.fftshift(np.fft.fftfreq(len(times), interval(times)))
 
 def tensor(*args):
     """Calculates the tensor product of input operators.
-    
-    Build from QuTip. 
+
+    Build from QuTip.
 
     Parameters
     ----------
@@ -49,7 +72,7 @@ def tensor(*args):
 
     return out
 
-        
+
 def ptrace(rho, dims, which='B'):
     """
     partial trace of subsystems in a density matrix defined in a composite space
@@ -67,28 +90,28 @@ def ptrace(rho, dims, which='B'):
         DESCRIPTION.
 
     """
-    dimA, dimB = dims 
-    
+    dimA, dimB = dims
+
     if rho.shape[0] != dimA * dimB:
         raise ValueError('Size of density matrix does not match dimensions.')
-    
+
     if issparse(rho):
         rho = rho.toarray()
-        
+
     rho_reshaped = np.reshape(rho, (dimA, dimB, dimA, dimB))
-    
+
     if which=='B':
         rhoA = np.einsum('injn -> ij', rho_reshaped)
         return rhoA
-    
+
     elif which == 'A':
-        
+
         rhoB = np.einsum('inim -> nm', rho_reshaped)
-    
+
         return rhoB
     else:
         raise ValueError('which can only be A or B.')
-        
+
 def lowering(dims=2):
     if dims == 2:
         sm = csr_matrix(np.array([[0.0, 1.0],[0.0,0.0]], dtype=np.complex128))
@@ -390,13 +413,15 @@ def commutator(A,B):
     assert(A.shape == B.shape)
     return A.dot(B) - B.dot(A)
 
+# @jit
 def comm(A,B):
     assert(A.shape == B.shape)
-    return A.dot(B) - B.dot(A)
+    return np.dot(A, B) - np.dot(B, A)
 
+# @jit
 def anticomm(A,B):
     assert(A.shape == B.shape)
-    return A.dot(B) + B.dot(A)
+    return np.dot(A, B) + np.dot(B, A)
 
 def anticommutator(A,B):
     assert(A.shape == B.shape)
@@ -405,6 +430,7 @@ def anticommutator(A,B):
 def dagger(a):
     return a.conjugate().transpose()
 
+# @jit
 def dag(a):
     return a.conjugate().transpose()
 
@@ -478,6 +504,7 @@ def quadrature(n):
     a = destroy(n)
     return 1./np.sqrt(2) * (a + dag(a))
 
+# @jit
 def obs_dm(rho, d):
     """
     observables for operator d
@@ -822,7 +849,7 @@ def multiboson(omega, nmodes, J=0, truncate=2):
 
 def project(P, a):
     """
-    reduce the representation of operators to a subspace defined by the 
+    reduce the representation of operators to a subspace defined by the
     projection operator P
 
     Parameters
