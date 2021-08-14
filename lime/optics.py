@@ -10,29 +10,41 @@ import numpy as np
 from scipy.sparse import lil_matrix, csr_matrix, kron, identity, linalg
 from numpy import sqrt, exp, pi
 import matplotlib.pyplot as plt
+
 from lime.units import au2k, au2ev
 from lime.fft import fft2
-from lime.phys import sinc, dag
-from lime.style import set_style
+from lime.phys import rect, sinc, dag, interval
+from lime.style import set_style, imshow
 
 from numba import jit
 
 class Pulse:
-    def __init__(self, delay, sigma, omegac, amplitude=0.01, cep=0.):
+    def __init__(self, sigma, omegac, delay=0., amplitude=0.01, cep=0., beta=0.):
         """
-        Gaussian pulse A * exp(-(t-T)^2/2 / sigma^2)
-        A: amplitude 
-        T: time delay 
-        sigma: duration 
+        (linearly chirped) Gaussian pulse
+
+        The positive frequency component reads
+
+        E = A/2 * exp(-(t-t0)^2/2/T^2) * exp[-i w (t-t0)(1 + beta (t-t0)/T)]
+
+        A: electric field amplitude
+        T: time delay
+        sigma: duration
+
         """
         self.delay = delay
         self.sigma = sigma
+        self.T = sigma
         self.omegac = omegac # central frequency
         self.unit = 'au'
         self.amplitude = amplitude
         self.cep = cep
         self.bandwidth = 1./sigma
-        self.duration = 2. * sigma 
+        self.duration = 2. * sigma
+        self.beta = beta  # linear chirping rate, dimensionless
+        self.ndim = 1
+
+
 
     def envelop(self, t):
         return np.exp(-(t-self.delay)**2/2./self.sigma**2)
@@ -41,34 +53,57 @@ class Pulse:
         """
         Fourier transform of the Gaussian pulse
         """
-        omegac = self.omegac
-        sigma = self.sigma
-        a = self.amplitude
-        return a * sigma * np.sqrt(2.*np.pi) * np.exp(-(omega-omegac)**2 * sigma**2/2.)
+        omega0 = self.omegac
+        T = self.sigma
+        A0 = self.amplitude
+        beta = self.beta
+
+#        if beta is None:
+#            return A0 * sigma * np.sqrt(2.*np.pi) * np.exp(-(omega-omega0)**2 * sigma**2/2.)
+#        else:
+        a = 0.5/T**2 + 1j * beta * omega0/T
+        return A0 * np.sqrt(np.pi/a) * np.exp(-(omega - omega0)**2/4./a)
 
     def field(self, t):
         '''
         electric field
         '''
+        return self.efield(t)
+
+    def efield(self, t):
         omegac = self.omegac
-        delay = self.delay
+        t0 = self.delay
         a = self.amplitude
-        sigma = self.sigma
-        return a * np.exp(-(t-delay)**2/2./sigma**2)*np.cos(omegac * (t-delay))
+        tau = self.sigma
+        beta = self.beta
+#
+#        if beta is None:
+#            return a * np.exp(-(t-delay)**2/2./sigma**2)*np.cos(omegac * (t-delay))
+#        else:
 
+        E = 0.5 * a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
+            * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
 
+        # return 2. * E.real
+        return E
 
+    def spectrogram(self, efield):
 
+        # from tftb.processing import WignerVilleDistribution
 
-def heaviside(x):
-    """
-    Heaviside function defined in a grid.
-      returns 0 if x<=0, and 1 if x>0
-    """
-    x = np.asarray(x)
-    y = np.zeros(x.shape)
-    y[x > 0] = 1.0
-    return y
+        # wvd = WignerVilleDistribution(z)
+        # w, ts, fs = wvd.run()
+        return
+
+# def heaviside(x):
+#     """
+#     Heaviside function defined in a grid.
+#       returns 0 if x<=0, and 1 if x>0
+#     """
+#     x = np.asarray(x)
+#     y = np.zeros(x.shape)
+#     y[x > 0] = 1.0
+#     return y
 
 
 class Biphoton:
@@ -84,7 +119,7 @@ class Biphoton:
         p: signal grid
         q: idler grid
         phase_matching: str
-            type of phase matching. Default is 'sinc'.
+            type of phase matching. Default is 'sinc'. A narrowband approxmation is invoked.
         """
         self.omegap = omegap
         self.pump_bandwidth = bw
@@ -96,6 +131,9 @@ class Biphoton:
         self.jta = None
         self.p = p
         self.q = q
+        if p is not None:
+            self.dp = interval(p)
+            self.dq = interval(q)
         self.grid = [p, q]
 
     def pump(self, bandwidth):
@@ -137,7 +175,8 @@ class Biphoton:
 
     def get_jta(self):
         """
-        Compute the joint temporal amplitude
+        Compute the joint temporal amplitude J(ts, ti) over a temporal meshgrid.
+
         Returns
         -------
         ts: 1d array
@@ -159,6 +198,9 @@ class Biphoton:
 
         else:
             raise ValueError('jsa is None. Call get_jsa() first.')
+
+    def jta(self, ts, ti):
+        return
 
     def detect(self):
         """
@@ -194,20 +236,120 @@ class Biphoton:
     def g2(self):
         pass
 
-    def plt_jsa(self, fname=None):
+    def bandwidth(self, which='signal'):
+        """
+        Compute the bandwidth of the signal/idler mode
 
-        fig, ax = plt.subplots(figsize=(4, 3))
+        Parameters
+        ----------
+        which : TYPE, optional
+            DESCRIPTION. The default is 'signal'.
 
-        set_style(14)
+        Returns
+        -------
+        None.
 
-        ax.imshow(self.jsa, origin='lower')
+        """
+        p, q = self.p, self.q
+        dp = interval(p)
+        dq = interval(q)
 
-        plt.show()
+        f = self.jsa
+
+        if which == 'signal':
+            rho = rdm(f, dq, which='x')
+            sigma = sqrt(rho.diagonal().dot(p**2) * dp)
+
+        elif which == 'idler':
+
+            rho = rdm(f, dp, which='y')
+
+            sigma = sqrt(rho.diagonal().dot(q**2) * dq)
+
+        return sigma
+
+    def plt_jsa(self, xlabel=None, ylabel=None, fname=None):
+
+        if self.jsa is None:
+            self.get_jsa()
+
+        plt, ax = imshow(self.p * au2ev, self.q * au2ev, np.abs(self.jsa))
+
+        if xlabel is not None: ax.set_xlabel(xlabel)
+        if ylabel is not None: ax.set_xlabel(ylabel)
+
 
         if fname is not None:
             fig.savefig('jsa.pdf')
 
+        plt.show()
+
         return ax
+
+    def rdm(self, which='signal'):
+        if which == 'signal':
+            return rdm(self.jsa, dy=self.dq, which='x')
+
+
+def jta(t2, t1, omegap, sigmap, Te):
+    """
+    Analytical form for the joint temporal amplitude for SPDC type-II
+    two-photon state.
+
+    Note that two single-photon electric field prefactors are neglected.
+
+    Parameters
+    ----------
+    t2 : TYPE
+        DESCRIPTION.
+    t1 : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    omegas = omegap/2.
+    omegai = omegap/2.
+
+    tau = t2 - t1
+    amp = sqrt(sigmap/Te) * (2.*pi)**(3./4) * \
+        rect(tau/2./Te) * exp(-sigmap**2*(t1+t2)**2/4.) *\
+            exp(-1j * omegas * t1 - 1j*omegai * t2)
+
+    return amp
+
+
+def rdm(f, dx=1, dy=1, which='x'):
+    '''
+    Compute the reduced density matrix by tracing out the other dof for a 2D wavefunction
+
+    Parameters
+    ----------
+    f : 2D array
+        2D wavefunction
+    dx : float, optional
+        DESCRIPTION. The default is 1.
+    dy : float, optional
+        DESCRIPTION. The default is 1.
+    which: str
+        indicator which rdm is required. Default is 'x'.
+
+    Returns
+    -------
+    rho1 : TYPE
+        Reduced density matrix
+
+    '''
+    if which == 'x':
+        rho = f.dot(dag(f)) * dy
+    elif which == 'y':
+        rho = f.T.dot(np.conj(f)) * dx
+    else:
+        raise ValueError('The argument which can only be x or y.')
+    return rho
 
 
 def _jsa(p, q, pump_bw, model='sinc', Te=None):
@@ -260,8 +402,7 @@ def _jsa(p, q, pump_bw, model='sinc', Te=None):
     return jsa
 
 
-def interval(x):
-    return x[1] - x[0]
+
 
 
 def hom(p, q, f, tau):

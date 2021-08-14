@@ -73,7 +73,7 @@ def FranckCondon(Ln, Lm, d):
     A = 2. * sqrt(wn * wm)/(wn + wm)
     S = d**2 * wn*wm/(wn + wm)
 
-    p = sqrt(A*exp(-S)/(factorial(n) * factorial(m) * 2**(n+m)))
+    p = sqrt(A*exp(-S)/(factorial(n) * factorial(m))) / 2.**((n+m)/2)
 
     def I(i,j):
         if (i+j) % 2 == 0:
