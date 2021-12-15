@@ -8,6 +8,7 @@ au2kev = 27.2116e-3
 au2mev = 27.2116e3
 au2wn = au2wavenumber = 219474.6305
 wavenumber2hartree = wavenum2au = 4.55633525277e-06
+ev2wavenumber = 8065.73
 
 au2debye =  2.541765 # hbar^2/(m_e * e)
 

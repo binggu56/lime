@@ -4,18 +4,23 @@
 import numpy as np
 #import numba
 
-def fft(x, f):
+def fft(f, x=None, **kwargs):
     """
     customized fourier transform of function f
     g = int dt f(t) * exp(- i * freq * t)
-    return:
+
+    Return:
         freq: frequencies where f are evaluated
         g: the fourier transform of f
     """
     nx = len(f)
+
+    if x is None:
+        x = np.arange(nx)
+
     dx = x[1] - x[0]
 
-    g = np.fft.fft(f)
+    g = np.fft.fft(f, **kwargs)
     g = np.fft.fftshift(g)
     g *= dx
 
@@ -23,7 +28,7 @@ def fft(x, f):
 
     return freq, g * np.exp(-1j * freq * x[0])
 
-def ifft(x, f):
+def ifft(f, x=None):
     """
     customized fourier transform of function f
     g = int dt f(t) * exp(i * freq * t)
@@ -32,6 +37,10 @@ def ifft(x, f):
         g: the fourier transform of f
     """
     nx = len(f)
+
+    if x is None:
+        x = np.arange(nx)
+
     dx = x[1] - x[0]
 
     g = np.fft.ifft(f)

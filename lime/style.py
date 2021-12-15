@@ -5,6 +5,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
 import numpy as np
 
+
 def subplots(nrows=1, ncols=1, figsize = (4, 3), sharex=True, \
              sharey=True, **kwargs):
 
@@ -12,8 +13,8 @@ def subplots(nrows=1, ncols=1, figsize = (4, 3), sharex=True, \
 
         fig, ax = plt.subplots(figsize=figsize, constrained_layout=True, **kwargs)
 
-        ax.xaxis.set_minor_locator(ticker.AutoMinorLocator(5))
-        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator(5))
+        ax.xaxis.set_minor_locator(ticker.AutoMinorLocator(2))
+        ax.yaxis.set_minor_locator(ticker.AutoMinorLocator(2))
         ax.tick_params(direction='in', length=6)
 
         return fig, ax
@@ -38,17 +39,36 @@ def subplots(nrows=1, ncols=1, figsize = (4, 3), sharex=True, \
 
         return fig, ax
 
+def curve(x, y, **kwargs):
+    """
+    simple 1D curve plot
 
+    Parameters
+    ----------
+    x : TYPE
+        DESCRIPTION.
+    y : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    fig, ax = subplots()
+    ax.plot(x, y, **kwargs)
+
+    return fig, ax
 
 def set_style(fontsize=12):
 
     size = fontsize
 
-    #fontProperties = {'family':'sans-serif','sans-serif':['Helvetica'],
-    #'weight' : 'normal', 'size' : fontsize}
-
-    fontProperties = {'family':'sans-serif','sans-serif':['Arial'],
+    fontProperties = {'family':'sans-serif','sans-serif':['Helvetica'],
     'weight' : 'normal', 'size' : fontsize}
+
+    # fontProperties = {'family':'sans-serif','sans-serif':['Arial'],
+    # 'weight' : 'normal', 'size' : fontsize}
 
     rc('font', **fontProperties)
 
@@ -120,7 +140,55 @@ def set_style(fontsize=12):
     plt.rc('lines', lw=2)
     return
 
-def matplot(x, y, f, vmin=None, vmax=None, output='output.pdf', xlabel='X', \
+def matplot(x, y, f, vmin=None, vmax=None, ticks=None, output='output.pdf', xlabel='X', \
+            ylabel='Y', diverge=False, cmap='viridis', **kwargs):
+    """
+
+    Parameters
+    ----------
+    f : 2D array
+        array to be plotted.
+
+    extent: list [xmin, xmax, ymin, ymax]
+
+    Returns
+    -------
+    Save a fig in the current directory.
+
+    To be deprecated. Please use imshow.
+    """
+
+    fig, ax = plt.subplots(figsize=(4,3))
+
+    set_style()
+
+    if diverge:
+        cmap = "RdBu_r"
+    else:
+        cmap = 'viridis'
+
+    xmin, xmax = min(x), max(x)
+    ymin, ymax = min(y), max(y)
+
+    extent = [xmin, xmax, ymin, ymax]
+    cntr = ax.imshow(f.T, aspect='auto', cmap=cmap, extent=extent, \
+                      origin='lower', vmin=vmin, vmax=vmax, **kwargs)
+
+    ax.set_aspect('auto')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    fig.colorbar(cntr, ticks=ticks)
+
+    ax.xaxis.set_ticks_position('bottom')
+
+#    fig.subplots_adjust(wspace=0, hspace=0, bottom=0.14, left=0.14, top=0.96, right=0.94)
+    if output is not None:
+        fig.savefig(output, dpi=1200)
+
+    return fig, ax
+
+def imshow(x, y, f, vmin=None, vmax=None, ticks=None, output='output.pdf', xlabel='X', \
             ylabel='Y', diverge=False, cmap='viridis', **kwargs):
     """
 
@@ -151,19 +219,19 @@ def matplot(x, y, f, vmin=None, vmax=None, output='output.pdf', xlabel='X', \
 
     extent = [xmin, xmax, ymin, ymax]
     cntr = ax.imshow(f.T, aspect='auto', cmap=cmap, extent=extent, \
-                      vmin=vmin, vmax=vmax, **kwargs)
+                      origin='lower', vmin=vmin, vmax=vmax, **kwargs)
 
     ax.set_aspect('auto')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    fig.colorbar(cntr)
+    fig.colorbar(cntr, ticks=ticks)
 
     ax.xaxis.set_ticks_position('bottom')
 
 #    fig.subplots_adjust(wspace=0, hspace=0, bottom=0.14, left=0.14, top=0.96, right=0.94)
-
-#    fig.savefig(output, dpi=1200)
+    if output is not None:
+        fig.savefig(output, dpi=1200)
 
     return fig, ax
 
@@ -193,7 +261,7 @@ def color_code(x, y, z, fig, ax, cbar=False):
 
     return line
 
-def level_scheme(E, fname=None):
+def level_scheme(E, ylim=None, fname=None):
     """
     plot the energy levels
     Parameters
@@ -211,6 +279,7 @@ def level_scheme(E, fname=None):
 
     ax.hlines(E, xmin=0.0, xmax=0.1)
     ax.set_ylabel('Energy (eV)')
+    ax.set_ylim(ylim)
 
     ax.axes.get_xaxis().set_visible(False)  # xticks off
 
@@ -224,10 +293,146 @@ def level_scheme(E, fname=None):
     plt.show()
     return ax
 
-if __name__ == '__main__':
-    fig, ax = subplots(ncols=1, nrows=2)
-    import numpy as np
+def two_scales(x, yl, yr, xlabel=None, ylabels=None, xlim=None, yllim=None, yrlim=None,\
+               yticks=None, fname='output.pdf'):
+    fig, ax = subplots()
+    ax.plot(x, yl, '-s')
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabels[0])
+    # ax.set_ylabel()
+    if yllim is not None:
+        ax.set_ylim(yllim)
+
+
+    if xlim is not None:
+        ax.set_xlim(xlim)
+
+    ax2 = ax.twinx()
+    ax2.plot(x, yr, 'r-o')
+    ax2.set_ylabel(ylabels[1], color='red')
+    ax2.tick_params(axis='y', labelcolor='r')
+
+
+
+    if yrlim is not None:
+        ax2.set_ylim(yrlim)
+
+    if yticks is not None:
+        ax2.set_yticks(yticks)
+
+    fig.savefig(fname)
+    return
+
+def surf(f, x, y, fname='output.png', xlabel='X', \
+         ylabel='Y', zlabel='Z', title=None, method='matplotlib'):
+
+    if method == 'matplotlib':
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        X, Y = np.meshgrid(x, y)
+        # ax.set_ylim(ymin=-6, ymax=6)
+        # ymax = 6
+        # f[Y>ymax] = np.nan
+
+        ax.plot_surface(X, Y, f, rstride=1, cstride=1, linewidth=0,
+                        cmap='viridis', edgecolor='none')
+
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+
+        if title is not None:
+            ax.set_title(title)
+
+        # ax.set_zlim(-1,1)
+        # ax.set_xlim(-40, 100)
+
+        fig.savefig(fname)
+        return ax
+
+    elif method == 'mayavi':
+
+        from mayavi import mlab
+
+        X, Y = np.meshgrid(x, y)
+        extent = [min(x), max(x), min(y), max(y), 0, 3]
+        #mlab.surf(s0 * au2ev, warp_scale="auto",extent = extent)
+
+        if isinstance(f, list):
+            for g in f:
+                s = mlab.surf(g)
+        else:
+            s = mlab.surf(f)
+
+        mlab.axes(s, xlabel = xlabel, ylabel = ylabel, zlabel = zlabel)
+
+        mlab.outline(s)
+
+        mlab.savefig(fname)
+        mlab.show()
+
+        return mlab
+
+    else:
+        raise ValueError('method has be either matplotlib or mayavi.')
+
+def export(x, y, z, fname='output.dat', fmt='gnuplot'):
+    """
+    export data to gnuplot format
+
+    Parameters
+    ----------
+    x : TYPE
+        DESCRIPTION.
+    y : TYPE
+        DESCRIPTION.
+    z : TYPE
+        DESCRIPTION.
+    fname : TYPE, optional
+        DESCRIPTION. The default is 'output.dat'.
+    fmt : str, optional
+        The target format. The default is 'gnuplot'.
+
+    Returns
+    -------
+    None.
+
+    """
+    f = open(fname, 'w')
+    nx, ny = z.shape
+    for j in range(ny):
+        for i in range(nx):
+            f.write('{} {} {}\n'.format(x[i,j], y[i,j], z[i,j]))
+        f.write('\n')
+    return
+
+
+############
+# tests
+###########
+def test_level_scheme():
     x = np.linspace(0,10)
     level_scheme(x)
+
+    return
+
+if __name__ == '__main__':
+    # fig, ax = subplots(ncols=1, nrows=2)
+    # import numpy as np
+
+
+    # test 3d
+    x = np.linspace(-2,2)
+    y = np.linspace(-8,8)
+
+    X, Y = np.meshgrid(x, y)
+    f = np.exp(-X**2)*np.sin(Y)
+    print(f.shape)
+    # ax = surf(f, x, y)
+
+    export(X, Y, f)
+
+
 
 

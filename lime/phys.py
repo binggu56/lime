@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import numpy as np
-from numpy import exp
+from numpy import exp, pi, sqrt
 from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg,\
                         spdiags, issparse
 
@@ -11,6 +11,30 @@ from numba import jit
 import sys
 
 from lime.units import au2fs, au2ev
+
+
+def coh_op(j, i, d):
+    """
+    return a matrix representing the coherence j, i
+
+    Parameters
+    ----------
+    j : TYPE
+        DESCRIPTION.
+    i : TYPE
+        DESCRIPTION.
+    d : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    a = lil_matrix((d,d), dtype=np.float16)
+    a[j, i] = 1.
+    return a.tocsr()
+
 
 def rect(x):
     return np.heaviside(x+0.5, 0.5) - np.heaviside(x - 0.5, 0.5)
@@ -111,6 +135,73 @@ def ptrace(rho, dims, which='B'):
         return rhoB
     else:
         raise ValueError('which can only be A or B.')
+
+
+def tracedist(A, B):
+    """
+    Calculates the trace distance between two density matrices..
+    See: Nielsen & Chuang, "Quantum Computation and Quantum Information"
+
+    Parameters
+    ----------!=
+    A : 2D array (N,N)
+        Density matrix or state vector.
+    B : 2D array (N,N)
+        Density matrix or state vector with same dimensions as A.
+    tol : float
+        Tolerance used by sparse eigensolver, if used. (0=Machine precision)
+    sparse : {False, True}
+        Use sparse eigensolver.
+
+    Returns
+    -------
+    tracedist : float
+        Trace distance between A and B.
+
+    Examples
+    --------
+    >>> x=fock_dm(5,3)
+    >>> y=coherent_dm(5,1)
+    >>> tracedist(x,y)
+    0.9705143161472971
+
+    """
+
+    if A.dims != B.dims:
+        raise TypeError("A and B do not have same dimensions.")
+
+    diff = A - B
+    diff = diff.dag() * diff
+    vals = sp.linalg.eigs(diff)
+    return float(np.real(0.5 * np.sum(np.sqrt(np.abs(vals)))))
+
+
+def hilbert_dist(A, B):
+    """
+    Returns the Hilbert-Schmidt distance between two density matrices A & B.
+
+    Parameters
+    ----------
+    A : qobj
+        Density matrix or state vector.
+    B : qobj
+        Density matrix or state vector with same dimensions as A.
+
+    Returns
+    -------
+    dist : float
+        Hilbert-Schmidt distance between density matrices.
+
+    Notes
+    -----
+    See V. Vedral and M. B. Plenio, Phys. Rev. A 57, 1619 (1998).
+
+    """
+
+    if A.shape != B.shape:
+        raise TypeError('A and B do not have same dimensions.')
+
+    return ((A - B)**2).tr()
 
 def lowering(dims=2):
     if dims == 2:
@@ -355,7 +446,7 @@ def fermi(E, Ef = 0.0, T = 1e-4):
     #else:
     return 1./(1. + np.exp((E-Ef)/T))
 
-def lorentzian(x, x0=0., width=1.):
+def lorentzian(x, width=1.):
     '''
 
 
@@ -374,7 +465,20 @@ def lorentzian(x, x0=0., width=1.):
     None.
 
     '''
-    return 1./np.pi * width/(width**2 + (x-x0)**2)
+    return 1./np.pi * width/(width**2 + (x)**2)
+
+
+def gaussian(x, sigma=1.):
+    '''
+    normalized Gaussian distribution
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    '''
+    return 1/sigma/sqrt(2.*pi) * exp(-x**2/2./sigma**2)
 
 
 
@@ -456,7 +560,11 @@ def pauli():
 
     s0 = np.identity(2)
 
+    for _ in [s0, sx, sy, sz]:
+        _ = csr_matrix(_)
+        
     return s0, sx, sy, sz
+
 
 def ham_ho(freq, n, ZPE=False):
     """
@@ -489,6 +597,7 @@ def boson(omega, n, ZPE=False):
 def quadrature(n):
     """
     Quadrature operator of a photon mode
+    X = (a + a+)/sqrt{2}
 
     Parameters
     ----------
@@ -756,6 +865,7 @@ def multi_spin(onsite, nsites):
     """
 
     s0, sx, sy, sz = pauli()
+    sm = lowering()
 
     head = onsite[0] * kron(sz, tensor_power(s0, nsites-1))
     tail = onsite[-1] * kron(tensor_power(s0, nsites-1), sz)
@@ -937,11 +1047,101 @@ def tensor_power(a, n:int):
 #
 #    fig.savefig('polariton_spectrum.eps', transparent=True)
 
+def expm(A, t, method='EOM'):
+    """
+    exponentiate a matrix at t
+        U(t) = e^{A t}
+
+    Parameters
+    -----------
+    A : TYPE
+        DESCRIPTION.
+
+    t: float or list
+        times
+
+    method : TYPE, optional
+        DESCRIPTION. The default is 'EOM'.
+
+        EOM: equation of motion approach.
+            d/dt U(t) = A U(t)
+            This can be generalized for time-dependent Hamiltonians A(t)
+
+        diagonalization: diagonalize A
+
+            for Hermitian matrices only, this is prefered
+
+
+    Returns
+    -------
+    Ulist : TYPE
+        DESCRIPTION.
+
+    """
+
+    if method == 'EOM':
+
+        # identity matrix at t = 0
+        U = identity(A.shape[-1], dtype=complex)
+
+        # set the ground state energy to 0
+        print('Computing the propagator. '
+              'Please make sure that the ground-state energy is 0.')
+
+        Ulist = []
+        Nt = len(t)
+        dt = interval(t)
+
+        for k in range(Nt):
+            Ulist.append(U.copy())
+            U = rk4(U, ldo, dt, A)
+
+        return Ulist
+    
+    elif method == 'SOS':
+        
+        raise NotImplementedError('Method of {} has not been implemented.\
+                                  Choose from EOM'.format(method))
+                                  
+
+def ldo(b, A):
+    '''
+    linear differential operator Ab
+
+    Parameters
+    ----------
+    b : TYPE
+        DESCRIPTION.
+    A : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    '''
+    return A.dot(b)
+
 
 def isherm(a):
     return np.allclose(a, dag(a))
 
 def isdiag(M):
+    """
+    Check if a matrix is diagonal.
+
+    Parameters
+    ----------
+    M : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
     return np.all(M == np.diag(np.diagonal(M)))
 
 

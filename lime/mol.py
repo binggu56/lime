@@ -19,14 +19,19 @@ from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg
 import numba
 import sys
 
+import proplot as plt
+
 from lime.units import au2fs, au2ev
 from lime.signal import sos
 from lime.phys import dag, quantum_dynamics, \
-    obs, rk4, tdse, basis
+    obs, rk4, tdse, basis, isdiag
+
+from lime.units import au2wavenumber
 
 
 class Result:
-    def __init__(self, description=None, psi0=None, rho0=None, dt=None, Nt=None):
+    def __init__(self, description=None, psi0=None, rho0=None, dt=None, \
+                 Nt=None, times=None):
         self.description = description
         self.dt = dt
         self.timesteps = Nt
@@ -35,7 +40,7 @@ class Result:
         self._psilist = None
         self.rho0 = rho0
         self.psi0 = psi0
-        self.times = None
+        self.times = np.arange(Nt) * dt
         return
 
     @property
@@ -57,9 +62,15 @@ class Result:
 
 
 class Mol:
-    def __init__(self, ham, edip=None, gamma=None):
+    def __init__(self, ham, edip=None, edip_rms=None, gamma=None):
         """
         Class for multi-level systems.
+
+        All signals computed using SOS formula can be directly called from the
+        Mol objective.
+
+        More sophisticated ways to compute the spectra should be done with
+        specific method, e.g., MESolver.
 
         Parameters
         ----------
@@ -82,12 +93,21 @@ class Mol:
         #        self.initial_state = psi0
         self.edip = edip
         self.dip = self.edip
-        # self.edip_x = edip_x 
-        # self.edip_y = edip_y
-        # self.edip_z = edip_z
+        if edip is not None:
+            self.edip_x = edip[:,:, 0]
+            self.edip_y = edip[:, :, 1]
+            self.edip_z = edip[:, :, 2]
+            self.edip_rms = np.sqrt(np.abs(edip[:, :, 0])**2 + \
+                                    np.abs(edip[:, :, 1])**2 + \
+                                        np.abs(edip[:,:,2])**2)
+        else:
+            self.edip_rms = edip_rms
+
         self.nstates = ham.shape[0]
-        #        self.ex = np.tril(dip)
-        #        self.deex = np.triu(dip)
+
+        # self.raising = np.tril(edip)
+        # self.lowering = np.triu(edip)
+
         self.idm = identity(ham.shape[0])
         self.size = ham.shape[0]
         self.dim = ham.shape[0]
@@ -96,6 +116,13 @@ class Mol:
         #     self.decay = 1./tau
         self.gamma = gamma
         self.mdip = None
+        self.dephasing = 0.
+
+    # def raising(self):
+    #     return self.raising
+
+    # def lowering(self):
+    #     return self.lowering
 
     def set_dip(self, dip):
         self.dip = dip
@@ -105,14 +132,14 @@ class Mol:
         self.dip = dip
         return
 
-    def set_edip(self, edip):
-        self.edip = edip
+    def set_edip(self, edip, pol=None):
+        self.edip_rms = edip
         return
-    
+
     def set_mdip(self, mdip):
         self.mdip = mdip
         return
-    
+
     def setH(self, H):
         '''
         Set model Hamiltonian
@@ -151,37 +178,71 @@ class Mol:
         self.gamma[0] = 0  # ground state decay is 0
         return
 
+    def set_dephasing(self, gamma):
+        """
+        set the pure dephasing rate for all coherences
+
+        Parameters
+        ----------
+        gamma : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.dephasing = gamma
+
+    def set_decay(self, gamma):
+        """
+        Set the decay rate for all excited states.
+
+        Parameters
+        ----------
+        gamma : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.gamma = gamma
+        return
+
+
     def get_ham(self):
         return self.H
-    
-     
+
+
     def getH(self):
         return self.H
 
     def get_nonhermitianH(self):
         H = self.H
-        
+
         if self.gamma is not None:
-            
+
             self.nonhermH = H - 1j * np.diagflat(self.gamma)
-            
+
         else:
             raise ValueError('Please set gamma first.')
-            
+
         return self.nonhermH
 
     def get_nonhermH(self):
         H = self.H
-        
+
         if self.gamma is not None:
-            
+
             self.nonhermH = H - 1j * np.diagflat(self.gamma)
-            
+
         else:
             raise ValueError('Please set gamma first.')
-            
+
         return self.nonhermH
-    
+
     def get_dip(self):
         return self.dip
 
@@ -196,6 +257,12 @@ class Mol:
 
     def eigenenergies(self):
         return np.linalg.eigvals(self.H)
+
+    def eigvals(self):
+        if isdiag(self.H):
+            return np.diagonal(self.H)
+        else:
+            return np.linalg.eigvals(self.H)
 
     def eigenstates(self, k=6):
         """
@@ -315,7 +382,7 @@ class Mol:
 
         '''
         if psi0 is None:
-            raise ValueError("Initial wavefunction not specified!")
+            raise ValueError("Please specify initial wavefunction psi0.")
 
         H = self.H
 
@@ -328,27 +395,27 @@ class Mol:
             return driven_dynamics(H, edip, psi0, pulse, dt=dt, Nt=Nt, \
                                    e_ops=obs_ops, nout=nout, t0=t0)
 
-    # def heom(self, env, nado=5, c_ops, obs_ops, fname=None):
+    # def heom(self, env, nado=5, c_ops=None, obs_ops=None, fname=None):
     #     nt = self.nt
     #     dt = self.dt
-    #     return heom(self.oqs, env, c_ops, nado, nt, dt, fname)
+    #     return _heom(self.oqs, env, c_ops, nado, nt, dt, fname)
 
     # def redfield(self, env, dt, Nt, c_ops, obs_ops, rho0, integrator='SOD'):
     #     nstates = self.nstates
 
     #     h0 = self.H
 
-    #     redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env, integrator='SOD')
+    #     _redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env, integrator='SOD')
     #     return
 
-    # # def tcl2(self, env, c_ops, obs_ops, rho0, dt, Nt, integrator='SOD'):
+    # def tcl2(self, env, c_ops, obs_ops, rho0, dt, Nt, integrator='SOD'):
 
-    # #     nstates = self.nstates
-    # #     h0 = self.H
+    #     nstates = self.nstates
+    #     h0 = self.H
 
-    # #     redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env, integrator='SOD')
+    #     redfield(nstates, rho0, c_ops, h0, Nt, dt,obs_ops, env, integrator='SOD')
 
-    # #     return
+    #     return
 
     # def lindblad(self, c_ops, obs_ops, rho0, dt, Nt):
     #     """
@@ -400,16 +467,15 @@ class Mol:
 
     #     return
 
-    # def tcl2(self):
-    #     """
-    #     second-order time-convolutionless quantum master equation
-    #     """
-    #     pass
+    def tcl2(self):
+        """
+        second-order time-convolutionless quantum master equation
+        """
+        pass
 
-    def linear_absorption(self, omegas, method='SOS', gamma=1. / au2ev, \
-                          c_ops=None, normalize=True):
+    def absorption(self, omegas, method='sos', **kwargs):
         '''
-        Linear absorption of the model
+        Linear absorption of the model.
 
         Parameters
         ----------
@@ -426,20 +492,110 @@ class Mol:
             DESCRIPTION.
 
         '''
-        if method == 'SOS':
-            eigvals = self.eigvals()
-            dip = self.dip
+        if method == 'sos':
+            # eigvals = self.eigvals()
+            # dip = self.dip
+            # gamma = self.gamma
 
-            return sos.linear_absorption(omegas, eigvals, dip=dip, gamma=gamma, \
-                                         normalize=normalize)
+            return sos.absorption(self, omegas, **kwargs)
 
         elif method == 'superoperator':
-            pass
+
+            raise NotImplementedError('The method {} has not been implemented. \
+                              Try "sos"'.format(method))
+
+    def PE(self, pump, probe, t2=0.0, **kwargs):
+        '''
+        alias for photon_echo
+
+        '''
+        return self.photon_echo(pump, probe, t2=t2, **kwargs)
+
+    def photon_echo(self, pump, probe, t2=0.0, **kwargs):
+        '''
+        2D photon echo signal at -k1+k2+k3
+
+        Parameters
+        ----------
+        pump : TYPE
+            DESCRIPTION.
+        probe : TYPE
+            DESCRIPTION.
+        t2 : TYPE, optional
+            DESCRIPTION. The default is 0.0.
+        **kwargs : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        '''
+        # E = self.eigvals()
+        # edip = self.edip
+
+        return sos.photon_echo(self, pump=pump, probe=probe, \
+                                t2=t2, **kwargs)
+
+    def PE2(self, omega1, omega2, t3=0.0, **kwargs):
+        '''
+        2D photon echo signal at -k1+k2+k3
+        Transforming t1 and t2 to frequency domain.
+
+        Parameters
+        ----------
+        pump : TYPE
+            DESCRIPTION.
+        probe : TYPE
+            DESCRIPTION.
+        t2 : TYPE, optional
+            DESCRIPTION. The default is 0.0.
+        **kwargs : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        '''
+
+        return sos.photon_echo_t3(self, omega1=omega1, omega2=omega2, \
+                                t3=t3, **kwargs)
+
+    def DQC(self):
+        pass
+
+    def TPA(self):
+        pass
+
+    def ETPA(self):
+        pass
+
+    def cars(self, shift, omega1, t2=0., plt_signal=False, fname=None):
+
+        edip = self.edip_rms
+        E = self.eigvals()
+
+        S = sos.cars(E, edip, shift, omega1, t2=t2)
+
+        if not plt_signal:
+
+            return S
 
         else:
-            raise ValueError('The method {} has not been implemented. \
-                             Try "SOS"'.format(method))
 
+            fig, ax = plt.subplots()
+
+            ax.contourf(shift*au2wavenumber, omega1*au2ev, S.imag.T, lw=0.6,\
+                        cmap='spectral')
+
+            ax.format(xlabel='Raman shift (cm$^{-1}$)', ylabel=r'$\Omega_1$ (eV)')
+
+            fig.savefig(fname+'.pdf')
+
+            return S, fig, ax
 
 class SESolver:
     def __init__(self, H, isherm=True):
@@ -609,6 +765,7 @@ def _propagator(H, dt, Nt):
     """
     compute the resolvent for the multi-point correlation function signals
     U(t) = e^{-i H t}
+
     Parameters
     -----------
     t: float or list
@@ -662,7 +819,8 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
     if e_ops is not None:
         fmt = '{} ' * (len(e_ops) + 1) + '\n'
 
-    f_obs = open(output, 'w')  # observables
+    # f_obs = open(output, 'w')  # observables
+    # f_wf = open('psi.dat', 'w')
 
     t = t0
 
@@ -687,6 +845,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
 
             # compute observables
             observables[k1, :] = [obs(psi, e_op) for e_op in e_ops]
+
             # f_obs.write(fmt.format(t, *e_list))
 
             psilist.append(psi.copy())
@@ -699,6 +858,9 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
         return result
 
     else:  # not save states
+
+        f_obs = open(output, 'w')  # observables
+
         for k1 in range(int(Nt / nout)):
             for k2 in range(nout):
                 psi = rk4(psi, tdse, dt, H)
@@ -830,7 +992,7 @@ def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
     nstates = len(psi0)
 
     # f = open(fname,'w')
-    
+
     if e_ops is None:
         e_ops = []
 
@@ -850,7 +1012,7 @@ def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
         for k1 in range(1, Nt // nout):
 
             for k2 in range(nout):
-                
+
                 ht = -pulse.field(t) * edip + H
                 psi = rk4(psi, tdse, dt, ht)
 
@@ -868,41 +1030,62 @@ def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
         result.observables = observables
 
         return result
-    
+
     else:
-        
+
         fmt = '{} ' * (len(e_ops) + 1) + '\n'
         fmt_dm = '{} ' * (nstates + 1) + '\n'
-    
+
         f_dm = open('psi.dat', 'w')  # wavefunction
         f_obs = open('obs.dat', 'w')  # observables
-            
+
         for k1 in range(int(Nt / nout)):
-    
+
             for k2 in range(nout):
-                ht = pulse.field(t) * dip + ham
+                ht = pulse.field(t) * edip + H
                 psi = rk4(psi, tdse, dt, ht)
-    
+
             t += dt * nout
-    
+
             # compute observables
             Aave = np.zeros(len(e_ops), dtype=complex)
             for j, A in enumerate(e_ops):
                 Aave[j] = obs(psi, A)
-    
+
             f_dm.write(fmt_dm.format(t, *psi))
             f_obs.write(fmt.format(t, *Aave))
-    
+
         f_dm.close()
         f_obs.close()
 
         return
 
+def mls(dim=3):
 
-if __name__ == '__main__':
-    from lime.phys import pauli
-    import time
+    E = np.array([0., 0.6, 1.0])/au2ev
+    N = len(E)
 
+    gamma = np.array([0, 0.002, 0.002])/au2ev
+    H = np.diag(E)
+
+    dip = np.zeros((N, N, 3), dtype=complex)
+    dip[1,2, :] = [1.+0.5j, 1.+0.1j, 0]
+
+    dip[2,1, :] = np.conj(dip[1, 2, :])
+    # dip[1,3, :] = dip[3,1] = 1.
+
+    dip[0, 1, :] = [1.+0.2j, 0.5-0.1j, 0]
+    dip[1, 0, :] = np.conj(dip[0, 1, :])
+
+    # dip[3, 3] = 1.
+    dip[0, 2, :] = dip[2, 0, :] = [0.5, 1, 0]
+
+    mol = Mol(H, dip)
+    mol.set_decay(gamma)
+
+    return mol
+
+def test_sesolver():
     s0, sx, sy, sz = pauli()
     H = (-0.05) * sz - 0. * sx
 
@@ -935,3 +1118,20 @@ if __name__ == '__main__':
     ax.plot(r.times, r.observables[:, 0], '--')
     # ax.plot(times, corr.real)
     plt.show()
+
+
+if __name__ == '__main__':
+    from lime.phys import pauli
+    import time
+    import proplot as plt
+
+    mol = mls()
+    mol.set_decay([0, 0.002, 0.002])
+    omegas=np.linspace(0, 2, 200)/au2ev
+    shift = np.linspace(0, 1)/au2ev
+
+    # mol.absorption(omegas)
+    # mol.photon_echo(pump=omegas, probe=omegas, plt_signal=True)
+    S = mol.cars(shift=shift, omega1=omegas, plt_signal=True)
+
+

@@ -8,12 +8,11 @@ Third-order susceptibility for a generic multi-level system
 @author: Bing Gu 
 """
 import numpy as np 
+from phys import heaviside
 
 def lineshape(a,b,t):
-    if t>0:
-        return np.exp(-1j*(en[a]-en[b])*t - (decay[a]+decay[b])/2.*t) 
-    else:
-        return 0.
+    return heaviside(t) * np.exp(-1j*(en[a]-en[b])*t - (decay[a]+decay[b])/2.*t) 
+    
 
 def G(a, b, omega):
     return 1./(omega - (en[a]-en[b]) + 1j * (decay[a]+decay[b])/2.0)

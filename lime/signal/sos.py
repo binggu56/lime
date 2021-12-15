@@ -1,21 +1,29 @@
 '''
-SOS formula for computing the nonlinear signals
+Sum over system eigenstates formula for computing the nonlinear signals.
+
+This is the simpliest method for nonlinear signals without going to
+the Liouville space.
+
 '''
 
 import numpy as np
-import matplotlib.pyplot as plt
+import proplot as plt
 from numba import jit
 import sys
+from numpy import heaviside
+from matplotlib import cm
 
+from numpy import conj
 
-from lime.phys import lorentzian
+from lime.phys import lorentzian, isdiag
 from lime.fft import fft2
-from lime.units import au2ev
-from lime.optics import heaviside
+from lime.units import au2ev, au2mev
+
+from lime.style import subplots
 
 
 
-def absorption(omegas, mol, fname=None, normalize=False, scale=1.):
+def absorption(mol, omegas, plt_signal=False, fname=None, normalize=False, scale=1., yscale=None):
     '''
     SOS for linear absorption signal S = 2 pi |mu_{fg}|^2 delta(omega - omega_{fg}).
     The delta function is replaced with a Lorentzian function.
@@ -42,48 +50,51 @@ def absorption(omegas, mol, fname=None, normalize=False, scale=1.):
 
     '''
 
+    edip = mol.edip_rms
 
-    H = mol.H
-    edip = mol.edip
     gamma = mol.gamma
-
-    if isdiag(H):
-        eigenergies = H.diagonal()
-    else:
-        sys.exit('The Hamiltonian is not a diagonal matrix.')
+    eigenergies = mol.eigvals()
 
     # set the ground state energy to 0
     eigenergies = eigenergies - eigenergies[0]
 
     # assume the initial state is from the ground state 0
     signal = 0.0
-    for j, e in enumerate(eigenergies):
-        signal += edip[0, j]**2 * lorentzian(omegas, e, gamma[j])
+    for j in range(1, mol.nstates):
+        e = eigenergies[j]
+        signal += abs(edip[j, 0])**2 * lorentzian(omegas-e, gamma[j])
 
     if normalize:
         signal /= max(signal)
 
-    if fname is not None:
+    if plt_signal:
 
         fig, ax = plt.subplots(figsize=(4,3))
 
         ax.plot(omegas * au2ev, signal)
 
         for j, e in enumerate(eigenergies):
-            ax.axvline(e * au2ev, 0., edip[0, j]**2 * scale, color='grey')
+            ax.axvline(e * au2ev, 0., abs(edip[0, j])**2 * scale, color='grey')
 
 
         ax.set_xlim(min(omegas) * au2ev, max(omegas) * au2ev)
         ax.set_xlabel('Energy (eV)')
         ax.set_ylabel('Absorption')
-        #ax.set_yscale('log')
+        if yscale:
+            ax.set_yscale(yscale)
+
+
         # ax.set_ylim(0, 1)
 
-        fig.subplots_adjust(wspace=0, hspace=0, bottom=0.15, \
-                            left=0.17, top=0.96, right=0.96)
-        fig.savefig(fname, dpi=1200, transparent=True)
+        # fig.subplots_adjust(wspace=0, hspace=0, bottom=0.15, \
+                            # left=0.17, top=0.96, right=0.96)
 
-    return signal
+        if fname is not None:
+            fig.savefig(fname, dpi=1200, transparent=True)
+
+        return signal, fig, ax
+    else:
+        return signal
 
 def linear_absorption(omegas, transition_energies, dip, output=None, \
                       gamma=1./au2ev, normalize=False):
@@ -118,7 +129,7 @@ def linear_absorption(omegas, transition_energies, dip, output=None, \
 
     for j, transition_energy in enumerate(transition_energies):
 
-        signal += dip[j]**2 * lorentzian(omegas, transition_energy, gamma)
+        signal += dip[j]**2 * lorentzian(omegas-transition_energy, gamma)
 
 
     if normalize:
@@ -142,8 +153,8 @@ def linear_absorption(omegas, transition_energies, dip, output=None, \
         #ax.set_yscale('log')
         # ax.set_ylim(0, 1)
 
-        fig.subplots_adjust(wspace=0, hspace=0, bottom=0.15, \
-                            left=0.17, top=0.96, right=0.96)
+        # fig.subplots_adjust(wspace=0, hspace=0, bottom=0.15, \
+                            # left=0.17, top=0.96, right=0.96)
         fig.savefig(output, dpi=1200, transparent=True)
 
     return signal
@@ -256,7 +267,7 @@ def GF(E, a, b, t):
         DESCRIPTION.
 
     '''
-    if t >= 0:
+    # if t >= 0:
         # N = len(evals)
         # propagator = np.zeros((N,N), dtype=complex)
 
@@ -265,9 +276,9 @@ def GF(E, a, b, t):
         #         propagator[a, b] = np.exp(-1j * (evals[a] - evals[b]) * t - (gamma[a] + gamma[b])/2. * t)
 
         # return propagator
-        return  -1j * np.exp(-1j * (E[a] - E[b]) * t)
-    else:
-        return 0.
+    return  -1j * heaviside(t, 0) * np.exp(-1j * (E[a] - E[b]) * t)
+    # else:
+    #     return 0.
 
 @jit
 def G(omega, E, a, b):
@@ -294,6 +305,7 @@ def G(omega, E, a, b):
 
     '''
     return 1./(omega - (E[a]- E[b]))
+
 
 
 def ESA(evals, dip, omega1, omega3, tau2, g_idx, e_idx, f_idx, gamma):
@@ -330,31 +342,97 @@ def ESA(evals, dip, omega1, omega3, tau2, g_idx, e_idx, f_idx, gamma):
     signal = np.zeros((len(omega1), len(omega3)), dtype=complex)
     a = 0 # initial state
 
-    for i in range(len(omega1)):
-        pump = omega1[i]
+    # for i in range(len(omega1)):
+    #     pump = omega1[i]
 
-        for j in range(len(omega3)):
-            probe = omega3[j]
+    #     for j in range(len(omega3)):
+    #         probe = omega3[j]
 
-            # sum-over-states
-            for b in e_idx:
+    pump, probe = np.meshgrid(omega1, omega3)
 
-                G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
+    # sum-over-states
+    for b in e_idx:
 
-                for c in e_idx:
-                    U_cb = -1j * np.exp(-1j * (evals[c] - evals[b]) * tau2 - (gamma[c] + gamma[b])/2. * tau2)
+        G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
 
-                    for d in f_idx:
+        for c in e_idx:
+            U_cb = -1j * np.exp(-1j * (evals[c] - evals[b]) * tau2 - (gamma[c] + gamma[b])/2. * tau2)
 
-                        G_db = 1./(probe - (evals[d]-evals[b]) + 1j * (gamma[d] + gamma[b])/2.0)
+            for d in f_idx:
 
-                        signal[i,j] += dip[b,a] * dip[c,a] * dip[d,c]* dip[b,d] * \
-                            G_db * U_cb * G_ab
+                G_db = 1./(probe - (evals[d]-evals[b]) + 1j * (gamma[d] + gamma[b])/2.0)
+
+                signal += dip[b,a] * dip[c,a] * dip[d,c]* dip[b,d] * \
+                    G_db * U_cb * G_ab
 
     # 1 interaction in the bra side
     sign = -1
     return sign * signal
 
+
+def _ESA(evals, dip, omega1, omega2, t3, g_idx, e_idx, f_idx, gamma, \
+         dephasing=10/au2mev):
+    '''
+    Excited state absorption component of the photon echo signal.
+    In Liouville sapce, gg -> ge -> e'e -> fe -> ee
+
+    Parameters
+    ----------
+    evals : TYPE
+        DESCRIPTION.
+    dip : TYPE
+        DESCRIPTION.
+    omega1 : TYPE
+        DESCRIPTION.
+    omega2 : TYPE
+        DESCRIPTION.
+    t2 : TYPE
+        DESCRIPTION.
+    g_idx: list of integers
+        index for ground state (manifold)
+    e_idx: list of integers
+        index for e-states
+    f_idx: list of integers
+        index of f-states
+    dephasing: float
+        pure dephasing rate
+    Returns
+    -------
+    signal : 2d array (len(pump), len(probe))
+        DESCRIPTION.
+
+    '''
+
+    signal = np.zeros((len(omega2), len(omega1)), dtype=complex)
+    a = 0 # initial state
+
+    pump, probe = np.meshgrid(omega1, omega2)
+
+    N = len(evals)
+
+    # define pure dephasing rate
+    gammaD = np.ones((N, N), dtype=float) * dephasing
+    np.fill_diagonal(gammaD, 0)
+
+    # sum-over-states
+    for b in e_idx:
+
+        G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * ((gamma[a] + gamma[b])/2.0 + gammaD[a, b]))
+
+        for c in e_idx:
+            U_cb = 1./(probe - (evals[c] - evals[b]) + 1j*((gamma[c] + gamma[b])/2. + gammaD[c, b]))
+
+            for d in f_idx:
+
+                G_db = -1j * np.exp(-1j * (evals[d]-evals[b])*t3 - \
+                                    ((gamma[d] + gamma[b])/2.0 + gammaD[d, b])*t3)
+
+                signal += dip[b,a] * dip[c,a] * dip[d,c]* dip[b,d] * \
+                    G_db * U_cb * G_ab
+
+    # 1 interaction in the bra side
+    sign = -1
+    return sign * signal
 
 def GSB(evals, dip, omega1, omega3, tau2, g_idx, e_idx, gamma):
     '''
@@ -383,30 +461,85 @@ def GSB(evals, dip, omega1, omega3, tau2, g_idx, e_idx, gamma):
         DESCRIPTION.
 
     '''
+    n1, n3 = len(omega1), len(omega3)
+    signal = np.zeros((n1, n3), dtype=complex)
 
-    signal = np.zeros((len(omega1), len(omega3)), dtype=complex)
     a = 0
-    for i in range(len(omega1)):
-        pump = omega1[i]
+    c = 0
+    # for i in range(n1):
+    #     pump = omega1[i]
 
-        for j in range(len(omega3)):
-            probe = omega3[j]
-            # sum-over-states
-            for b in e_idx:
+    #     for j in range(n3):
+    #         probe = omega3[j]
 
-                G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
+    pump, probe = np.meshgrid(omega1, omega3)
 
-                for c in g_idx:
-                    U_ac = -1j * np.exp(-1j * (evals[a] - evals[c]) * tau2 - (gamma[a] + gamma[c])/2. * tau2)
+    # sum-over-states
+    for b in e_idx:
 
-                    for d in e_idx:
+        G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
 
-                        G_dc = 1./(probe - (evals[d]-evals[c]) + 1j * (gamma[d] + gamma[c])/2.0)
+        # for c in g_idx:
+        #     U_ac = -1j * np.exp(-1j * (evals[a] - evals[c]) * tau2 - (gamma[a] + gamma[c])/2. * tau2)
 
-                        signal[i,j] += dip[a,b] * dip[b,c] * dip[c,d]* dip[d,a] * \
-                            G_dc * U_ac * G_ab
+        for d in e_idx:
+
+            G_dc = 1./(probe - (evals[d]-evals[c]) + 1j * (gamma[d] + gamma[c])/2.0)
+
+            signal += dip[a,b] * dip[b,c] * dip[c,d]* dip[d,a] * \
+                G_dc * G_ab
     return signal
 
+
+# def _GSB(evals, dip, omega1, omega2, t3, g_idx, e_idx, gamma):
+#     '''
+#     GSB for photon echo
+#     gg -> ge -> gg' -> e'g' -> g'g'
+
+#     Parameters
+#     ----------
+#     evals : TYPE
+#         DESCRIPTION.
+#     dip : TYPE
+#         DESCRIPTION.
+#     omega3 : TYPE
+#         DESCRIPTION.
+#     t2 : TYPE
+#         DESCRIPTION.
+#     omega1 : TYPE
+#         DESCRIPTION.
+#     g_idx: list of integers
+#         indexes for ground manifold
+#     e_idx: list of integers
+#         indexes for excited state manifold
+
+#     Returns
+#     -------
+#     chi : TYPE
+#         DESCRIPTION.
+
+#     '''
+#     n1, n3 = len(omega1), len(omega2)
+#     signal = np.zeros((n1, n3), dtype=complex)
+
+#     a = 0
+#     c = 0
+
+#     pump, probe = np.meshgrid(omega1, omega2)
+
+#     # sum-over-states
+#     for b in e_idx:
+
+#         G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
+
+#         for d in e_idx:
+
+#             G_dc = 1./(probe - (evals[d]-evals[c]) + 1j * (gamma[d] + gamma[c])/2.0)
+
+#             signal += dip[a,b] * dip[b,c] * dip[c,d]* dip[d,a] * \
+#                 G_dc * G_ab
+
+#     return signal
 
 def SE(evals, dip, omega1, omega3, tau2, g_idx, e_idx, gamma):
     '''
@@ -439,27 +572,297 @@ def SE(evals, dip, omega1, omega3, tau2, g_idx, e_idx, gamma):
 
     signal = np.zeros((len(omega1), len(omega3)), dtype=complex)
     a = 0
-    for i in range(len(omega1)):
-        pump = omega1[i]
+    # for i in range(len(omega1)):
+    #     pump = omega1[i]
 
-        for j in range(len(omega3)):
-            probe = omega3[j]
-            # sum-over-states
-            for b in e_idx:
+    #     for j in range(len(omega3)):
+    #         probe = omega3[j]
 
-                G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
+    pump, probe = np.meshgrid(omega1, omega3)
 
-                for c in e_idx:
-                    U_cb = -1j * np.exp(-1j * (evals[c] - evals[b]) * tau2 - (gamma[c] + gamma[b])/2. * tau2)
+    # sum-over-states
+    for b in e_idx:
 
-                    for d in g_idx:
+        G_ab = 1./(pump - (evals[a]-evals[b]) + 1j * (gamma[a] + gamma[b])/2.0)
 
-                        G_cd = 1./(probe - (evals[c]-evals[d]) + 1j * (gamma[c] + gamma[d])/2.0)
+        for c in e_idx:
+            U_cb = -1j * np.exp(-1j * (evals[c] - evals[b]) * tau2 - (gamma[c] + gamma[b])/2. * tau2)
 
-                        signal[i,j] += dip[a,b] * dip[c,a] * dip[d,c]* dip[b, d] * \
-                            G_cd * U_cb * G_ab
+            for d in g_idx:
+
+                G_cd = 1./(probe - (evals[c]-evals[d]) + 1j * (gamma[c] + gamma[d])/2.0)
+
+                signal += dip[a,b] * dip[c,a] * dip[d,c]* dip[b, d] * \
+                    G_cd * U_cb * G_ab
+
     return signal
 
+
+def _SE(E, dip, omega1, omega2, t3, g_idx, e_idx, gamma, dephasing=10/au2mev):
+    '''
+    Stimulated emission gg -> ge -> e'e -> g'e -> g'g' in the impulsive limit.
+    The signal wave vector is ks = -k1 + k2 + k3
+
+    Parameters
+    ----------
+    evals : TYPE
+        DESCRIPTION.
+    dip : TYPE
+        DESCRIPTION.
+    omega3 : TYPE
+        DESCRIPTION.
+    t2 : TYPE
+        DESCRIPTION.
+    omega1 : TYPE
+        DESCRIPTION.
+    g_idx: list of integers
+        indexes for ground manifold
+    e_idx: list of integers
+        indexes for excited state manifold
+
+    Returns
+    -------
+    chi : TYPE
+        DESCRIPTION.
+
+    '''
+
+    signal = np.zeros((len(omega2), len(omega1)), dtype=complex)
+    a = 0
+
+    pump, probe = np.meshgrid(omega1, omega2)
+
+    N = len(E)
+    # define pure dephasing rate
+    gammaD = np.ones((N, N)) * dephasing
+    np.fill_diagonal(gammaD, 0)
+
+    # sum-over-states
+    for b in e_idx:
+
+        G_ab = 1./(pump - (E[a]-E[b]) + 1j * ((gamma[a] + gamma[b])/2.0 + gammaD[a, b]))
+
+        for c in e_idx:
+            U_cb = 1./(probe - (E[c]-E[b])  + 1j* ((gamma[c] + gamma[b])/2. + gammaD[c, b]))
+
+            for d in g_idx:
+
+                G_cd = -1j * np.exp(-1j * (E[c]-E[d])*t3 - ((gamma[c] + gamma[d])/2.0 + gammaD[c, d])*t3)
+
+                signal += dip[a,b] * dip[c,a] * dip[d,c]* dip[b, d] * \
+                    G_cd * U_cb * G_ab
+
+    return signal
+
+
+def _photon_echo(evals, edip, omega1, omega3, t2, g_idx, e_idx, f_idx, gamma):
+    """
+    2D photon echo signal scanning omega1 and omega3 at population time t2.
+
+    Parameters
+    ----------
+    evals : ndarray
+        eigenvalues of system.
+    edip : ndarray
+        electric dipole matrix.
+    omega1 : TYPE
+        DESCRIPTION.
+    omega3 : TYPE
+        DESCRIPTION.
+    tau2 : TYPE
+        DESCRIPTION.
+    g_idx : TYPE
+        DESCRIPTION.
+    e_idx : TYPE
+        DESCRIPTION.
+    gamma : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+
+    gsb = GSB(evals, edip, omega1, omega3, t2, g_idx, e_idx, gamma)
+    se = SE(evals, edip, omega1, omega3, t2, g_idx, e_idx, gamma)
+    esa = ESA(evals, edip, omega1, omega3, t2, g_idx, e_idx, f_idx, gamma)
+
+    return gsb + se + esa
+
+
+def photon_echo_t3(mol, omega1, omega2, t3, g_idx=[0], e_idx=None, f_idx=None,\
+                   fname='2DES', plt_signal=False, separate=False):
+    """
+    2D photon echo signal scanning omega1 and omega2 at detection time t3.
+
+    The current implementation only applies for a single ground state.
+
+    For a manifold of g states, the ground state bleaching neglected here has to be considered.
+
+    Parameters
+    ----------
+    evals : ndarray
+        eigenvalues of system.
+    edip : ndarray
+        electric dipole matrix.
+    omega1 : TYPE
+        DESCRIPTION.
+    omega3 : TYPE
+        DESCRIPTION.
+    tau2 : TYPE
+        DESCRIPTION.
+    g_idx : TYPE
+        DESCRIPTION.
+    e_idx : TYPE
+        DESCRIPTION.
+    gamma : TYPE
+        DESCRIPTION.
+    separate: bool
+        separate the ladder diagrams
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+
+    E = mol.eigvals()
+    edip = mol.edip_rms
+
+    gamma = mol.gamma
+    dephasing = mol.dephasing
+
+    if gamma is None:
+        raise ValueError('Please set the decay constants gamma first.')
+
+    N = mol.nstates
+
+    if e_idx is None: e_idx = range(1, N)
+    if f_idx is None: f_idx = range(1, N)
+
+
+    # gsb = _GSB(evals, edip, omega1, omega3, t2, g_idx, e_idx, gamma)
+    se = _SE(E, edip, -omega1, omega2, t3, g_idx, e_idx, gamma, dephasing=dephasing)
+    esa = _ESA(E, edip, -omega1, omega2, t3, g_idx, e_idx, f_idx, \
+               gamma, dephasing=dephasing)
+
+    S = se + esa
+
+
+
+    if plt_signal == True:
+
+        # make plots
+        fig, ax = plt.subplots(refaspect=2)
+
+        im = ax.contourf(omega1*au2ev, omega2*au2ev, S.real/abs(S).max(), #interpolation='bilinear',
+                        cmap=cm.RdBu, lw=0.6,
+                        origin='lower') #-abs(SPE).max())
+
+        ax.set_xlabel(r'$-\Omega_1$ (eV)')
+        ax.set_ylabel(r'$\Omega_2$ (eV)')
+
+    if separate:
+        np.savez(fname, omega1, omega2, se, esa)
+        return se, esa
+    else:
+        np.savez(fname, omega1, omega2, S)
+        return S
+
+def photon_echo(mol, pump, probe, t2=0., g_idx=[0], e_idx=None, f_idx=None, fname='signal', \
+                plt_signal=False, pol=None):
+    """
+    Photon echo signal for a multi-level system using SOS expression.
+
+    Approximations:
+        1. decay are included phenomelogically
+        2. no population relaxation
+
+    Parameters
+    ----------
+    mol : TYPE
+        DESCRIPTION.
+    pump : TYPE
+        Omega1, conjugate variable of t1
+    probe : TYPE
+        Omega3, conjugate variable of t3
+    t2 : TYPE
+        population time.
+    g_idx : TYPE
+        DESCRIPTION.
+    e_idx : TYPE
+        DESCRIPTION.
+    f_idx : TYPE
+        DESCRIPTION.
+    gamma : float
+        decay rates for excited states.
+
+    Raises
+    ------
+    ValueError
+        DESCRIPTION.
+
+    Returns
+    -------
+    S : TYPE
+        DESCRIPTION.
+
+    """
+
+    E = mol.eigvals()
+    dip = mol.edip_rms
+
+    gamma = mol.gamma
+
+    if gamma is None:
+        raise ValueError('Please set the decay constants gamma first.')
+
+    N = mol.nstates
+
+    if e_idx is None: e_idx = range(N)
+    if f_idx is None: f_idx = range(N)
+
+    # compute the signal
+    S = _photon_echo(E, dip, omega1=-pump, omega3=probe, t2=t2, g_idx=g_idx, e_idx=e_idx, f_idx=f_idx,\
+              gamma=gamma)
+
+    np.savez(fname, pump, probe, S)
+
+    if plt_signal == True:
+
+        # make plots
+        fig, ax = plt.subplots()
+
+        omega_min = min(pump) * au2ev
+        omega_max = max(pump) * au2ev
+
+        im = ax.contour(S.real.T/abs(S).max(), #interpolation='bilinear',
+                        cmap=cm.RdBu,
+                        origin='lower', extent=[omega_min, omega_max, omega_min, omega_max],
+                        vmax=1, vmin=-1) #-abs(SPE).max())
+
+        ax.plot(pump*au2ev, probe*au2ev, '--', lw=1, color='grey')
+        # ax.axhline(y=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+        # ax.axhline(y=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+        #
+        # ax.axvline(x=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+        # ax.axvline(x=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
+        #im = ax.contour(SPE,
+        #               origin='lower', extent=[0.8, omega_max, omega_min, omega_max],
+        #               vmax=1, vmin=0) #-abs(SPE).max())
+
+        ax.set_xlabel(r'$-\Omega_1$ (eV)')
+        ax.set_ylabel(r'$\Omega_3$ (eV)')
+        #ax.set_title(r'$T_2 = $' + str(t2))
+
+        # plt.colorbar(im)
+
+        # fig.subplots_adjust(hspace=0.0,wspace=0.0,bottom=0.14,left=0.0,top=0.95,right=0.98)
+
+    return S
 
 def DQC_R1(evals, dip, omega1=None, omega2=[], omega3=None, tau1=None, tau3=None,\
            g_idx=[0], e_idx=None, f_idx=None, gamma=None):
@@ -727,10 +1130,12 @@ def etpa(omegaps, mol, epp, g_idx, e_idx, f_idx):
     return _etpa(omegaps, Es, edip, jta, t1, t2, g_idx, e_idx, f_idx)
 
 
-@jit
+# @jit
 def _etpa(omegaps, Es, edip, jta, t1, t2, g_idx, e_idx, f_idx):
     """
     internal function to compute the ETPA signal.
+
+    The double time integrals are computed numerically.
 
     Parameters
     ----------
@@ -754,7 +1159,7 @@ def _etpa(omegaps, Es, edip, jta, t1, t2, g_idx, e_idx, f_idx):
     T1, T2 = np.meshgrid(t1, t2)
 
     # discrete heaviside function
-    theta = heaviside(T2 - T1)
+    theta = heaviside(T2 - T1, 0.5)
 
     signal = np.zeros(len(omegaps), dtype=complex)
     g = g_idx
@@ -780,31 +1185,7 @@ def _etpa(omegaps, Es, edip, jta, t1, t2, g_idx, e_idx, f_idx):
 
     return signal
 
-
-if __name__ == '__main__':
-
-    from lime.units import au2fs
-    from lime.style import subplots
-
-    fig, ax = plt.subplots(figsize=(4.2, 3.2))
-    E = np.array([0., 0.5, 1.1, 1.3])/au2ev
-    gamma = [0, 0.02, 0.02]
-    H = np.diag(E)
-
-    from lime.mol import Mol
-    from lime.optics import Biphoton
-
-    from matplotlib import cm
-
-    dip = np.zeros((len(E), len(E)))
-    dip[1,2] = dip[2,1] = 1.
-    dip[1,3] = dip[3,1] = 1.
-
-    dip[0,1] = dip[1, 0] = 1.
-    dip[3, 3] = 1.
-    dip[0, 3] = dip[3,0] = 1.
-
-    mol = Mol(H, dip)
+def test_etpa():
     epp = Biphoton(0, 0.04/au2ev, Te=10./au2fs)
     p = np.linspace(-4, 4, 256)/au2ev
     q = p
@@ -819,32 +1200,153 @@ if __name__ == '__main__':
     fig, ax = subplots()
     ax.plot(pump*au2ev, np.abs(signal)**2)
     plt.show()
+    return
 
-    # pump = np.linspace(0.5, 1.5, 100)/au2ev
-    # probe = np.linspace(0.8, 1.2, 100)
-    # omega_min = min(pump)
-    # omega_max = max(pump)
-    # SPE = SE(E, dip, omega1=-pump, omega3=probe, tau2=1e-3, g_idx=[0], e_idx= [1,2],\
-    #           gamma=gamma)
+def cars(E, edip, shift, omega1, t2=0, gamma=10/au2mev):
+    '''
+    two pump pulses followed by a stimulated raman probe.
+
+    The first, second, and fourth pulses are assumed impulse,
+    the thrid pulse is cw.
 
 
-    # im = ax.imshow(SPE.real/abs(SPE).max(), interpolation='bilinear', cmap=cm.RdBu,
-    #                origin='lower', extent=[omega_min, omega_max, omega_min, omega_max],
-    #                vmax=1, vmin=-1, aspect=1) #-abs(SPE).max())
-    #
-    # ax.axhline(y=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-    # ax.axhline(y=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-    #
-    # ax.axvline(x=1.1, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-    # ax.axvline(x=0.9, color='w', linestyle='--', linewidth=0.5, alpha=0.5)
-    # #im = ax.contour(SPE,
-    # #               origin='lower', extent=[0.8, omega_max, omega_min, omega_max],
-    # #               vmax=1, vmin=0) #-abs(SPE).max())
-    #
-    # ax.set_xlabel(r'$-\Omega_1/\omega_\mathrm{c}$')
-    # ax.set_ylabel(r'$\Omega_3/\omega_\mathrm{c}$')
-    # #ax.set_title(r'$T_2 = $' + str(t2))
-    #
-    # plt.colorbar(im)
-    #
-    # fig.subplots_adjust(hspace=0.0,wspace=0.0,bottom=0.14,left=0.0,top=0.95,right=0.98)
+    S = \sum_{b,a = e} 2 * pi * delta(Eshift - omega_{ba}) * mu_{bg} *
+        mu_{ag} * alpha_{ba}
+
+    Parameters
+    ----------
+    E : TYPE
+        DESCRIPTION.
+    edip : TYPE
+        DESCRIPTION.
+    t1 : TYPE
+        time decay between pulses 1 and 2
+    t2 : TYPE, optional
+        time delay between pulse 2 and 4 (stokes beam). The default is 0.
+
+    Returns
+    -------
+    S : TYPE
+        DESCRIPTION.
+
+    '''
+
+    N = len(E)
+    g = 0
+    S = 0
+    alpha = np.ones((N, N))
+    np.fill_diagonal(alpha, 0)
+
+    for a in range(1, N):
+        for b in range(1, N):
+            S += edip[b, g] * edip[a, g] * alpha[b, a] * np.outer(lorentzian(shift - (E[b] - E[a]), gamma), \
+                1./(omega1 - (E[a] - E[g]) + 1j * gamma))
+
+    return S
+
+def mcd(mol, omegas):
+    '''
+    magentic circular dichroism signal with SOS
+
+    The electronic structure data should contain the B field ready,
+    not the bare quantities.
+
+    B = (0, 0, Bz)
+
+    Reference:
+        Shichao Sun, David Williams-Young, and Xiaosong Li, JCTC, 2019, 15, 3162-3169
+
+    Parameters
+    ----------
+    mol : TYPE
+        DESCRIPTION.
+    omegas : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    signal : TYPE
+        DESCRIPTION.
+
+    '''
+    signal = 0.
+
+    mu = mol.edip[0, :, :]
+
+    E = mol.eigvals()
+    gamma = mol.gamma
+
+    nstates = mol.nstates
+
+    for nst in range(1, nstates):
+        signal += np.imag(mu[nst, 0] * conj(mu[nst, 1]) - mu[nst, 1] * conj(mu[nst, 0]))\
+             * lorentzian(omegas - E[nst], gamma[nst])
+
+
+    return signal
+
+
+def test_model():
+
+    E = np.array([0., 0.6, 1.1])/au2ev
+    N = len(E)
+
+    gamma = np.array([0, 0.002, 0.002])/au2ev
+    H = np.diag(E)
+
+    dip = np.zeros((N, N, 3), dtype=complex)
+    dip[1,2, :] = [1.+0.5j, 1.+0.1j, 0]
+
+    dip[2,1, :] = conj(dip[1, 2, :])
+    # dip[1,3, :] = dip[3,1] = 1.
+
+    dip[0, 1, :] = [1.+0.2j, 0.5-0.1j, 0]
+    dip[1, 0, :] = conj(dip[0, 1, :])
+
+    # dip[3, 3] = 1.
+    # dip[0, 3] = dip[3,0] = [0.5, 1, 0]
+
+    mol = Mol(H, dip)
+    mol.set_decay(gamma)
+
+    return mol
+
+
+
+if __name__ == '__main__':
+
+    from lime.units import au2fs
+    from lime.style import subplots
+
+    fig, ax = plt.subplots(figsize=(4.2, 3.2))
+    E = np.array([0., 0.5, 1.1, 1.3])/au2ev
+    gamma = [0, 0.002, 0.002, 0.002]
+    H = np.diag(E)
+
+    from lime.mol import Mol
+    from lime.optics import Biphoton
+
+    from matplotlib import cm
+
+    dip = np.zeros((len(E), len(E)))
+    dip[1,2] = dip[2,1] = 1.
+    dip[1,3] = dip[3,1] = 1.
+
+    dip[0,1] = dip[1, 0] = 1.
+    dip[0, 3] = dip[3,0] = 1
+    dip[0, 2] = dip[2,0] = 1
+
+    mol = Mol(H, edip_rms=dip)
+    mol.set_decay_for_all(50/au2mev)
+
+    pump = np.linspace(0., 2, 100)/au2ev
+    probe = np.linspace(0, 1, 100)/au2ev
+
+    g_idx=[0]
+    e_idx= [1, 2, 3]
+    f_idx=[2, 3]
+
+    # photon_echo(mol, pump, probe, t2=1e-3, g_idx=g_idx, e_idx=e_idx, f_idx=f_idx, plt_signal=True)
+
+    photon_echo_t3(mol, omega1=pump, omega2=probe, t3=1e-3, g_idx=g_idx)
+

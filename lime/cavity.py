@@ -15,12 +15,14 @@ import sys
 
 from lime.units import au2fs, au2k, au2ev
 from lime.phys import dag, coth, ket2dm, comm, anticomm, pauli, destroy,\
-    basis, isherm
+    basis, isherm, basis_transform
 from lime.mol import Mol
 from lime.oqs import Lindblad_solver
 
 
- 
+
+
+
 class Composite(Mol):
     def __init__(self, A, B):
         """
@@ -49,11 +51,13 @@ class Composite(Mol):
         self.rdm_b = None
         self.dim = A.dim * B.dim
         self.dims = [A.dim, B.dim]
+        self.eigvals = None
+        self.eigvecs = None
 
     def getH(self, a_ops=None, b_ops=None, g=0):
         """
         Compute the Hamiltonian for the composite A + B system.
-        
+
         The interaction between A and B are
             V_AB = sum_i g[i] * a_ops[i] * b_ops[i]
         Parameters
@@ -76,22 +80,22 @@ class Composite(Mol):
             print('Warning: there is no coupling between the two subsystems.')
 
 
-        
+
         elif isinstance(a_ops, list):
-            
+
             for i, a_op in enumerate(a_ops):
                 b_op = b_ops[i]
                 H += g[i] * kron(a_op, b_op)
 
-        
+
         elif isinstance(a_ops, np.ndarray):
-            
+
             H += g * a_ops @ b_ops
 
         self.H = H
-                    
+
         return H
-    
+
     def get_nonhermH(self, a_ops=None, b_ops=None, g=0):
         """
         The interaction between A and B are
@@ -110,7 +114,7 @@ class Composite(Mol):
         """
         if self.A.nonhermH is None:
             raise ValueError('Call get_nonhermH() for subsystem A first.')
-        
+
         if self.B.nonhermH is None:
             raise ValueError('Call get_nonhermH() for subsystem B first.')
 
@@ -121,18 +125,18 @@ class Composite(Mol):
             print('Warning: there is no coupling between the two subsystems.')
 
         elif isinstance(a_ops, list):
-            
+
             for i, a_op in enumerate(a_ops):
                 b_op = b_ops[i]
                 H += g[i] * kron(a_op, b_op)
 
-        
+
         elif isinstance(a_ops, np.ndarray):
-            
+
             H += g * a_ops @ b_ops
 
         self.nonhermH = H
-                    
+
         return H
 
     def promote(self, o, subspace='A'):
@@ -159,7 +163,7 @@ class Composite(Mol):
         return new_ops
 
 
-    def eigenstates(self, k=6):
+    def eigenstates(self, k=None):
         """
         compute the polaritonic spectrum
 
@@ -184,18 +188,31 @@ class Composite(Mol):
         if self.H is None:
             sys.exit('Please call getH to compute the Hamiltonian first.')
 
-        if k < self.dim:
+        if k is None:
 
-            evals, evecs = linalg.eigsh(self.H, k, which='SA')
+            # compute the full polariton states
+            if issparse(self.H):
+                evals, evecs = scipy.linalg.eigh(self.H.toarray())
+            else:
+                evals, evecs = scipy.linalg.eigh(self.H)
+
+            self.eigvals = evals
+            self.eigvecs = evecs
+            return evals, evecs
+
+        elif k < self.dim:
+
+            if issparse(self.H):
+                evals, evecs = linalg.eigsh(self.H, k, which='SA')
+            else:
+                raise TypeError('H is not sparse matrix.')
+
+            self.eigvals = evals
+            self.eigvecs = evecs
             return evals, evecs
 
         else:
-
-            # compute the full polariton states
-            # if issparse(self.H):
-            evals, evecs = scipy.linalg.eigh(self.H.toarray())
-            
-            return evals, evecs
+            raise ValueError('k cannot exceed the size of H.')
 
     def spectrum(self):
         if self.H is None:
@@ -204,6 +221,27 @@ class Composite(Mol):
             eigvals, eigvecs = np.linalg.eigh(self.H.toarray())
 
             return eigvals, eigvecs
+
+    def transform_basis(self, a):
+        """
+        transform the operator a from the direct product basis to polariton basis
+
+        Parameters
+        ----------
+        a : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        2d array
+
+        """
+        if self.eigvecs is None:
+            self.eigenstates()
+
+        return basis_transform(a, self.eigvecs)
+
+            # raise ValueError('Call eigenstates() to compute eigvecs first.')
 
     def rdm(self, psi, which='A'):
         """
@@ -351,7 +389,7 @@ class Cavity():
         # self.annihilate = destroy(ncav)
         self.H = self.getH()
         self.nonhermH = None
-        
+
         self.quality_factor = Q
         self.decay = freq/2./Q
         self.polarization = polarization
@@ -399,10 +437,10 @@ class Cavity():
 
         self.nonhermH = self.H - 1j * kappa * np.identity(ncav)
         return self.nonhermH
-    
+
     def get_nonhermH(self):
         return self.get_nonhermitianH()
-    
+
     def ham(self, ZPE=False):
         return ham_ho(self.freq, self.n_cav, ZPE=ZPE)
 
@@ -491,7 +529,7 @@ class Polariton(Composite):
 
     def getH(self, g, RWA=False):
         """
-        
+
 
         Parameters
         ----------
@@ -518,8 +556,8 @@ class Polariton(Composite):
 
         if RWA:
 
-            hint = g * (kron(mol.raising(), cav.get_annihilate()) +
-                        kron(mol.lowering(), cav.get_create()))
+            hint = g * (kron(mol.raising, cav.annihilate()) +
+                        kron(mol.lowering, cav.create()))
 
         else:
 
@@ -584,7 +622,7 @@ class Polariton(Composite):
 
         return self.cav_leak
 
-    def eigenstates(self, k=6):
+    def eigenstates(self, k=None):
         """
         compute the polaritonic spectrum
 
@@ -609,28 +647,34 @@ class Polariton(Composite):
         if self.H == None:
             sys.exit('Please call getH to compute the Hamiltonian first.')
 
-        if k < self.dim:
 
-            evals, evecs = linalg.eigsh(self.H, k, which='SA')
-
-            # number of photons in polariton states
-            num_op = self.cav.num()
-            num_op = kron(self.mol.idm, num_op)
-
-            n_ph = np.zeros(k)
-            for j in range(k):
-                n_ph[j] = np.real(evecs[:, j].conj().dot(
-                    num_op.dot(evecs[:, j])))
-
-            return evals, evecs, n_ph
-
-        else:
+        if k is None:
 
             """
             compute the full polariton states with numpy
             """
+
             h = self.H.toarray()
-            evals, evecs = scipy.linalg.eigh(h, subset_by_index=[0, k])
+            # evals, evecs = scipy.linalg.eigh(h, subset_by_index=[0, self.dim])
+            evals, evecs = scipy.linalg.eigh(h)
+            # number of photons in polariton states
+            num_op = self.cav.num()
+            num_op = kron(self.mol.idm, num_op)
+
+            n_ph = np.zeros(self.dim)
+            for j in range(self.dim):
+                n_ph[j] = np.real(evecs[:, j].conj().dot(
+                    num_op.dot(evecs[:, j])))
+
+            self.eigvals = evals
+            self.eigvecs = evecs
+
+            return evals, evecs
+
+        elif k < self.dim:
+
+            evals, evecs = linalg.eigsh(self.H, k, which='SA')
+
             # number of photons in polariton states
             num_op = self.cav.num()
             num_op = kron(self.mol.idm, num_op)
@@ -646,7 +690,24 @@ class Polariton(Composite):
         """
         return the reduced density matrix for the photons
         """
+    def transform_basis(self, a):
+        """
+        transform the operator a from the direct product basis to polariton basis
 
+        Parameters
+        ----------
+        a : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        2d array
+
+        """
+        if self.eigvecs is None:
+            self.eigenstates()
+
+        return basis_transform(a, self.eigvecs)
 
 def QRM(omega0, omegac, ncav=2):
     '''
@@ -675,6 +736,46 @@ def QRM(omega0, omegac, ncav=2):
 
     return Polariton(mol, cav)
 
+class Dicke(Cavity):
+
+    def __init__(self, onsite, nsites, omegac):
+        self.nsites = nsites
+        self.onsite = onsite
+
+        self.omegac = omegac
+
+        return
+
+    def Hsubspace(self, g, nexc=1):
+        '''
+        single-polariton Hamiltonian for N two-level molecules coupled to
+        a single cavity mode including the ground state
+
+        input:
+            g_cav: single cavity-molecule coupling strength
+        '''
+        nsites = self.nsites
+        onsite = self.onsite
+        omegac = self.omegac
+
+        if nexc == 1:
+            nstates = nsites + 1 + 1 # number of states in the system
+
+            dip = np.zeros((nstates, nstates))
+            # the states are respectively, |000>, |100>, |010>, |001>,
+            # the position are ordered as
+
+            H = np.diagflat([0.] + onsite + [omegac])
+            H[1:nsites+1, -1] = H[-1, 1:nsites+1] = g
+
+            dip[0,1:nsites+1] = dip[1:nsites+1, 0] =  1
+
+            return csr_matrix(H), csr_matrix(dip)
+        else:
+            raise NotImplementedError()
+
+    def Hfull(self):
+        pass
 
 if __name__ == '__main__':
 
@@ -687,15 +788,15 @@ if __name__ == '__main__':
     mol = Mol(hmol, sx)  # atom
     mol.set_decay_for_all(0.05)
     mol.get_nonhermH()
-    
+
     cav = Cavity(1, 2, Q=100)  # cavity
     cav.get_nonhermH()
 
     pol = Polariton(mol, cav)
     H = pol.get_nonhermH(g=0.1)
-    
+
     print(isherm(H.toarray()))
-    
+
     # set up the initial state
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0)
@@ -703,7 +804,7 @@ if __name__ == '__main__':
     # mesolver = Lindblad_solver(H, c_ops=[0.2 * sx], e_ops = [sz])
     Nt = 200
     dt = 0.05
-    
+
     # results = mesolver.evolve(rho0, dt=dt, Nt=Nt)
     # pol.getH([sx], [cav.annihilate() + cav.create()], [0.1])
     # evals, evecs = pol.eigenstates()

@@ -4,16 +4,33 @@
 Created on Sat Jul 24 22:23:15 2021
 
 @author: bing
+
+@Source:
+https://www.frank-zalkow.de/en/the-wigner-ville-distribution-with-python.html
+
 """
 from __future__ import absolute_import
 
 # from time import clock
 from numpy import abs, arange, shape, array, ceil, zeros, conj, ix_,\
- transpose, append, fft, real, float64, linspace, sqrt
+ transpose, append, real, float64, linspace, sqrt, pi
+
 import numpy as np
 from scipy.signal import hilbert
 from scipy import interpolate
+from scipy.fft import fft, fftfreq, fftshift, ifft
 from math import log, ceil, floor
+import sys
+
+import lime
+
+import matplotlib.pyplot as plt
+
+def nextpow2(p):
+    n = 2
+    while p < n:
+        n *= 2
+    return n
 
 def wvd(audioFile, t=None, N=None, trace=0, make_analytic=True):
     # if make_analytic:
@@ -22,30 +39,38 @@ def wvd(audioFile, t=None, N=None, trace=0, make_analytic=True):
     #     x = array(audioFile[1])
 
     x = array(audioFile)
-    if x.ndim == 1: [xrow, xcol] = shape(array([x]))
+    if x.ndim == 1:
+        [xrow, xcol] = shape(array([x]))
     else: raise ValueError("Signal x must be one-dimensional.")
 
     if t is None: t = arange(len(x))
     if N is None: N = len(x)
 
-    if (N <= 0 ): raise ValueError("Number of Frequency bins N must be greater than zero.")
+    if (N <= 0 ):
+        raise ValueError("Number of Frequency bins N must be greater than zero.")
 
-    if t.ndim == 1: [trow, tcol] = shape(array([t]))
-    else: raise ValueError("Time indices t must be one-dimensional.")
+    if t.ndim == 1:
+        [trow, tcol] = shape(array([t]))
+    else:
+        raise ValueError("Time indices t must be one-dimensional.")
 
-    # if xrow != 1:
-    #     raise ValueError("Signal x must have one row.")
-    # elif trow != 1:
-    #     raise ValueError("Time indicies t must have one row.")
+    if xrow != 1:
+        raise ValueError("Signal x must have one row.")
+    elif trow != 1:
+        raise ValueError("Time indicies t must have one row.")
     # elif nextpow2(N) != N:
-        # print "For a faster computation, number of Frequency bins N should be a power of two."
+    #     print("For a faster computation, number of Frequency bins N should be a power of two.")
 
     tfr = zeros([N, tcol], dtype='complex')
     # if trace: print "Wigner-Ville distribution",
     for icol in range(0, tcol):
+
         ti = t[icol]
-        taumax = min([ti, xcol-ti-1, int(round(N/2.0))-1])
+
+        taumax = min([ti, xcol-ti-1, int(round(N/2))-1])
+
         tau = arange(-taumax, taumax+1)
+
         indices = ((N+tau)%N)
         tfr[ix_(indices, [icol])] = transpose(array(x[ti+tau] * conj(x[ti-tau]), ndmin=2))
         tau=int(round(N/2))+1
@@ -56,12 +81,138 @@ def wvd(audioFile, t=None, N=None, trace=0, make_analytic=True):
 
     tfr = real(fft.fft(tfr, axis=0))
     f = 0.5*arange(N)/float(N)
-    return (transpose(tfr), t, f )
+    return transpose(tfr), t, f
 
 
-def wigner(signal):
+# def wigner(signal):
+#     """
+#     Wigner transform of an input signal with FFT.
+#     W(t, w) = int dtau x(t + tau/2) x^*(t - tau/2) e^{i w tau}
+
+#     Parameters
+#     ----------
+#     x : TYPE
+#         DESCRIPTION.
+
+#     Returns
+#     -------
+#     TYPE
+#         DESCRIPTION.
+#     TYPE
+#         DESCRIPTION.
+#     TYPE
+#         DESCRIPTION.
+
+#     """
+
+#     N = len(signal)
+#     tausec = N//2
+#     winlength = tausec - 1
+
+#     taulens = np.min(np.c_[np.arange(N),
+#                             N - np.arange(N) - 1,
+#                       winlength * np.ones(N)], axis=1)
+
+#     # complex conjugate
+#     conj_signal = np.conj(signal)
+
+#     # the wigner function, axis 0 is the new axis
+#     tfr = zeros((N, N), dtype=complex)
+
+#     for icol in range(N):
+
+#         taumax = taulens[icol]
+
+#         tau = np.arange(-taumax, taumax + 1).astype(int)
+
+#         indices = np.remainder(N + tau, N).astype(int)
+#         # print(tau)
+#         # print(indices)
+#         # if icol == 2: sys.exit()
+
+#         tfr[indices, icol] = signal[icol + tau] * conj_signal[icol - tau]
+
+
+#         # if (icol <= N - tausec) and (icol >= tausec + 1):
+#         #     tfr[tausec, icol] = signal[icol + tausec, 0] * \
+#         #         np.conj(signal[icol - tausec, 0]) + \
+#         #         signal[icol - tausec, 0] * conj_signal[icol + tausec, 0]
+
+#     fig, ax = plt.subplots()
+#     ax.matshow(tfr.real)
+
+#     tfr = np.real(fft(tfr, axis=0))
+
+#     # freqs = 0.5 * np.arange(N, dtype=float) / N
+#     freqs = fftfreq(N)
+
+#     return tfr, freqs
+
+def spectrogram(x, d=1):
     """
-    Wigner transform of an input signal.
+    Wigner transform of an input signal with FFT.
+    W(w, t) = int dtau x(t + tau/2) x^*(t - tau/2) e^{i w tau}
+
+    Parameters
+    ----------
+    x : 1d array 
+        The time-domain signal.
+
+    d : TYPE, optional
+        DESCRIPTION. The default is 1.
+
+    Returns
+    -------
+    TYPE
+        spectrogram in (f, t)
+    freqs : 1d array
+        sample frequencies. 
+
+    """
+
+    N = len(x)
+    tausec = N//2
+
+    # taus = np.linspace(-N//2*dt)
+    winlength = tausec - 1
+
+    taulens = np.min(np.c_[np.arange(N),
+                            N - np.arange(N) - 1,
+                      winlength * np.ones(N)], axis=1)
+
+    taus = np.arange(-tausec, tausec) * d
+
+    # complex conjugate
+    xc = np.conj(x)
+
+    # the wigner function, axis 0 is the new axis
+    w = zeros((N, N), dtype=complex)
+
+    for j in range(N):
+
+        taumax = taulens[j]
+
+        tau = np.arange(-taumax, taumax + 1).astype(int)
+
+        indices = (tau + tausec).astype(int)
+
+        # if j == 2: sys.exit()
+
+        w[indices, j] = x[j + tau] * xc[j - tau]
+
+
+        # if (icol <= N - tausec) and (icol >= tausec + 1):
+        #     tfr[tausec, icol] = signal[icol + tausec, 0] * \
+        #         np.conj(signal[icol - tausec, 0]) + \
+        #         signal[icol - tausec, 0] * conj_signal[icol + tausec, 0]
+        freqs, w[:, j] = lime.fft.ifft(w[:, j], taus)
+
+    return np.real(w), freqs
+
+
+def wigner(x, d=1):
+    """
+    Wigner transform of an input signal with FFT.
     W(t, w) = int dtau x(t + tau/2) x^*(t - tau/2) e^{i w tau}
 
     Parameters
@@ -80,55 +231,80 @@ def wigner(signal):
 
     """
 
-    N = len(signal)
+    N = len(x)
     tausec = N//2
+
+    # taus = np.linspace(-N//2*dt)
     winlength = tausec - 1
 
     taulens = np.min(np.c_[np.arange(N),
-                           N - np.arange(N) - 1,
-                     winlength * np.ones(N)], axis=1)
+                            N - np.arange(N) - 1,
+                      winlength * np.ones(N)], axis=1)
 
-    conj_signal = np.conj(signal)
+    taus = np.arange(-tausec, tausec) * d
 
-    tfr = zeros((N, N), dtype=complex)
+    # complex conjugate
+    xc = np.conj(x)
 
-    for icol in range(N):
+    # the wigner function, axis 0 is the new axis
+    w = zeros((N, N), dtype=complex)
 
-        taumax = taulens[icol]
+    for j in range(N):
+
+        taumax = taulens[j]
 
         tau = np.arange(-taumax, taumax + 1).astype(int)
 
-        indices = np.remainder(N + tau, N).astype(int)
+        indices = (tau + tausec).astype(int)
 
-        tfr[indices, icol] = signal[icol + tau] * conj_signal[icol - tau]
+        # if j == 2: sys.exit()
 
-        if (icol <= N - tausec) and (icol >= tausec + 1):
-            tfr[tausec, icol] = signal[icol + tausec, 0] * \
-                np.conj(signal[icol - tausec, 0]) + \
-                signal[icol - tausec, 0] * conj_signal[icol + tausec, 0]
-
-    tfr = np.fft.fft(tfr, axis=0)
-    tfr = np.real(tfr)
-    freqs = 0.5 * np.arange(N, dtype=float) / N
-
-    return tfr, freqs
+        w[indices, j] = x[j + tau] * xc[j - tau]
 
 
-from lime.optics import Pulse, interval
-from lime.units import au2fs, au2ev
-#from lime.phys import
+        # if (icol <= N - tausec) and (icol >= tausec + 1):
+        #     tfr[tausec, icol] = signal[icol + tausec, 0] * \
+        #         np.conj(signal[icol - tausec, 0]) + \
+        #         signal[icol - tausec, 0] * conj_signal[icol + tausec, 0]
+        freqs, w[:, j] = lime.fft.fft(w[:, j], taus)
 
-pulse = Pulse(sigma=4/au2fs, omegac=2/au2ev, beta=0.2)
+    # fig, ax = plt.subplots()
+    # ax.matshow(w.real)
 
+    # tfr = np.real(fft(w, axis=0))
 
-times = np.linspace(-14, 14, 256)/au2fs
+    # freqs = 0.5 * np.arange(N, dtype=float) / N
+    # freqs = pi * fftfreq(N, d=d)
+    return np.real(w.T), freqs
 
-efield = pulse.efield(times)
+if __name__=='__main__':
 
-# wvd(efield.real, times, N=None, trace=0, make_analytic=False)
+    from lime.optics import Pulse, interval
+    from lime.units import au2fs, au2ev
+    #from lime.phys import
 
-wvd = wigner(efield)[0]
+    pulse = Pulse(sigma=6/au2fs, omegac=2/au2ev, beta=0.2)
+    # sigma=4/au2fs
+    t = np.linspace(-14, 14, 128)/au2fs
+    N = len(t)
 
-import matplotlib.pyplot as plt
-fig, ax = plt.subplots()
-ax.imshow(wvd)
+    efield = pulse.efield(t)
+    # efield = np.exp(-t**2/sigma**2)
+    dt = interval(t)
+
+    # w = wvd(efield.real, N=None, trace=0, make_analytic=False)[0]
+    # w = wigner(efield)
+    wvd, freqs = spectrogram(efield, dt)
+
+    # import matplotlib.pyplot as plt
+    # fig, ax = plt.subplots()
+    # ax.imshow(wvd)
+
+    from lime.style import imshow
+    # # fig, ax = plt.subplots()
+    imshow(freqs, t, wvd, xlabel=r'$\omega$', ylabel='$t$')
+
+    # from lime.style import surf
+    # ax = surf(wvd, t, freqs)
+    # # ax.set_ylim(-0.1, 0)
+    
