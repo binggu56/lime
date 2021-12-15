@@ -2,6 +2,20 @@
 Welcome to LIght-Matter Everything!
 ***********************
 The goal is to provide a simple-to-use package to study how light interacts with matter.  
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
 
 Main modules
 ==========================
