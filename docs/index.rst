@@ -2,8 +2,6 @@
 
 The ultimate goal is to provide a simple-to-use package to study how light interacts with matter.  
 
-Check http://binggu.me/lime for documentations! 
-
 Main modules
 
 # Nonlinear molecular spectroscopy 
