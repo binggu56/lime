@@ -19,22 +19,24 @@ Indices and tables
 
 Main modules
 ==========================
+
 Nonlinear molecular spectroscopy
 ====
+
 * sum-of-states for multilevel system 
 
-- correlation function approach (for open quantum systems)
+* correlation function approach (for open quantum systems)
 
 Direct computing the many-point correlation functions with the quantum regression theorem 
 
-- non-perturbative approah 
+* non-perturbative approah 
 
 Simulating the laser-driven dynamics including explicitly all laser pulses. 
 This approach can be used for all systems provided the dynamics can be solved. 
 
 
 
-=============
+
 Molecular quantum dynamics 
 =============
 
@@ -49,6 +51,7 @@ For the exact nonadiabatic dynamics of vibronic models in the diabatic represent
 
 # Quantum chemistry 
 ==================
+
 Open quantum systems
 ==================
 
@@ -57,16 +60,23 @@ Open quantum systems
 - second-order time-convolutionless master equation 
 - hierarchical equation of motion 
 
-# Quantum transport 
+Quantum transport 
+==================
 - Landauer transport 
 
-# Soid state materials 
+Soid state materials
+====================
+
 - Band structure from tight-binding Hamiltonians 
 
-# Periodically driven matter 
+Periodically driven matter 
+==========================
+
 - Floquet spectrum 
 
-# Others 
+Others
+======
+ 
 - Schmidt decomposition 
 
 
