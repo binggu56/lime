@@ -1,0 +1,535 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{commath, braket, amsmath, bm}
+
+\usepackage{hyperref}
+
+
+\usepackage[compat=1.0.0]{tikz-feynman}
+
+\newcommand{\se}{Schr\"{o}dinger equation}
+\newcommand{\bl}{\begin{flalign}}
+	\newcommand{\enl}{\end{flalign}}
+\newcommand{\bx}{{\bf x}}
+\newcommand{\bv}{{\bf v}}
+
+\newcommand{\pa}{\partial}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\tdse}{time-dependent Schr\"{o}dinger equation}
+\newcommand{\zpe}{zero-point energy\ }
+\newcommand{\eq}[1]{Eq. \eqref{#1}}
+\newcommand{\Eq}[1]{Equation \eqref{#1}}
+\newcommand{\fig}[1]{Fig. \ref{#1}}
+\newcommand{\tab}[1]{Table \ref{#1}}
+
+\newcommand{\bbraket}[1]{\braket{\braket{#1}}}
+\newcommand{\BBraket}[1]{\Braket{\Braket{#1}}}
+\newcommand{\bbra}[1]{\langle\langle#1|}
+\newcommand{\kket}[1]{| #1 \rangle\rangle}
+
+\newcommand{\qm}{quantum mechanical}
+\newcommand{\QM}{Quantum Mechanical}
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\intf}{\int_{-\infty}^{\infty}}
+\newcommand{\pat}{\frac{\partial}{\partial t}}
+
+\newcommand{\ih}{i\hbar}\newcommand{\tr}{\text{Tr}}
+
+\renewcommand{\bf}[1]{\mathbf{#1}}
+\newcommand{\grad}{\nabla}
+\renewcommand{\pa}{\partial}
+
+\newcommand{\aver}{\overline}
+%\usepackage{mystyle}
+
+\newcommand{\be}{\begin{equation}}
+	\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+	\newcommand{\eea}{\end{eqnarray}}
+
+\newcommand{\ba}{\begin{array}}
+	\newcommand{\ea}{\end{array}}
+\newcommand{\nin}{\noindent}
+\renewcommand{\bf}[1]{\mathbf{#1}}
+
+
+\newcommand{\me}{\mathcal{E}}
+\newcommand{\ip}{\tilde}
+
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\tord}{{\mathcal{T}}}
+
+\newcommand{\Sec}[1]{Section~\ref{#1}}
+% \newcommand{\sec}[1]{Section~\ref{#1}}
+
+\newcommand{\antitord}{\bar{\mathcal{T}}}
+\newcommand{\tordc}{\mathcal{T}_\gamma}
+\newcommand{\intc}{\int_\gamma}
+
+\newcommand{\mol}{{(i)}}
+\newcommand{\sgn}{\text{sgn}}
+
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\renewcommand{\bf}{\mathbf}
+
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+
+%\newcommand{\dif}{\text{d}}
+\newcommand{\dt}{\frac{\text{d}}{\text{d}t}}
+\newcommand{\ioh}{\frac{i}{\hbar}}
+\newcommand{\Tr}[1]{\text{Tr}\cbr{#1}}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+%\SectionNumbersOn
+%\newcommand{\si}{Supporting Information}
+
+\newcommand{\proj}[1]{\ket{#1}\bra{#1}}
+\newcommand{\bs}{\begin{split}}
+	\newcommand{\es}{\end{split}}
+%\renewcommand{\mark}[1]{\underline{\textit{#1}}} # conflict with the book class
+
+
+\renewcommand{\neg}{{(-)}}
+\newcommand{\pos}{{(+)}}
+
+\newcommand{\xxx}{\textcolor{red}{need change}}
+
+%\usepackage[compat=1.1.0]{tikz-feynman}
+
+\renewcommand{\cite}{\text}
+\begin{document}
+
+\author{Bing Gu}
+\title{User manual for LIME}
+\date{Nov 2019}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+%\include{chapter01}
+%\include{./TeX_files/chapter02}
+
+
+% bibliography, glossary and index would go here.
+\chapter{Electrodynamics}
+
+
+\section{Plasmon }
+
+Electrostatics
+\be
+\bm \grad^2 \phi = 0
+\eq{eq:110}
+\ee
+The Laplacian in spherical coordinates reads
+\be
+\bm \Delta f={\frac {1}{r}}{\frac {\partial ^{2}}{\partial r^{2}}}(rf)+{\frac {1}{r^{2}\sin \theta }}{\frac {\partial }{\partial \theta }}\left(\sin \theta {\frac {\partial f}{\partial \theta }}\right)+{\frac {1}{r^{2}\sin ^{2}\theta }}{\frac {\partial ^{2}f}{\partial \varphi ^{2}}},
+\ee
+
+For sphere, we have azimuthal symmetry such that $\Phi(r, \theta) = R(r) \Theta(\theta)$
+Inserting into \eq{eq:110} leads to
+\be
+\grad_r \del{r^2 \grad_r R} = - l R
+\ee
+and
+\be
+\frac{1}{\sin(\theta)} \grad_\theta \del{\sin(\theta) \grad_\theta \Theta} = l \Theta
+\ee
+change of variable to $x = \cos(\theta)$,
+$ \pa_x = - \frac{1}{\sin(\theta)} \pa_\theta
+$
+
+\be
+\grad_x \del{\del{1 - x^2} \grad_x} P(x) = -\lambda P(x)
+\ee
+
+Wiki: If we demand that the solution be regular at $x=\pm 1$, the differential operator on the left is Hermitian. The eigenvalues are found to be of the form $n(n + 1)$, with $n=0,1,2,\ldots$, and the eigenfunctions are the $P_n(x)$. The orthogonality and completeness of this set of solutions follows at once from the larger framework of Sturm–Liouville theory.
+
+\section{FDTD}
+main reference: Dennis Michael Sullivan and Jennifer E. Houle - Electromagnetic Simulation Using the FDTD Method with Python (2019, Wiley) - libgen.lc.pdf
+
+
+\section{1D}
+
+assuming the EM filed propagating in the $z$ direction, $\bf E = \hat{\bf x} E_x(z,t)$ and $  \bf H = \hat{\bf y} H_y(z,t)$
+
+The Maxwell equation in free space reads $A \equiv A(z,t)$
+\be
+\pd{E_x(z,t)}{t} =  \frac{1}{\epsilon_0} \pd{H_y(z,t)}{z},
+\ee
+\be
+\pd{H_y(z,t)}{t} =  -\frac{1}{\mu_0} \pd{E_x(z,t)}{z}
+\ee
+With the central difference approximation,
+\be
+\frac{E_x^{n + 1/2}(k)-E_x^{n - 1/2}(k)}{\Delta t} = \frac{1}{\epsilon_0} \frac{H_y^n\del{k + 1/2} - H_y^n\del{k + 1/2} }{\Delta x}
+\ee
+\be
+\frac{H_y^{n+1}(k+1/2) - H_y^{n}(k+1/2)}{\Delta t} = -\frac{1}{\mu_0} \frac{E_x^n\del{k + 1} - E_x^n\del{k} }{\Delta x}
+\ee
+redefine $\tilde{E} = \sqrt{\epsilon_0/\mu_0} E $
+
+\subsection{Cavity Resonator}
+
+\subsection{Debye materials}
+\be
+\epsilon(z, \omega) = \epsilon_r - i \frac{\sigma}{\epsilon_0 \omega}  + \frac{\chi_1}{1 +i \omega \tau}
+\ee
+Introducing
+\be
+S(\omega) = \frac{\chi_1}{1 +i \omega \tau} E(\omega)
+\ee
+In time-domain, it reads
+\be
+S(t) = \frac{\chi_1}{\tau} \int_0^t e^{-(t-t')/\tau} E(t')\dif t'
+\ee
+discrete form reads
+\be
+S^n = e^{-\Delta t/\tau} S^{{n-1}} + \frac{\chi_1 \Delta t}{\tau}E^n
+\ee
+
+Introducing also
+\be I = - i \frac{\sigma}{\epsilon_0 \omega} E(\omega)
+\ee
+The link between $E$ and $D$ reads
+\be
+E^n = \frac{ D^n - I^n - e^{-\Delta t/\tau}	S^{n-1}}{\epsilon_r + \sigma\Delta t/\epsilon_0+  \chi_1 \Delta t/\tau}
+\ee
+
+\section{Photonic GF from FDTD}
+How can we calculate the $\bf G(\bf r, \bf r', \omega)$ from the FDTD method?
+
+
+The DGF is defined as
+\be
+\grad \times \grad \times \bf G - k^2 \epsilon(\bf r, \omega) \bf G = \bf I \delta(\bf r - \bf r')
+\ee
+
+ The outgoing boundary condition is connected to the boundary condition of the GF, and to the QNMs.
+
+ \section{GF for homogeneous medium in 1D, 2D, 3D}
+
+ For scattering geometry $\epsilon_\text{s}(\bf r, \omega)$
+ \be \del{\bf L_0 + k^2 \Delta \epsilon} \bf G = \bf I
+ \ee
+ where $ \bf L_0 = -\grad \times \grad \times + k^2 \epsilon_0 $
+ \be
+ G  = G_0 - G_0  k^2 \Delta \epsilon G
+\label{eq:dyson}
+ \ee
+ Since $\Delta \epsilon = 0$ outside the scattering region, \eq{eq:dyson} can be solved inside the nanoparticle first.
+ \be G_{ij} \equiv G(\bf r_i, \bf r_j) \ee
+
+ \subsection{Nearfield to far-field transformation}
+
+ \subsection{1D}
+ For 1D problem,
+ \be \del{ \od[2]{}{z} + k^2 } g(z,z') = -\delta(z-z')
+ \ee
+ \be g(z,z') = g(z-z') = \frac{i}{2k}e^{i k \abs{z-z'}}
+ \ee
+ The GF reads
+ \be
+ g = \del{1 + g_0k^2 \Delta \epsilon  }^{-1} g_0
+ \ee
+
+
+\chapter{Quantum dynamics}
+
+
+
+\section{ Adiabatic Nuclear Quantum Dynamics}
+
+Exact methods:
+
+\subsection{Split-operator method}
+Discrete variable representation
+Semiclassical methods:
+
+\subsection{Quantum trajectory method}
+b. Non-adiabatic molecular dynamics
+
+Exact nonadiabatic quantum dynamic with multiple electronic surfaces.
+
+Split-operator method in the diabatic representation
+Mixed quantum-classical methods
+
+Surface-hopping method
+\chapter{Quantum chemistry}
+Quantum chemistry solves the electronic structure given the nuclear geometry. This has been an active field of research for many decades, and sophisticated programs like Gaussian, Qchem, Psi4, Pyscf, Molpro have been widely used in the scientific community. We will take advantage of these remarkable developments. On one hand, we will apply existing methods to interesting molecules and materials. On the other hand, we will develop new techniques based on these programs as well since many functions and modules such as Coulomb integrals are the same irrespective of what your method is.
+
+Currently, we primarily use Pyscf and Molpro for Quantum Chemistry computations.
+
+3. Polaritonic dynamics
+Quantum dynamics of molecules coupled to the electromagnetic photon modes confined inside an optical cavity.
+
+4. Stochastic Schrödinger equation
+Generate white and colored noise to simulate stochastic dynamics, e.g., stochastic Schrödinger equations.
+
+5. Band structure of solids
+Compute band structure from tight-binding Hamiltonians.
+
+\chapter{Open quantum systems}
+Quantum systems are rarely isolated from their surrounding environment. For an isolated quantum system, dynamics can be described by the time-dependent Schrödinger equation (TDSE). One straightforward approach simulating the open quantum system dynamics is to include the environment degrees of freedom directly into the TDSE. While conceptually simple, this is not always the optimal choice when the environment is complex. Alternatively, we can solve a quantum master equation describing the equation of motion for the reduced density matrix.
+
+The following methods are currently implemented
+
+
+
+\section{Lindblad quantum master equations}
+\section{Redfield equations}
+Consider a quantum system coupled to a bath,
+\be
+H = H_\text{S} + H_\text{B} + H_\text{SB}
+\ee
+where
+\be
+H_\text{SB} = \sum_\alpha S_\alpha \otimes B_\alpha
+\ee
+We assume $\set{S_n}$ is Hermitian.
+We can simplify this equation considerably if we use the shortcut \be  \Lambda _{m}=\sum _{n}\int _{0}^{\infty }d\tau C_{mn}(\tau )S_{n,\mathrm {I} }(-\tau )\ee
+where
+\be C_{mn}(t) = \tr\sbr{\rho_\text{B} B_{m, \text{I}}(t) B_{n, \text{I}}} \ee is the bath correlation function and $\rho_\text{B}$ is the initial bath density matrix, e.g., canonical state.
+In the Schrödinger picture, the equation then reads
+\be {\frac {\partial }{\partial t}}\rho (t)=-{\frac {i}{\hbar }}[H,\rho (t)]-{\frac {1}{\hbar ^{2}}}\sum _{m}[S_{m},\Lambda _{m}\rho (t)-\rho (t)\Lambda _{m}^{\dagger }]
+\ee
+
+In the superoperator notation, the Redfield equation reads
+\be
+ {\frac {\partial }{\partial t}}\rho (t)=-i \mc{L}_0 \rho(t) - \sum _{m, n}\int_0^\infty \dif \tau \mc{S}^-_{m} \del{ \Re C_{mn}(\tau) \mc{S}_n^+(-\tau) + i \Im C_{mn}(\tau) \mc{S}_n^-(-\tau)  } \rho(t)
+\label{eq:110}
+\ee
+
+\eq{eq:110} can now be implemented numerically. Further simplifications can be introduced by the secular approximation.
+%is still inconvenient to use due to the system operators in the interaction picture.
+\subsection{Computing $\Lambda$}
+The matrix elements of
+\be
+\Lambda_{m, ab} =\sum _{n}\int _{0}^{\infty }d\tau C_{mn}(\tau ) e^{-i\omega_{ab} \tau}S_{n, ab} = \sum_{n} C_{mn}(-\omega_{ab}) S_{n, ab}
+\ee
+where in the last step we have neglected the imaginary part of the correlation function, which leads to an energy shift, and
+\be C(\omega) = \int_0^\infty \dif \tau C(\tau) e^{i\omega \tau}
+\ee.
+
+Supposing that the cross-correlation between bath operators vanish, i.e.,
+\be
+\Lambda_{m, ab} =  C_{m}'(\omega_{ba}) S_{m, ab}
+\ee  the input for the \verb|Redfield_solver| will be \verb|H, c_ops, spectra|
+where \verb|c_ops| contains the system operators and the \verb|spectra| (list of callback functions) contains the bath spectral function $C_n(\omega)$.
+
+\subsection{Gaussian bath}
+For bath operator $B = \sum_\alpha g_\alpha \del{a_\alpha + a_\alpha^\dag}$, the spectral density is defined as
+\be
+J(\omega) = \sum_\alpha \abs{g_\alpha}^2 \delta(\omega - \omega_\alpha)
+\ee
+For the environment in thermal equilibrium at temperature $\beta$, the correlation function reads
+\be
+C(t) = \int_0^\infty \frac{\dif \omega}{\pi}\del{\coth(\beta \omega/2) \cos(\omega t) - i \sin(\omega t)} J(\omega)
+\ee
+%It follows that
+%\be
+%C(\omega) = \del{\coth(\beta \omega/2) + 1 } J(\omega)
+%\ee
+The Fourier-Laplace transform of the correlation function leads to
+\be
+C(\omega) = \int_0^\infty \dif t e^{i\omega t} \int_0^\infty \frac{\dif \omega'}{\pi}\del{ \del{n_\text{BE}(\omega') + 1}e^{-i\omega' t} + n_\text{BE}(\omega') e^{i\omega' t} } J(\omega')
+\label{eq:112}
+\ee
+where $n_\text{BE}(\omega) = \frac{1}{e^{\beta \omega} - 1}$ is the Bose-Einstein distribution.
+
+Carrying  out  first the time integration in \eq{eq:112}  yields
+\be
+\begin{split}
+C(\omega) &= \int_0^\infty \dif t \int_0^\infty \frac{\dif \omega}{\pi}\del{ \del{n_\text{BE}(\omega) + 1}e^{-i\omega t} + n_\text{BE}(\omega) e^{i\omega t} } J(\omega) \\
+&= \int_0^\infty \dif t \int_0^\infty \frac{\dif \omega'}{\pi}\del{ \del{n_\text{BE}(\omega') + 1} e^{-i\omega' t} + n_\text{BE}(\omega') e^{i\omega' t} } J(\omega') e^{i\omega t} \\
+&=  \int_0^\infty \frac{\dif \omega'}{\pi} J(\omega') \del{ \del{n_\text{BE}(\omega') + 1} \frac{i}{\omega - \omega' + i \eta}  + n_\text{BE}(\omega')   \frac{i}{\omega + \omega' + i \eta} }
+\end{split}
+\ee
+
+The real part of $S(\omega) \equiv \Re C(\omega)$ is then
+\be
+S(\omega) =
+\begin{cases}
+  \del{n_\text{BE}(\omega) + 1} J(\omega)    & \omega \ge 0 \\
+  n_\text{BE}(-\omega)  J(-\omega)    & \omega < 0
+\end{cases}
+\ee
+At $\omega = 0$ we should take the limit of $S(\omega = 0^+)$.
+
+\subsection{Secular approximation}
+To invoke the secular approximation that decouples the coherence and population dynamics, we work in the eigenstate basis of the system Hamiltonian \be H_\text{S}\ket{a} = \omega_a \ket{a} \ee
+
+The secular approximation amounts to neglecting the transfer between coherences and populations. The only nonzero elements of the Redfield tensor is then
+\be
+\mc{R}_{aabb}, \mc{R}_{aaaa},  \mc{R}_{ab ab}
+\ee
+accounting for, respectively, the population transfer from $b$ to $a$, depopulation, and pure dephasing.
+
+The secular approximation breaks the basis-invariance of the master equation, but put it in Lindblad form.
+
+The elements of the Redfield tensor can be determined as follows.
+
+
+\subsection{Symmetry properties of bath correlation function}
+From the spectral representation of the correlation function
+\be
+C_{mn}(\tau) = \frac{e^{-\beta \omega_\alpha}}{Z} e^{i \omega_{\alpha \beta} \tau}B_{m, \alpha \beta} B_{n, \beta \alpha}
+\ee
+it follows that (assuming that the operators $\set{B_n}$ are Hermitian)
+\be
+C^*_{mn}(\tau) = C_{nm}(-\tau)
+\ee
+
+the time-translation invariance reads
+\be C(t,t') = C(t+T, t'+T)
+\ee  for any $T $.
+
+
+\section{Green's function}
+
+
+The GF for a quantum master equation with a time-independent Liouvillian $\mc{L}$
+\be
+\del{i\dt - \mc{L}}\mc{G}(t,t') = \delta(t-t')
+\ee
+can be given by
+\be
+\mc{G}(t-t') = -i \theta(t-t') e^{-i\mc{L} (t-t') }
+\ee
+
+
+the G[a, b, k] is a three dimensional tensor, to construct observables, we need
+
+out[i, k] = e[a] * U[a, b, k] * rho0[b]
+
+\subsection{Biorthogonal basis}
+Assume that $\mc{L}$ have right and left eigenvectors \cite{Brody2013}
+\be
+\mc{L}\kket{\phi_\mu} = \tilde{\omega}_\mu \kket{\phi_\mu}
+\ee
+and
+\be
+\mc{L}^\dag \kket{\chi_\mu} = \tilde{\kappa}_\mu \kket{\chi_\mu}
+\label{eq:113}
+\ee
+The eigenvalues satisfy $\kappa_\mu = \tilde{\omega}_\mu^*$
+The Green's function can then be obtained as
+\be
+\mc{G}(\tau) = -i \theta(\tau) e^{-i\tilde{\omega}_\mu \tau} \frac{\kket{\phi_\mu}\bbra{\chi_\mu}}{\bbraket{\chi_\mu|\phi_\mu}}
+\ee
+
+\red{Degenerate eigenvalues cause numerical problems because the degenerate eigenvectors are randomly mixed.}
+This can be solved by computing the inverse of $R_{a, \mu} = \bbraket{a| \phi_\mu}$ instead of using \eq{eq:113}.
+
+\subsection{Equation of motion}
+The GF can also be obtained by integration of the defining equation.
+Equivalently, we can solve the propagator
+\be
+\mc{U}(t) = e^{-i \mc{L} t}
+\ee
+satisfying the EOM with initial condition
+\be
+i \dt \mc{U}(t) =  \mc{L}\mc{U}(t)
+\ee
+with initial condition $\mc{U}(0) = \bf I$.
+
+\section{second-order time-convolutionless equation}
+
+\section{Correlation function}
+\subsection{GF method}
+The correlation function can be computed using the GF method.
+
+For multidimensional spectroscopy, we are generally interested in the four-point correlation function
+\be
+\bbraket{\mc{A} \mc{G}(\tau_3)\mc{B} \mc{G}(\tau_2) \mc{C} \mc{G}(\tau_1) \mc{D}\rho_0 }
+\ee
+
+\section{Hierarchical equation of motion}
+
+\section{Transformation From Hilbert space to Liouville space}
+\label{sec:ls}
+Some useful relations are listed below for transforming simulations from Hilbert space to Liouville space.
+Inner product in the Liouville space
+\be
+\Tr{A^\dag B} \rightarrow \bbraket{A|B}
+\ee
+Trace of a density matrix leads to
+\be
+\Tr{\rho} \rightarrow \bbraket{\bf I|\rho} = \sum_{\alpha, \beta} I_{\alpha \beta} \rho_{\alpha \beta}
+\ee
+For an observable represented by operator ${A}$ in the Hilbert space
+\be \Tr{A \rho } = \half \Tr{\mc{A}_+ \rho} = \half \bbraket{\bf I| \mc{A}_+ |\rho} = \bbraket{ \bf I|\mc{A}_\text{L}| \rho}
+\ee
+\be \Tr{\mc{A}_- \rho} = 0 \ee
+For commutators
+\be
+\braket{[A, B]} = \half \bbraket{\bf I| \mc{A}_+\mc{B}_-|\rho}
+\ee
+%How do we calculate susceptibility?
+The linear response function reads
+\be
+\chi = \braket{[V(t), V]}  = \half \Tr{\mc{V}_+(t) \mc{V}_- \rho_0} =
+\half \bbraket{I|\mc{V}_+(t) \mc{V}_- |\rho_0}
+\ee
+
+\chapter{Periodically driven quantum systems}
+Quasienergy levels of a periodically driven quantum system using Floquet theorem
+
+
+\chapter{Nonlinear molecular spectroscopy}
+Time-independent approach to optical signals via sum-over-states expressions
+
+Absorption
+\section{Transient absorption spectroscopy}
+Photo echo
+Time-dependent approach to coherent signals via explicitly solving the dynamics of matter interacting with laser pulses employed in the spectroscopic experiment. For example, pump and probe pulses in pump-probe experiments.
+
+\section{Transient absorption}
+
+\chapter{ Quantum transport}
+This module is to compute the current of nano-structures under a finite bias using the non-equilibrium Green's function (NEGF) method.
+
+\section{NEGF for time-independent transport}
+
+
+\chapter{Uncategorized}
+
+\section{Schmdit decomposition}
+\section{Wigner transformation}
+
+We want to transform a signal $\psi(t)$ through
+\be
+\psi_\text{W}(\omega , t) = \intf \dif \tau e^{i\omega \tau} \psi(t + \tau/2)\psi^*(t - \tau/2) = 2 \intf \dif \tau e^{i2 \omega \tau} \psi(t + \tau)\psi^*(t - \tau)
+\ee
+
+for $t$-index $j$, the $\tau$ index $i$ should be $i$
+
+the input is $\psi_n$ at $t_n = t_0 + n\delta$ for $n = [0, N-1]$, discretize the integration into $N$ segments,
+
+we use $[-N/2, N/2-1)$ for $\tau$-grid,  $\tau_i = \del{i  - N/2} \delta $
+and introduce $W(\tau, t) = W_{ij}$
+and
+
+\be
+W_{ij} = \psi(t_j + \tau_i) \psi^*(t_j - \tau_i) = \psi(t_0 + j \delta + (i-N/2) \delta ) \psi^*(t_0 + (j - i + N/2)\delta ) = \psi_{j + i - N/2} \psi^*_{j-i+N/2}
+\ee
+for given $j$,
+$  \max(N/2 - j, 0) \le i  \le \min(N-1, j+N/2)$ so
+
+\section{FFT}
+the Numpy implements
+
+y[k] = np.sum(x * np.exp(-2j * np.pi * k * np.arange(n)/n))
+
+what we want is
+
+ y[w] = np.sum(x * np.exp(-j * w * t))
+
+\backmatter
+
+\bibliography{../../manuscripts/optics}
+\end{document}
