@@ -1,15 +1,14 @@
-.. lime documentation master file, created by
-   sphinx-quickstart on Wed Dec 15 16:26:01 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+
 
 Welcome to lime's documentation!
 ================================
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   modules
 
 
 Indices and tables
@@ -19,14 +18,14 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-The ultimate goal is to provide a simple-to-use package to study how light interacts with matter.  
+The goal is to provide a simple-to-use package to study how light interacts with matter.  
 
 Check manual.pdf for documentations! 
 
 Main modules
 
 Nonlinear molecular spectroscopy 
-========
+================================
 
 * sum-of-states for multilevel system
 

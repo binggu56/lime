@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -12,8 +15,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../lime'))
-
+# sys.path.insert(0, os.path.abspath('.'))
+sys.path.append('/Users/bing/Google Drive/My Drive/lime')
 
 # -- Project information -----------------------------------------------------
 
@@ -33,7 +36,7 @@ release = '0.1'
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon'
 ]
 
-.. autoclass:: lime.oqs.Redfield_solver
+#.. autoclass:: lime.oqs.Redfield_solver
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
