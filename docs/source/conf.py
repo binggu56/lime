@@ -33,8 +33,7 @@ release = '0.1'
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon'
 ]
 
-.. automodapi:: lime.phys
-    :include-all-objects:
+.. autoclass:: lime.oqs.Redfield_solver
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
