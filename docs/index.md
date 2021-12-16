@@ -1,4 +1,3 @@
-***********************
 Welcome to LIght-Matter Everything!
 ***********************
 The goal is to provide a simple-to-use package to study how light interacts with matter.  
