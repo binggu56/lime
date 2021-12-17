@@ -19,7 +19,7 @@ from lime.style import set_style, imshow
 from numba import jit
 
 class Pulse:
-    def __init__(self, sigma, omegac, delay=0., amplitude=0.01, cep=0., beta=0.):
+    def __init__(self, tau, omegac, delay=0., amplitude=0.001, cep=0., beta=0):
         """
         (linearly chirped) Gaussian pulse
 
@@ -33,28 +33,29 @@ class Pulse:
 
         """
         self.delay = delay
-        self.sigma = sigma
-        self.T = sigma
+
+        self.tau = tau
+        self.sigma = tau # for compatibility only
         self.omegac = omegac # central frequency
         self.unit = 'au'
         self.amplitude = amplitude
         self.cep = cep
-        self.bandwidth = 1./sigma
-        self.duration = 2. * sigma
+        self.bandwidth = 1./tau
+        self.duration = 2. * tau 
         self.beta = beta  # linear chirping rate, dimensionless
         self.ndim = 1
 
 
 
     def envelop(self, t):
-        return np.exp(-(t-self.delay)**2/2./self.sigma**2)
+        return np.exp(-(t-self.delay)**2/2./self.tau**2)
 
     def spectrum(self, omega):
         """
         Fourier transform of the Gaussian pulse
         """
         omega0 = self.omegac
-        T = self.sigma
+        T = self.tau
         A0 = self.amplitude
         beta = self.beta
 
@@ -71,6 +72,18 @@ class Pulse:
         return self.efield(t)
 
     def efield(self, t):
+        """
+
+        Parameters
+        ----------
+        t : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        electric field at time t.
+
+        """
         omegac = self.omegac
         t0 = self.delay
         a = self.amplitude
@@ -81,11 +94,10 @@ class Pulse:
 #            return a * np.exp(-(t-delay)**2/2./sigma**2)*np.cos(omegac * (t-delay))
 #        else:
 
-        E = 0.5 * a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
+        E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
             * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
 
-        # return 2. * E.real
-        return E
+        return E.real 
 
     def spectrogram(self, efield):
 
@@ -280,7 +292,7 @@ class Biphoton:
 
 
         if fname is not None:
-            fig.savefig('jsa.pdf')
+            plt.savefig(fname)
 
         plt.show()
 

@@ -80,6 +80,12 @@ class SPO_3d():
         psi = psi0
         return psi
 
+def gwp(x, a, x0=0., p0=0.):
+    """
+    a Gaussian wave packet centered at x0, with momentum k0
+    """
+    return (a/np.sqrt(np.pi))**(-0.25)*\
+        np.exp(-0.5 * a * (x - x0)**2 + 1j * (x-x0) * p0)
 
 @jit
 def gauss_x_2d(sigma, x0, y0, kx0, ky0):

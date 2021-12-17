@@ -16,7 +16,6 @@ from lime.phys import lorentzian
 from lime.units import au2ev, au2angstrom
 
 
-
 def ETPA(omegap, E, edip, Te, g_idx=[0], e_idx=[], f_idx=[]):
     """
     ETPA signal with SOS formula
@@ -219,4 +218,4 @@ if __name__ == '__main__':
     A = transition_amplitude(E,  edip=dip, Te=1/au2fs, omegap=1.2/au2ev,\
                                   sigmap=0.2/au2ev, e_idx=[1], f_idx=[2, 3])
 
-    print(A)
+    print((vacuum_efield(1.2/au2ev)*vacuum_efield(1.2/au2ev))**2)

@@ -1,36 +1,61 @@
 '''
 modules for open quantum systems
 
+
+
 @author: Bing Gu
 @email: bingg@uci.edu
+
+Credits:
+    QuTip
 '''
 
 import numpy as np
+from numpy import tensordot
 from numba import jit, njit
 import sys
 import scipy
+from scipy.linalg import eigh, eig
+from scipy.sparse import csr_matrix, issparse, identity
+import scipy.sparse.linalg as la
+from scipy.integrate import solve_ivp
+# from scipy.sparse.linalg import eigs
+import opt_einsum as oe
 
 from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
-    obs_dm, destroy, rk4, basis
+    obs_dm, destroy, rk4, basis, transform, isherm, expm
 
-from lime.superoperator import lindblad_dissipator, operator_to_superoperator
-
-from lime.units import au2fs, au2k
+# from lime.superoperator import lindblad_dissipator
+from lime.superoperator import op2sop, dm2vec, obs, left, right, operator_to_superoperator
+from lime.liouville import sort
+from lime.units import au2fs, au2k, au2wavenumber
 from lime.mol import Mol, Result
 
-from scipy.sparse import csr_matrix
-import scipy.sparse.linalg as la
+
 
 import lime.superoperator as superop
 
 
 
 class Redfield_solver:
-    def __init__(self, H, c_ops=None, e_ops=None):
-        self.H = None
-        self.c_ops = None
-        self.e_ops = None
-        return
+    def __init__(self, H, c_ops=None, spectra=None, e_ops=None):
+        self.H = H
+        self.c_ops = c_ops
+        self.R = None
+        self.spectra = spectra
+        self.evecs = None
+        self.dim = H.shape[0] # size of Hilbert space
+        self.U = None
+        self.G = None # Green's function for Redfield equation
+
+        # deprcated variables, use e_ops as function variable
+        self.e_ops = e_ops
+
+    def idm(self, sp=True):
+        if sp:
+            return dm2vec(identity(self.dim)) # identity operator in Liouville space
+        else:
+            return dm2vec(identity(self.dim).toarray())
 
     def configure(self, H, c_ops, e_ops):
         self.c_ops = c_ops
@@ -38,7 +63,7 @@ class Redfield_solver:
         self.H = H
         return
 
-    def evolve(self, rho0, dt, Nt, store_states=False, nout=1):
+    def evolve(self, rho0, dt, Nt, evecs=None, e_ops=[], store_states=False, t0=0, nout=1):
         '''
         propogate the open quantum dynamics
 
@@ -57,13 +82,502 @@ class Redfield_solver:
 
         '''
 
-        c_ops = self.c_ops
-        h0 = self.H
-        e_ops = self.e_ops
+        if self.R is None:
+            R, evecs = self.redfield_tensor()
 
-        rho = _redfield(rho0, c_ops, h0, Nt, dt,e_ops, integrator='SOD')
+        result = _redfield(self.R, rho0, evecs=self.evecs, Nt=Nt, dt=dt, t0=t0, e_ops=e_ops)
+
+        return result
+
+    def redfield_tensor(self, secular=False):
+        """
+        compute the Redfield tensor represented in the eigenbasis of H
+
+        The returned Redfield tensor contains the unitary dynamics and is defined as
+
+        i d/dt rho =  R rho
+
+        Parameters
+        ----------
+        spectra : list of callback functions
+            DESCRIPTION.
+        secular : TYPE, optional
+            DESCRIPTION. The default is False.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+        H = self.H
+        c_ops = self.c_ops
+
+        if self.spectra is None:
+            raise TypeError('Specify the bath spectral function.')
+        else:
+            spectra = self.spectra
+
+        R, evecs = redfield_tensor(H, c_ops, spectra, secular)
+        self.R = R
+        self.evecs = evecs
+
+        return R, evecs
+
+    # def liouvillian(self):
+    #     """
+    #     compute the Liouvillian superoperator
+    #     i d/dt rho = L rho
+
+    #     Returns
+    #     -------
+    #     TYPE
+    #         DESCRIPTION.
+
+    #     """
+    #     if self.R is None:
+    #         raise('Call redfield_tensor first.')
+
+    #     return  op2sop(self.H) - 1j * self.R
+    def steady_state():
+        pass
+
+    def gf(self, t, w=None, secular=False, k=1, domain='time', method='EOM'):
+        # compute the Liouville-space Green's function with Redfield dissipation
+
+        # H = self.H
+        # c_ops = self.c_ops
+
+        if method == 'EOM':
+
+            # construct total liouvillian
+            if self.R is None:
+                R, evecs = self.redfield_tensor(secular=secular)
+
+            # Liouvillian
+
+            return -1j * expm(R, t)
+
+        elif method == 'eseries':
+
+            if self.R is None:
+                R, evecs = self.redfield_tensor(secular=secular)
+
+            return getG(1j * self.R, t)
+
+
+    def propagator(self, t, method='SOS'):
+        """
+        compute the Liouville-space propagator with Redfield dissipation
+
+        Parameters
+        ----------
+        t : list
+            time values to compute the propagator.
+
+        Raises
+        ------
+        TypeError
+            DESCRIPTION.
+
+        Returns
+        -------
+        list
+            list of propagators at t.
+
+        """
+
+
+        # construct total liouvillian
+        if self.R is None:
+            raise TypeError('Redfield tensor is not computed. Please call redfield_tensor()')
+
+
+        if method == 'EOM':
+
+            U = expm(self.R, t)
+
+            # store the Green's function for future use G(t) = -1j * (t>0) * U(t)
+            # G = np.zeros((self.dim**2, self.dim**2, len(t)), dtype=complex)
+            # for n in range(len(t)):
+            #     G[:,:, n] = -1j * U[n].toarray()
+
+            # G = -1j * np.dstack(U)
+
+            U = [_.toarray() for _ in U]
+
+            self.U = np.dstack(U)
+
+        elif method in ['eseries', 'SOS']:
+
+            evals1, U1 = eig(self.R.toarray())
+
+            U2 = scipy.linalg.inv(U1)
+
+            E = np.exp(evals1[:,np.newaxis] * t[np.newaxis,:])
+            # self.U =  np.einsum('aj, jk, jb -> abk', U1, E, U2)
+            self.U =  oe.contract('aj, jk, jb -> abk', U1, E, U2)
+
+        self.G = -1j * self.U
+
+        return self.U
+
+    def expect(self, rho0, e_ops):
+
+        evecs = self.evecs
+        U = self.U
+        # transform the intial density matrix to eigenbasis
+        rho0_eb = dm2vec(transform(rho0, evecs))
+        e_ops = [transform(e, evecs) for e in e_ops]
+
+        if isinstance(U, list):
+            # if the propagator is given in list form
+            Nt = len(U)
+            out = np.zeros((Nt, len(e_ops)), dtype=complex)
+
+            for j, e in enumerate(e_ops):
+
+                rholist = [u.dot(rho0_eb) for u in U]
+
+                out[:, j] = [np.vdot(e, rho) for rho in rholist]
+
+        else: # if propagator is ndarray
+            Nt = U.shape[-1]
+            out = np.zeros((Nt, len(e_ops)), dtype=complex)
+
+            rho = np.tensordot(U, rho0_eb, axes=([1], [0]))
+            for j, e in enumerate(e_ops):
+                out[:, j] = dm2vec(e).dot(rho)
+
+        return out
+
+    def correlation_2op_1t(self, rho0, a, b, tau):
+        # 2-point correlation function <<I|a G(tau) b|rho0>>
+
+        if self.G is None:
+            self.propagator(tau)
+
+        G = self.G
+
+        # unit operator in Liouville space
+        idm = dm2vec(identity(self.dim))
+
+        # for _ in [a, b, rho0]:
+        #     if _.ndim == 2:
+        #         _ = dm2vec(_)
+
+        if rho0.ndim == 2:
+            rho0 = dm2vec(rho0)
+
+        corr = idm.dot(a.dot(np.tensordot(G, b.dot(rho0), axes=([1], [0]))))
+
+        return corr
+
+
+    def correlation_4op_3t(self, rho0, oplist, signature, tau):
+        """
+        4-point correlation function <<I|A G(tau3) B G(tau2) C G(tau1) D|rho0>>
+
+        make sure all the operators, density matrix, and the GF are represented
+        in the eigenbasis of H.
+
+        Parameters
+        ----------
+        rho0 : TYPE
+            DESCRIPTION.
+        oplist : TYPE
+            DESCRIPTION.
+        signature : str of (lr+-)
+            signifies the superoperator transform the operators in the oplist
+        tau : TYPE
+            DESCRIPTION.
+
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+
+
+        if len(oplist) != 4:
+            raise ValueError('Number of operators is not 4.')
+
+        a = operator_to_superoperator(oplist[0], signature[0])
+        b = operator_to_superoperator(oplist[1], signature[1])
+        c = operator_to_superoperator(oplist[2], signature[2])
+        d = operator_to_superoperator(oplist[3], signature[3])
+
+        for _ in oplist:
+            if issparse(_):
+                _ = _.toarray()
+
+
+        # nmax = max(len(tau3), len(tau2), len(tau1))
+
+        # g = -1j * (tau > 0) * self.propagator(tau)
+        # G = np.zeros((self.dim, self.dim, len(tau)))
+
+        # for n, elem in enumerate(g):
+        #     G[:,:, n] = g[n]
+
+        if self.G is None:
+            self.propagator(tau)
+
+        G = self.G
+
+        # unit operator in Liouville space
+        N = self.dim
+        idm = self.idm(sp=False)
+
+        # print(d.shape, dm2vec(rho0.toarray()).shape)
+        if issparse(rho0):
+            rho = d.dot(dm2vec(rho0.toarray()))
+        else:
+            rho = d.dot(dm2vec(rho0))
+
+        # print(type(rho), rho.shape)
+
+        if issparse(rho): rho = rho.toarray()
+
+        tmp = np.tensordot(G, rho, axes=((1), (0)))
+        tmp = c.dot(tmp)
+        tmp = np.tensordot(G, tmp, axes=([1], [0])) # ajk
+
+        # tmp = np.einsum('dcj, ca, abk, b -> djk', G, c, G, rho)
+
+
+        '''
+        Scipy sparse matrix does not support dimensions more than 2, so
+        ndarray has to be used for the tensor products.
+
+        This can be improved by using sparse package.
+        '''
+        tmp = np.tensordot(b.todense(), tmp, axes=([1], [0]))
+        # tmp = b.todense().dot(tmp)
+
+        tmp = np.tensordot(G, tmp, axes=([1], [0]))
+
+        return oe.contract('a, ab, bijk -> ijk', idm, a.todense(), tmp)
+
+        # corr = np.einsum('a, ab, bck, bc, cdj, de, efi, f ->kji', idm, \
+        #                  left(a), G, left(b), left(c), G, left(d).dot(dm2vec(rho0))
+
+        # return
+
+def _redfield(R, rho0, evecs=None, Nt=1, dt=0.005, t0=0, e_ops=[], return_result=True):
+
+    """
+    time propagation of the Redfield quantum master equation with RK4
+
+    Input
+    -------
+    R: 2d array
+        Redfield tensor
+
+    rho0: 2d array
+        initial density matrix
+
+    Nt: total number of time steps
+
+    dt: time step
+    e_ops: list of observable operators
+
+    Returns
+    =========
+    rho: 2D array
+        density matrix at time t = Nt * dt
+    """
+
+    N = rho0.shape[0]
+    # initialize the density matrix
+    if e_ops is None:
+        e_ops = []
+
+    # basis transformation
+    if evecs is not None:
+        rho0 = transform(rho0, evecs)
+        e_ops = [transform(e, evecs) for e in e_ops]
+
+    rho = rho0.copy()
+    rho = dm2vec(rho).astype(complex)
+
+    # tf = t0 + dt * Nt
+    # result = solve_ivp(rhs, t_span=(t0, tf), y0=rho0, vectorized=True, args=(R, ))
+
+    t = t0
+
+    if return_result == False:
+
+        f_obs = open('obs.dat', 'w')
+        fmt = '{} '* (len(e_ops) + 1) + '\n'
+
+        for k in range(Nt):
+
+            # compute observables
+            # observables = np.zeros(len(e_ops), dtype=complex)
+            # for i, obs_op in enumerate(e_ops):
+
+            observables = [obs_dm(rho, e) for e in e_ops]
+
+            t += dt
+            rho = rk4(rho, rhs, dt, R)
+
+            # dipole-dipole auto-corrlation function
+            #cor = np.trace(np.matmul(d, rho))
+
+            # take a partial trace to obtain the rho_el
+
+
+            f_obs.write(fmt.format(t, *observables))
+
+
+        f_obs.close()
+        # f_dm.close()
 
         return rho
+
+    else:
+
+        rholist = [] # store density matries
+
+        result = Result(dt=dt, Nt=Nt, rho0=rho0)
+
+        observables = np.zeros((Nt, len(e_ops)), dtype=complex)
+
+        for k in range(Nt):
+
+            t += dt
+            rho = rk4(rho, rhs, dt, R)
+
+            tmp = np.reshape(rho, (N, N))
+            rholist.append(transform(tmp, dag(evecs)))
+
+
+            observables[k, :] = [obs_dm(tmp, e) for e in e_ops]
+
+
+        result.observables = observables
+        result.rholist = rholist
+
+        return result
+
+
+def rhs(psi, H):
+    return H.dot(psi)
+
+def getG(L, t, w=None, k=6, domain='time'):
+    """
+    return the Green's function of linear differential operator (id/dt - L)
+
+    time domain
+        G(t) = -1j * theta(t) * exp(-i L t)
+    frequency domain
+        G(w) = 1/(w - L)
+
+    Parameters
+    ----------
+    l : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    G : TYPE
+        DESCRIPTION.
+
+    """
+    # evals1, U1 = eigs(L, k=k, which='LR')
+    # evals1, U1 = sort(evals1, U1)
+
+    # eigvals2, U2 = eigs(dag(L), k=k, which='LR')
+    # eigvals2, U2 = sort(eigvals2, U2)
+    evals1, U1 = eig(L.todense())
+    # evals1, U1 = sort(evals1, U1)
+
+    # U2 = U1.conj()
+    # eigvals2, U2 = eig(dag(L).todense())
+    # eigvals2, U2 = sort(eigvals2, U2)
+
+    U2 = scipy.linalg.inv(U1)
+
+    # norm = np.array([np.vdot(U2[:,n], U1[:,n]) for n in range(len(evals1))])
+
+    # print('normalization', norm)
+
+    if domain == 'time':
+
+        U = -1j * np.exp(-1j * evals1[:,np.newaxis] * t[np.newaxis,:])
+       # tmp = np.exp(-1j * evals1[:,np.newaxis] * t[np.newaxis,:])
+
+        # U = np.einsum('ab, a -> ab', tmp, 1./norm)
+
+        G =  np.einsum('aj, jk, jb -> abk', U1, U, U2)
+
+    elif domain == 'freq':
+
+        W = 1./((w[:, np.newaxis] - evals1[np.newaxis, :]))
+        G = np.einsum('an, nk, bn ->abk', U1, W, U2.conj())
+
+    return G
+
+def redfield_tensor(H, a_ops, spectra, secular=False):
+
+    for a in a_ops:
+        if issparse(a):
+            if not isherm(a.todense()):
+                raise TypeError("Operators in a_ops must be Hermitian.")
+        elif not isherm(a):
+            raise TypeError("Operators in a_ops must be Hermitian.")
+
+    if issparse(H):
+        evals, evecs = eigh(H.todense())
+    else:
+        evals, evecs = eigh(H)
+
+    print('eigenvalues', evals)
+
+    # pre-calculate matrix elements and spectral densities
+    # W[m,n] = real(evals[m] - evals[n])
+    W = np.real(evals[:,np.newaxis] - evals[np.newaxis,:])
+
+    # bath spectral density at transition energies
+
+    K = len(a_ops)
+    N = len(evals)
+
+    C = []
+    for k in range(K):
+
+        c = np.zeros((N,N))
+        for n in range(N):
+            for m in range(N):
+                c[n, m] = spectra[k](-W[n, m])
+
+        C.append(c)
+
+        # C = [s(-W) for s in spectra]
+
+    # transfrom a_ops to eigenbasis
+    A = [transform(a, evecs) for a in a_ops]
+
+
+    # calc the lambda operators
+    L = [C[k] * A[k]  for k in range(K)]
+
+    R = 0
+    # superoperator
+    for k in range(K):
+        a = A[k]
+        l = L[k]
+        R += op2sop(a).dot(left(l) - right(dag(l)))
+
+    return csr_matrix(-1j * op2sop(np.diag(evals))  - R), evecs
+
 
 
 class OQS(Mol):
@@ -514,7 +1028,7 @@ def make_lambda(ns, h0, S, T, cutfreq, reorg):
 
 
 
-def _redfield(nstates, rho0, c_ops, h0, Nt, dt,e_ops, env):
+def _redfield_old(nstates, rho0, c_ops, h0, Nt, dt,e_ops, env):
     """
     time propagation of the Redfield equation with second-order differencing
     input:
@@ -626,32 +1140,59 @@ class Lindblad_solver():
         self.c_ops = c_ops
         self.e_ops = e_ops
         return
-    
+
     def liouvillian(self):
         H = self.H
         c_ops = self.c_ops
         return superop.liouvillian(H, c_ops)
 
-    def steady_states(self):
+    def steady_state(self):
         pass
 
     def evolve(self, rho0, dt, Nt, t0=0., e_ops=None, return_result=True):
-        
+        """
+        propagate the dynamics
+
+        if H is ndarray, H is time-independent
+        if H = [H0, [f(t), H1]], H = H0 - f(t) * H1 is time-dependent
+
+        Parameters
+        ----------
+        rho0 : TYPE
+            DESCRIPTION.
+        dt : TYPE
+            DESCRIPTION.
+        Nt : TYPE
+            DESCRIPTION.
+        t0 : TYPE, optional
+            DESCRIPTION. The default is 0..
+        e_ops : TYPE, optional
+            DESCRIPTION. The default is None.
+        return_result : TYPE, optional
+            DESCRIPTION. The default is True.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+
         if isinstance(self.H, list):
-            
-            return _lindblad_driven(self.H, rho0=rho0, c_ops=self.c_ops, 
+
+            return _lindblad_driven(self.H, rho0=rho0, c_ops=self.c_ops,
                                     e_ops=e_ops,
                                     Nt=Nt, dt=dt, t0=t0)
-        
+
         else:
 
             return _lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=e_ops, \
                   Nt=Nt, dt=dt, return_result=return_result)
-    
+
     def evolve_fast(self, rho0, dt, Nt, t0=0., e_ops=None, return_result=True, fast=True):
             return _fast_lindblad(self.H, rho0, c_ops=self.c_ops, e_ops=e_ops, \
                    Nt=Nt, dt=dt)
-                
+
     def correlation_2op_1t(self, rho0, a_op, b_op, dt, Nt, output='cor.dat'):
         '''
         two-point correlation function <A(t)B>
@@ -682,7 +1223,7 @@ class Lindblad_solver():
 
         return _correlation_2p_1t(H, rho0, ops=[a_op, b_op], c_ops=c_ops, dt=dt,\
                           Nt=Nt, output=output)
-    
+
     def correlation_3op_1t(self, rho0, oplist, dt=0.005, Nt=1):
         """
         <AB(t)C>
@@ -701,9 +1242,9 @@ class Lindblad_solver():
         a_op, b_op, c_op = oplist
         cor = _lindblad(self.H, rho0 = c_op @ rho0 @ a_op, c_ops=self.c_ops, \
                         e_ops=[b_op], dt=dt, Nt=Nt).observables[:,0]
-        
+
         return cor
-    
+
     def correlation_4op_1t(self, rho0, oplist, dt=0.005, Nt=1):
         """
         <AB(t)C(t)D>
@@ -722,8 +1263,8 @@ class Lindblad_solver():
         a_op, b_op, c_op, d_op = oplist
         return self.correlation_3p_1t(rho0=rho0, oplist=[a_op, b_op @ c_op, d_op],\
                                       dt=dt, Nt=Nt)
-    
-    
+
+
     def correlation_3op_2t(self, rho0, ops, dt, Nt, Ntau):
         """
         Internal function for calculating the three-operator two-time
@@ -808,9 +1349,9 @@ class HEOMSolverDL():
         set observable operators
         """
         self.e_ops = e_ops
-        
+
         return
-    
+
     def setH(self, H):
         self.H = H
         return
@@ -925,7 +1466,7 @@ class HEOMSolverDL():
 
 #     return corr_mat
 
-# @jit 
+# @jit
 # def _rk4(rho, fun, dt, H, c_ops):
 #     """
 #     Runge-Kutta method
@@ -946,9 +1487,9 @@ def _fast_lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005):
 
     """
     fast time propagation of the lindblad quantum master equation
-    
+
     (not completed yet.)
-    
+
     Input
     -------
     h0: 2d array
@@ -965,13 +1506,13 @@ def _fast_lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005):
     rho: 2D array
         density matrix at time t = Nt * dt
     """
-    
+
     # initialize the density matrix
     rho = rho0
-    
+
     # if e_ops is None:
     #     e_ops = []
-    
+
     t = 0.0
     dt2 = dt/2.
     # first-step
@@ -1036,16 +1577,16 @@ def _fast_lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005):
     #         rho = rk4(rho, liouvillian, dt, H, c_ops)
 
     #         rholist.append(rho.copy())
-            
-            
+
+
     #         observables[k, :] = [obs_dm(rho, op) for op in e_ops]
-            
+
 
     #     result.observables = observables
     #     result.rholist = rholist
 
     #     return result
-    
+
 def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
 
     """
@@ -1068,14 +1609,14 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
     rho: 2D array
         density matrix at time t = Nt * dt
     """
-    
+
     # initialize the density matrix
     rho = rho0.copy()
     rho = rho.astype(complex)
-    
+
     if e_ops is None:
         e_ops = []
-    
+
     t = 0.0
     # first-step
     # rho_half = rho0 + liouvillian(rho0, h0, c_ops) * dt2
@@ -1098,7 +1639,7 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
 
             for i, obs_op in enumerate(e_ops):
                 observables[i] = obs_dm(rho, obs_op)
-                
+
             t += dt
 
             # rho_new = rho_old + liouvillian(rho, h0, c_ops) * 2. * dt
@@ -1107,7 +1648,7 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
             # rho = rho_new
 
             rho = rk4(rho, liouvillian, dt, H, c_ops)
-            
+
             # dipole-dipole auto-corrlation function
             #cor = np.trace(np.matmul(d, rho))
 
@@ -1136,10 +1677,10 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
             rho = rk4(rho, liouvillian, dt, H, c_ops)
 
             rholist.append(rho.copy())
-            
-            
+
+
             observables[k, :] = [obs_dm(rho, op) for op in e_ops]
-            
+
 
         result.observables = observables
         result.rholist = rholist
@@ -1147,12 +1688,12 @@ def _lindblad(H, rho0, c_ops, e_ops=None, Nt=1, dt=0.005, return_result=True):
         return result
 
 
-def _lindblad_driven(H, rho0, c_ops=None, e_ops=None, Nt=1, dt=0.005, t0=0., 
+def _lindblad_driven(H, rho0, c_ops=None, e_ops=None, Nt=1, dt=0.005, t0=0.,
                      return_result=True):
 
     """
-    time propagation of the lindblad quantum master equation with time-dependent Hamiltonian 
-    H = H0 - f(t) * H1 - ...
+    time propagation of the lindblad quantum master equation with time-dependent Hamiltonian
+    H = H0 + f(t) * H1 - ...
 
     Input
     -------
@@ -1174,28 +1715,28 @@ def _lindblad_driven(H, rho0, c_ops=None, e_ops=None, Nt=1, dt=0.005, t0=0.,
     """
 
     def calculateH(t):
-        
+
         Ht = H[0]
-    
+
         for i in range(1, len(H)):
-            Ht += + H[i][1](t) * H[i][0]
-        
+            Ht += - H[i][1](t) * H[i][0]
+
         return Ht
 
     nstates = H[0].shape[-1]
-    
+
     if c_ops is None:
-        c_ops = [] 
+        c_ops = []
     if e_ops is None:
         e_ops = []
-        
-    
+
+
     # initialize the density matrix
     rho = rho0.copy()
     rho = rho.astype(complex)
-    
 
-    
+
+
     t = t0
 
     if return_result == False:
@@ -1209,11 +1750,11 @@ def _lindblad_driven(H, rho0, c_ops=None, e_ops=None, Nt=1, dt=0.005, t0=0.,
         for k in range(Nt):
 
             t += dt
-            
+
             Ht = calculateH(t)
-            
+
             rho = rk4(rho, liouvillian, dt, Ht, c_ops)
-            
+
             # dipole-dipole auto-corrlation function
             #cor = np.trace(np.matmul(d, rho))
 
@@ -1243,21 +1784,21 @@ def _lindblad_driven(H, rho0, c_ops=None, e_ops=None, Nt=1, dt=0.005, t0=0.,
         for k in range(Nt):
 
             t += dt
-            
+
             Ht = calculateH(t)
-            
+
             rho = rk4(rho, liouvillian, dt, Ht, c_ops)
 
             rholist.append(rho.copy())
-            
+
             observables[k, :] = [obs_dm(rho, op) for op in e_ops]
-            
+
 
         result.observables = observables
         result.rholist = rholist
 
         return result
-    
+
 def _heom_dl(H, rho0, c_ops, e_ops, temperature, cutoff, reorganization,\
              nado, dt, nt, fname=None, return_result=True):
     '''
@@ -1323,12 +1864,43 @@ def _heom_dl(H, rho0, c_ops, e_ops, temperature, cutoff, reorganization,\
     f.close()
     return ado[:,:,0]
 
+def test_lindblad():
+    mesolver = Lindblad_solver(H, c_ops=[sz.astype(complex)])
+    Nt = 800
+    dt = 0.5
+
+    import time
+    start_time = time.time()
+    # L = mesolver.liouvillian()
+    t0=-10/au2fs
+    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, e_ops = [H1], return_result=True, t0=t0)
+    #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
+
+    # print(result.observables)
+    import proplot as plt
+    fig, ax = plt.subplots()
+    times = np.arange(Nt) * dt + t0
+    ax.plot(times, result.observables[:,0])
+    ax.format(ylabel='Coherence')
+
+    print('Execution time = {} s'.format(time.time() - start_time))
+
+    fig, ax = plt.subplots()
+    ax.plot(times, pulse.field(times))
+    ax.set_ylabel('E(t)')
+    return
+
+
 if __name__ == '__main__':
+
 
     from lime.phys import pauli
     from lime.optics import Pulse
     from lime.units import au2ev
-    
+
+    import time
+    start_time = time.time()
+
     s0, sx, sy, sz = pauli()
 
     # set up the molecule
@@ -1337,36 +1909,33 @@ if __name__ == '__main__':
 
     # def coeff1(t):
     #     return np.exp(-t**2)*np.cos(1./au2ev * t)
-    
-    pulse = Pulse(0, 2/au2fs, 1./au2ev, amplitude=0.05)
 
-    
-    # H = [H0, [H1, pulse.field]]
+    pulse = Pulse(tau=2/au2fs, omegac=1./au2ev, delay=0, amplitude=0.05)
+
+
+    # H = [H0.astype(complex), [H1.astype(complex), pulse.field]]
     H = H0.astype(complex)
-    
+
     psi0 = basis(2, 0)
     rho0 = ket2dm(psi0).astype(complex)
 
-    mesolver = Lindblad_solver(H, c_ops=[sz.astype(complex)])
-    Nt = 2000
-    dt = 0.08
-    
-    import time 
-    start_time = time.time()
-    # L = mesolver.liouvillian()
-    t0=-10/au2fs
-    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, e_ops = [H1], return_result=True, t0=t0)
+    mesolver = Redfield_solver(H, c_ops=[sz.astype(complex)])
+    Nt = 800
+    dt = 0.5
+
+
+    result = mesolver.evolve(rho0, dt=dt, Nt=Nt, e_ops = [H1])
     #corr = mesolver.correlation_3op_2t(rho0, [sz, sz, sz], dt, Nt, Ntau=Nt)
 
     # print(result.observables)
-    from lime.style import subplots
-    fig, ax = subplots()
-    times = np.arange(Nt) * dt + t0
+    import proplot as plt
+    fig, ax = plt.subplots()
+    times = np.arange(Nt) * dt
     ax.plot(times, result.observables[:,0])
+    ax.format(ylabel='Coherence')
 
     print('Execution time = {} s'.format(time.time() - start_time))
 
-    fig, ax = subplots()
-    ax.plot(times, pulse.field(times))
-    ax.set_ylabel('E(t)')
-    
+    # fig, ax = plt.subplots()
+    # ax.plot(times, pulse.field(times))
+    # ax.set_ylabel('E(t)')
