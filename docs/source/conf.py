@@ -20,7 +20,7 @@ sys.path.append('/Users/bing/Google Drive/My Drive/lime')
 
 # -- Project information -----------------------------------------------------
 
-project = 'lime'
+project = 'LIME'
 copyright = '2021, Bing Gu'
 author = 'Bing Gu'
 
