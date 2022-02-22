@@ -1,5 +1,7 @@
 
 *.gz
 *.aux
-*.aux
+*.npz
+*.out
+*.log
 docs/manual.synctex.gz
