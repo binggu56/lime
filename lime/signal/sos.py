@@ -1,10 +1,12 @@
-'''
+# -*- coding: utf-8 -*-
+"""
 Sum over system eigenstates formula for computing the nonlinear signals.
 
 This is the simpliest method for nonlinear signals without going to
 the Liouville space.
 
-'''
+@Author: Bing Gu (binggu56 at gmail dot com)
+"""
 
 import numpy as np
 import proplot as plt
@@ -15,12 +17,69 @@ from matplotlib import cm
 
 from numpy import conj
 
-from lime.phys import lorentzian, isdiag
+from lime.phys import lorentzian, isdiag, dag
 from lime.fft import fft2
 from lime.units import au2ev, au2mev
 
 from lime.style import subplots
 
+
+def polarizability(w, Er, Ev, d, use_rwa=False):
+    """
+    Calculate the vibrational and electronic polarizability using SOS expansion.
+
+    \alpha_{ji}(w) =  \frac{d_{jv} d_{vi}}{w_{vi} - w - i \Gamma_{vi}}
+
+    Parameters
+    ----------
+    w : TYPE
+        DESCRIPTION.
+    Er : vec
+        energies of "real" states.
+    Ev : TYPE
+        eigenenergies of virtual states.
+    d : 2d array
+        dipole matrix elements between virtual and real states.
+    use_rwa : TYPE, optional
+        DESCRIPTION. The default is False.
+
+    Raises
+    ------
+    ValueError
+        DESCRIPTION.
+
+    Returns
+    -------
+    a : TYPE
+        DESCRIPTION.
+
+    """
+
+
+    ne = len(Er) # number of valence excited states
+    nv = len(Ev) # number of virtual states
+
+    if d.shape != (nv, ne):
+        raise ValueError('Shape of dipole matrix does not match the number of real\
+                    and virtual states.')
+
+    # a = np.zeros((ne, ne), dtype=complex)
+    dE = Ev[:, np.newaxis] - Er - w
+
+    assert dE.shape == d.shape
+
+    # for i in range(ne):
+    #     for j in range(i):
+
+            # for v in range(nv):
+                # a[j, i] += d[j, v] * d[v, i]/((Ev[v] - Er[i]) )
+
+            # a[i,j] = conj(a[j, i])
+
+    a = dag(d).dot(d/dE)
+
+
+    return a
 
 
 def absorption(mol, omegas, plt_signal=False, fname=None, normalize=False, scale=1., yscale=None):
@@ -69,10 +128,15 @@ def absorption(mol, omegas, plt_signal=False, fname=None, normalize=False, scale
 
     if plt_signal:
 
-        fig, ax = plt.subplots(figsize=(4,3))
+        plt.rc.update(grid=False)
+        plt.rc['figure.facecolor'] ='white'
+        plt.rc['savefig.transparent'] = True
+
+        fig, ax = plt.subplots(figsize=(6,4))
 
         ax.plot(omegas * au2ev, signal)
 
+        # stick spectrum
         for j, e in enumerate(eigenergies):
             ax.axvline(e * au2ev, 0., abs(edip[0, j])**2 * scale, color='grey')
 
@@ -1202,16 +1266,17 @@ def test_etpa():
     plt.show()
     return
 
-def cars(E, edip, shift, omega1, t2=0, gamma=10/au2mev):
+def cars(E, edip, shift, omega1, t2=0, gamma=10/au2mev, pulse4=None):
     '''
-    two pump pulses followed by a stimulated raman probe.
+    two pump pulses followed by a stimulated Raman probe.
 
-    The first, second, and fourth pulses are assumed impulse,
+    The first and second pulses are assumed impulse,
     the thrid pulse is cw.
+    The fourth Stokes beam can be set to Gaussian.
 
 
     S = \sum_{b,a = e} 2 * pi * delta(Eshift - omega_{ba}) * mu_{bg} *
-        mu_{ag} * alpha_{ba}
+        mu_{ag} * alpha_{ba} * E_4^*(omega)
 
     Parameters
     ----------
@@ -1223,6 +1288,8 @@ def cars(E, edip, shift, omega1, t2=0, gamma=10/au2mev):
         time decay between pulses 1 and 2
     t2 : TYPE, optional
         time delay between pulse 2 and 4 (stokes beam). The default is 0.
+    pulse4: obj of Pulse
+        The (anti)Stokes pulse.
 
     Returns
     -------
@@ -1234,8 +1301,17 @@ def cars(E, edip, shift, omega1, t2=0, gamma=10/au2mev):
     N = len(E)
     g = 0
     S = 0
-    alpha = np.ones((N, N))
-    np.fill_diagonal(alpha, 0)
+
+    # polarizability
+    alpha = np.zeros((N, N))
+
+    for j in range(0, N-1):
+        alpha[j, j+1] = 1.
+
+    for j in range(1, N):
+        alpha[j, j-1] = 1.
+
+    alpha[2, 1] = alpha[1, 2] = 500
 
     for a in range(1, N):
         for b in range(1, N):
@@ -1311,7 +1387,15 @@ def test_model():
 
     return mol
 
+def test_polarizability():
+    Er = np.array([0.])
+    Ev = np.array([2, 3])
+    d = np.zeros((2, 1))
+    d[0, 0] = d[1, 0] = 1.
 
+    a = polarizability(1, Er, Ev, d)
+    print(a)
+    return
 
 if __name__ == '__main__':
 
@@ -1348,5 +1432,6 @@ if __name__ == '__main__':
 
     # photon_echo(mol, pump, probe, t2=1e-3, g_idx=g_idx, e_idx=e_idx, f_idx=f_idx, plt_signal=True)
 
-    photon_echo_t3(mol, omega1=pump, omega2=probe, t3=1e-3, g_idx=g_idx)
+    # photon_echo_t3(mol, omega1=pump, omega2=probe, t3=1e-3, g_idx=g_idx)
 
+    test_polarizability()
