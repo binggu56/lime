@@ -2,3 +2,9 @@
 *.gz
 *.aux
 *.aux
+docs/manual.aux
+.DS_Store
+docs/manual.aux
+*.log
+docs/manual.out
+lime/__pycache__/phys.cpython-37.pyc
