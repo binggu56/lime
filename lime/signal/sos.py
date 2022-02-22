@@ -15,13 +15,48 @@ from matplotlib import cm
 
 from numpy import conj
 
-from lime.phys import lorentzian, isdiag
+from lime.phys import lorentzian, isdiag, dag
 from lime.fft import fft2
 from lime.units import au2ev, au2mev
 
 from lime.style import subplots
 
+def polarizability(w, Er, Ev, d, use_rwa=True):
+    """
+    Compute the vibrational/electronic polarizability using sum-over-states formula
 
+    \alpha_{ji}(w) = d_{jv} d_{vi}/(E_v - E_i - w)
+
+    Parameters
+    ----------
+    w : TYPE
+        DESCRIPTION.
+    Er : TYPE
+        DESCRIPTION.
+    Ev : TYPE
+        DESCRIPTION.
+    d : TYPE
+        DESCRIPTION.
+    use_rwa : TYPE, optional
+        DESCRIPTION. The default is True.
+
+    Returns
+    -------
+    a : TYPE
+        DESCRIPTION.
+
+    """
+    ne = len(Er)
+    nv = len(Ev)
+
+    assert d.shape == (nv, ne)
+
+    # denominator
+    dE = Ev[:, np.newaxis] - Er - w
+
+    a = dag(d).dot(d/dE)
+
+    return a
 
 def absorption(mol, omegas, plt_signal=False, fname=None, normalize=False, scale=1., yscale=None):
     '''
