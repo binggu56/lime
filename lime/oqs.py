@@ -20,7 +20,7 @@ from scipy.sparse import csr_matrix, issparse, identity
 import scipy.sparse.linalg as la
 from scipy.integrate import solve_ivp
 # from scipy.sparse.linalg import eigs
-
+# import opt_einsum as oe
 
 from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
     obs_dm, destroy, rk4, basis, transform, isherm, expm
@@ -166,7 +166,7 @@ class Redfield_solver:
             return getG(1j * self.R, t)
 
 
-    def propagator(self, t, method):
+    def propagator(self, t, method='SOS'):
         """
         compute the Liouville-space propagator with Redfield dissipation
 
@@ -208,14 +208,15 @@ class Redfield_solver:
 
             self.U = np.dstack(U)
 
-        elif method == 'eseries':
+        elif method in ['eseries', 'SOS']:
 
             evals1, U1 = eig(self.R.toarray())
 
             U2 = scipy.linalg.inv(U1)
 
             E = np.exp(evals1[:,np.newaxis] * t[np.newaxis,:])
-            self.U =  np.einsum('aj, jk, jb -> abk', U1, E, U2)
+            # self.U =  np.einsum('aj, jk, jb -> abk', U1, E, U2)
+            self.U =  oe.contract('aj, jk, jb -> abk', U1, E, U2)
 
         self.G = -1j * self.U
 
@@ -316,8 +317,6 @@ class Redfield_solver:
             if issparse(_):
                 _ = _.toarray()
 
-        # a, b, c, d = oplist
-
 
         # nmax = max(len(tau3), len(tau2), len(tau1))
 
@@ -348,9 +347,10 @@ class Redfield_solver:
 
         tmp = np.tensordot(G, rho, axes=((1), (0)))
         tmp = c.dot(tmp)
-
-
         tmp = np.tensordot(G, tmp, axes=([1], [0])) # ajk
+
+        # tmp = np.einsum('dcj, ca, abk, b -> djk', G, c, G, rho)
+
 
         '''
         Scipy sparse matrix does not support dimensions more than 2, so
@@ -363,7 +363,7 @@ class Redfield_solver:
 
         tmp = np.tensordot(G, tmp, axes=([1], [0]))
 
-        return np.einsum('a, ab, bijk -> ijk', idm, a.todense(), tmp)
+        return oe.contract('a, ab, bijk -> ijk', idm, a.todense(), tmp)
 
         # corr = np.einsum('a, ab, bck, bc, cdj, de, efi, f ->kji', idm, \
         #                  left(a), G, left(b), left(c), G, left(d).dot(dm2vec(rho0))

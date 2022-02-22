@@ -22,7 +22,7 @@ from numba import jit
 
 from numpy import exp
 
-from lime.phys import dag, pauli
+from lime.phys import dag, pauli, sort
 from lime.mol import Result
 # from qutip import Qobj as Basic
 
@@ -175,12 +175,12 @@ def op2sop(a, kind='commutator'):
 
 def to_super(a, kind='commutator'):
     return operator_to_superoperator(a, kind=kind)
-  
+
 def vec2mat_index(N, I):
     """
     Convert a vector index to a matrix index pair that is compatible with the
     vector to matrix rearrangement done by the vec2mat function.
-    
+
     From Qutip.
     """
     j = int(I / N)
@@ -192,10 +192,10 @@ def mat2vec_index(N, i, j):
     """
     Convert a matrix index pair to a vector index that is compatible with the
     matrix to vector rearrangement done by the mat2vec function.
-    
+
     From Qutip.
     """
-    
+
     return i + N * j
 
 def operator_to_superoperator(a, kind='commutator'):
@@ -245,7 +245,7 @@ def operator_to_superoperator(a, kind='commutator'):
     else:
 
         raise ValueError('Error: superoperator {} does not exist.'.format(kind))
-        
+
 
 def lindblad_dissipator(l):
     return kron(l, l.conj()) - 0.5 *\
@@ -359,14 +359,7 @@ def _correlation_2p_1t(omegas, rho0, ops, L):
 
     return cor
 
-def sort(eigvals, eigvecs):
 
-    idx = np.argsort(eigvals)
-
-    eigvals = eigvals[idx]
-    eigvecs = eigvecs[:,idx]
-
-    return eigvals, eigvecs
 
 def cdot(a, b):
     """
