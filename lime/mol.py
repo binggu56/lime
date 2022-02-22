@@ -586,7 +586,7 @@ class Mol:
 
         else:
 
-            fig, ax = plt.subplots(figsize=(8,4))
+            fig, ax = plt.subplots()
 
             ax.contourf(shift*au2wavenumber, omega1*au2ev, S.imag.T, lw=0.6,\
                         cmap='spectral')
@@ -834,9 +834,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
         psilist = [psi0.copy()]
 
         # compute observables for t0
-        print(psi.shape, e_ops[0].shape)
-
-        observables[0, :] = [obs(psi.toarray(), e_op) for e_op in e_ops]
+        observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
 
         for k1 in range(1, Nt // nout):
 
@@ -846,7 +844,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
             t += dt * nout
 
             # compute observables
-            observables[k1, :] = [obs(psi.toarray(), e_op) for e_op in e_ops]
+            observables[k1, :] = [obs(psi, e_op) for e_op in e_ops]
 
             # f_obs.write(fmt.format(t, *e_list))
 

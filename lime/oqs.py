@@ -20,7 +20,7 @@ from scipy.sparse import csr_matrix, issparse, identity
 import scipy.sparse.linalg as la
 from scipy.integrate import solve_ivp
 # from scipy.sparse.linalg import eigs
-# import opt_einsum as oe
+import opt_einsum as oe
 
 from lime.phys import anticommutator, comm, commutator, anticomm, dag, ket2dm, \
     obs_dm, destroy, rk4, basis, transform, isherm, expm

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lime.polariton package &mdash; LIME 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="setup module" href="setup.html" />
+    <link rel="prev" title="lime package" href="lime.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> LIME
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">lime</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="lime.html">lime package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="lime.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">lime.polariton package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-etpa-module">lime.ETPA module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.Floquet">lime.Floquet module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.FranckCondon">lime.FranckCondon module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-backup-module">lime.backup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-cavity-module">lime.cavity module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.common">lime.common module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.correlation">lime.correlation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.fft">lime.fft module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-liouville-module">lime.liouville module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-mol-module">lime.mol module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.noise">lime.noise module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-optics-module">lime.optics module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-oqs-module">lime.oqs module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.phys">lime.phys module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-qnm-module">lime.qnm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.spin_boson">lime.spin_boson module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.style">lime.style module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.superoperator">lime.superoperator module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.susceptibility">lime.susceptibility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.units">lime.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#lime-wigner-module">lime.wigner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime.wpd">lime.wpd module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lime.html#module-lime">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html">setup module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LIME</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">lime</a> &raquo;</li>
+          <li><a href="lime.html">lime package</a> &raquo;</li>
+      <li>lime.polariton package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/lime.polariton.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lime-polariton-package">
+<h1>lime.polariton package<a class="headerlink" href="#lime-polariton-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-lime.polariton.cavity">
+<span id="lime-polariton-cavity-module"></span><h2>lime.polariton.cavity module<a class="headerlink" href="#module-lime.polariton.cavity" title="Permalink to this headline"></a></h2>
+<p>Created on Tue Mar 26 17:26:02 2019</p>
+<p>&#64;author: binggu</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Cavity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">Cavity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cav</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Cavity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Cavity.get_annihilate">
+<span class="sig-name descname"><span class="pre">get_annihilate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Cavity.get_annihilate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Cavity.get_create">
+<span class="sig-name descname"><span class="pre">get_create</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Cavity.get_create" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Cavity.get_dm">
+<span class="sig-name descname"><span class="pre">get_dm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Cavity.get_dm" title="Permalink to this definition"></a></dt>
+<dd><p>get initial density matrix for cavity</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Cavity.get_ham">
+<span class="sig-name descname"><span class="pre">get_ham</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zpe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Cavity.get_ham" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Cavity.get_num">
+<span class="sig-name descname"><span class="pre">get_num</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Cavity.get_num" title="Permalink to this definition"></a></dt>
+<dd><p>number operator</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Mol">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">Mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Mol" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Mol.get_dip">
+<span class="sig-name descname"><span class="pre">get_dip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Mol.get_dip" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Mol.get_dm">
+<span class="sig-name descname"><span class="pre">get_dm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Mol.get_dm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Mol.get_ham">
+<span class="sig-name descname"><span class="pre">get_ham</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Mol.get_ham" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Mol.set_dip">
+<span class="sig-name descname"><span class="pre">set_dip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Mol.set_dip" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Mol.set_dipole">
+<span class="sig-name descname"><span class="pre">set_dipole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Mol.set_dipole" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">Polariton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cav</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton.get_cav_leak">
+<span class="sig-name descname"><span class="pre">get_cav_leak</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton.get_cav_leak" title="Permalink to this definition"></a></dt>
+<dd><p>damp operator for the cavity mode</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton.get_dip">
+<span class="sig-name descname"><span class="pre">get_dip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton.get_dip" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton.get_dm">
+<span class="sig-name descname"><span class="pre">get_dm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton.get_dm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton.get_ham">
+<span class="sig-name descname"><span class="pre">get_ham</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RWA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton.get_ham" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton.rdm_photon">
+<span class="sig-name descname"><span class="pre">rdm_photon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton.rdm_photon" title="Permalink to this definition"></a></dt>
+<dd><p>return the reduced density matrix for the photons</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Polariton.spectrum">
+<span class="sig-name descname"><span class="pre">spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nstates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RWA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Polariton.spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>compute the polaritonic spectrum</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Pulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">Pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omegac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Pulse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Pulse.envelop">
+<span class="sig-name descname"><span class="pre">envelop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Pulse.envelop" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Pulse.field">
+<span class="sig-name descname"><span class="pre">field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Pulse.field" title="Permalink to this definition"></a></dt>
+<dd><p>electric field</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.polariton.cavity.Pulse.spectrum">
+<span class="sig-name descname"><span class="pre">spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.Pulse.spectrum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.anticomm">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">anticomm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.anticomm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.comm">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">comm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.comm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.coth">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">coth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.coth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.dag">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">dag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.dag" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.fft">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">fft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.00204082,</span> <span class="pre">0.00408163,</span> <span class="pre">0.00612245,</span> <span class="pre">0.00816327,</span> <span class="pre">0.01020408,</span> <span class="pre">0.0122449,</span> <span class="pre">0.01428571,</span> <span class="pre">0.01632653,</span> <span class="pre">0.01836735,</span> <span class="pre">0.02040816,</span> <span class="pre">0.02244898,</span> <span class="pre">0.0244898,</span> <span class="pre">0.02653061,</span> <span class="pre">0.02857143,</span> <span class="pre">0.03061224,</span> <span class="pre">0.03265306,</span> <span class="pre">0.03469388,</span> <span class="pre">0.03673469,</span> <span class="pre">0.03877551,</span> <span class="pre">0.04081633,</span> <span class="pre">0.04285714,</span> <span class="pre">0.04489796,</span> <span class="pre">0.04693878,</span> <span class="pre">0.04897959,</span> <span class="pre">0.05102041,</span> <span class="pre">0.05306122,</span> <span class="pre">0.05510204,</span> <span class="pre">0.05714286,</span> <span class="pre">0.05918367,</span> <span class="pre">0.06122449,</span> <span class="pre">0.06326531,</span> <span class="pre">0.06530612,</span> <span class="pre">0.06734694,</span> <span class="pre">0.06938776,</span> <span class="pre">0.07142857,</span> <span class="pre">0.07346939,</span> <span class="pre">0.0755102,</span> <span class="pre">0.07755102,</span> <span class="pre">0.07959184,</span> <span class="pre">0.08163265,</span> <span class="pre">0.08367347,</span> <span class="pre">0.08571429,</span> <span class="pre">0.0877551,</span> <span class="pre">0.08979592,</span> <span class="pre">0.09183673,</span> <span class="pre">0.09387755,</span> <span class="pre">0.09591837,</span> <span class="pre">0.09795918,</span> <span class="pre">0.1])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.fft" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.ham_ho">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">ham_ho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ZPE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.ham_ho" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>input:</dt><dd><p>freq: fundemental frequency in units of Energy
+n : size of matrix</p>
+</dd>
+<dt>output:</dt><dd><p>h: hamiltonian of the harmonic oscilator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.ket2dm">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">ket2dm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.ket2dm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.obs">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.obs" title="Permalink to this definition"></a></dt>
+<dd><p>compute observables</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.polariton.cavity.rk4_step">
+<span class="sig-prename descclassname"><span class="pre">lime.polariton.cavity.</span></span><span class="sig-name descname"><span class="pre">rk4_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.polariton.cavity.rk4_step" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-lime.polariton">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-lime.polariton" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lime.html" class="btn btn-neutral float-left" title="lime package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="setup.html" class="btn btn-neutral float-right" title="setup module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bing Gu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

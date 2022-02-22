@@ -12,14 +12,6 @@ import sys
 
 from lime.units import au2fs, au2ev
 
-def sort(eigvals, eigvecs):
-
-    idx = np.argsort(eigvals)
-
-    eigvals = eigvals[idx]
-    eigvecs = eigvecs[:,idx]
-
-    return eigvals, eigvecs
 
 def coh_op(j, i, d):
     """
@@ -100,7 +92,7 @@ def tensor(*args):
         if n == 0:
             out = q
         else:
-            out = sp.kron(out, q)
+            out = sp.kron(out, q, format='csr')
 
     return out
 
@@ -570,7 +562,7 @@ def pauli():
 
     for _ in [s0, sx, sy, sz]:
         _ = csr_matrix(_)
-
+        
     return s0, sx, sy, sz
 
 
@@ -648,7 +640,6 @@ def obs(psi, a):
         Expectation of operator a.
 
     """
-
     return dag(psi).dot(a.dot(psi))
 
 def resolvent(omega, Ulist, dt):
@@ -1106,12 +1097,12 @@ def expm(A, t, method='EOM'):
             U = rk4(U, ldo, dt, A)
 
         return Ulist
-
+    
     elif method == 'SOS':
-
+        
         raise NotImplementedError('Method of {} has not been implemented.\
                                   Choose from EOM'.format(method))
-
+                                  
 
 def ldo(b, A):
     '''
