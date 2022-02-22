@@ -7,4 +7,4 @@ docs/manual.aux
 docs/manual.aux
 *.log
 docs/manual.out
-lime/__pycache__/phys.cpython-37.pyc
+*.pyc
