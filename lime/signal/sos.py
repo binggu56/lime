@@ -21,6 +21,7 @@ from lime.units import au2ev, au2mev
 
 from lime.style import subplots
 
+
 def polarizability(w, Er, Ev, d, use_rwa=True):
     """
     Compute the vibrational/electronic polarizability using sum-over-states formula
@@ -32,9 +33,9 @@ def polarizability(w, Er, Ev, d, use_rwa=True):
     w : TYPE
         DESCRIPTION.
     Er : TYPE
-        DESCRIPTION.
+        eigenenergies of resonant states.
     Ev : TYPE
-        DESCRIPTION.
+        eigenenergies of virtual states.
     d : TYPE
         DESCRIPTION.
     use_rwa : TYPE, optional
@@ -57,6 +58,7 @@ def polarizability(w, Er, Ev, d, use_rwa=True):
     a = dag(d).dot(d/dE)
 
     return a
+
 
 def absorption(mol, omegas, plt_signal=False, fname=None, normalize=False, scale=1., yscale=None):
     '''
