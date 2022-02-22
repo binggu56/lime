@@ -117,6 +117,31 @@
 % bibliography, glossary and index would go here.
 \chapter{Electrodynamics}
 
+\subsection{Gaussian pulse}
+The electric field of a Gaussian pulse reads 
+\be E(t) = \mc{E}(t) + \text{c.c.}, \ee 
+and 
+\be \mc{E}(t)  = \half A e^{-t^2/\tau_\text{p}^2} e^{-i\omega (t-t_0) - i \phi} = A e^{-t^2/\tau_\text{p}^2} \cos\del{\omega (t-t_0) + \phi}
+\ee 
+is the positive frequency component. (is it?, it's approximately true when the bandwidth is much smaller than the center frequency.)
+The positive frequency part should be defined as 
+\be 
+E^\pos(t) = \int_0^\infty \dif \omega E(\omega) e^{-i\omega t} 
+\ee 
+Due to reality of the electric field, 
+\be 
+E^*(\omega) = E(-\omega).
+\ee 
+\be 
+\mc{E}_4(t) = A_4 e^{-(t/T)^2} e^{-i\omega_4 t}
+\ee 
+with spectral profile 
+\be 
+{E}(\omega) = A\frac{\sqrt{\pi}\tau}{2} \del{ e^{- {(\omega - \omega_0)^2\tau^2/4}} + e^{- {(\omega + \omega_0)^2\tau^2/4}}}
+\ee 
+
+The bandwidth $\sigma = 2\hbar/\tau$.  
+
 
 \section{Plasmon }
 
