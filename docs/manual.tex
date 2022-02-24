@@ -2,6 +2,121 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{amsmath,dsfont}
+\usepackage{bm}
+\usepackage{braket}
+\usepackage{hyperref, xcolor}
+\usepackage{units}
+%\usepackage{unicode-math}
+
+
+\newcommand{\be}{\begin{equation}}
+	\newcommand{\intf}{\int_{-\infty}^{+\infty}}
+	\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+	\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\grad}{\nabla}
+
+\newcommand{\bk}{{\bf k}}
+\newcommand{\ba}{\begin{array}}
+	\newcommand{\ea}{\end{array}}
+\newcommand{\nin}{\noindent}
+\newcommand{\se}{Schr\"{o}dinger equation}
+\newcommand{\bl}{\begin{flalign}}
+	\newcommand{\enl}{\end{flalign}}
+\newcommand{\bx}{{\bf x}}
+\newcommand{\bv}{{\bf v}}
+\newcommand{\pa}{\partial}
+\newcommand{\im}{\imath}
+\newcommand{\tdse}{time-dependent Schr\"{o}dinger equation\ }
+\newcommand{\zpe}{zero-point energy\ }
+%\renewcommand \thesection{\Roman{section}}
+\newcommand{\dirac}[1]{\bra{#1}\ket}
+\newcommand{\qm}{quantum mechanical}
+\newcommand{\QM}{Quantum Mechanical}
+\newcommand{\pat}{\frac{d }{dt}}
+\newcommand{\ih}{i \hbar}
+\newcommand{\ioh}{i/\hbar}
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\pp}[1]{\frac{\paritial}{\partial #1}}
+\renewcommand{\div}{\bm \grad \cdot}
+\newcommand{\curl}{\bm \grad \times}
+
+
+
+\newcommand{\me}{\mathcal{E}}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\eq}[1]{Eq.~\eqref{#1}}
+\newcommand{\Eq}[1]{Equation~\eqref{#1}}
+\newcommand{\fig}[1]{Fig.~\ref{#1}}
+\newcommand{\Fig}[1]{Figure~\ref{#1}}
+\renewcommand{\sec}[1]{Sec.~\ref{#1}}
+\newcommand{\Sec}[1]{Section~\ref{#1}}
+\newcommand{\tord}{\mathcal{T}}
+\newcommand{\tordc}{\mathcal{T}_\gamma}
+\newcommand{\intc}{\int_\gamma}
+
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\renewcommand{\bf}{\mathbf}
+\newcommand{\mc}{\mathcal}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+\renewcommand{\t}[1]{\text{#1}}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+%\SectionNumbersOn
+%\newcommand{\si}{Supporting Information}
+\newcommand{\tr}{\text{Tr}}
+\newcommand{\proj}[1]{\ket{#1}\bra{#1}}
+\newcommand{\bs}{\begin{split}}
+	\newcommand{\es}{\end{split}}
+
+
+\newcommand{\inth}{\int_0^\infty}
+
+\makeatletter
+\newsavebox{\@brx}
+\newcommand{\llangle}[1][]{\savebox{\@brx}{\(\m@th{#1\langle}\)}%
+	\mathopen{\copy\@brx\kern-0.5\wd\@brx\usebox{\@brx}}}
+\newcommand{\rrangle}[1][]{\savebox{\@brx}{\(\m@th{#1\rangle}\)}%
+	\mathclose{\copy\@brx\kern-0.5\wd\@brx\usebox{\@brx}}}
+\makeatother
+
+
+\newcommand{\bbraket}[1]{\llangle #1 \rrangle}
+
+
+%\newcommand{\BBraket}[1]{\Braket{\Braket{#1}}}
+\newcommand{\kket}[1]{| #1\rrangle}
+\newcommand{\bbra}[1]{ \llangle #1 |}
+
+
+\renewcommand{\bf}{\mathbf}
+
+
+\newcommand{\dt}{\od{}{t}}
+\newcommand{\mol}{{(n)}}
+
+
+% units
+\newcommand{\eV}[1]{\SI{#1}{\electronvolt}}
+\newcommand{\meV}[1]{\SI{#1}{\milli\electronvolt}}
+\newcommand{\wavenumber}[1]{\SI{#1}{\per\centi\meter}}
+
+%\SectionNumbersOn
+
+\renewcommand{\mark}[1]{\underline{\textit{#1}}}
+
+
+\renewcommand{\neg}{{(-)}}
+\newcommand{\pos}{{(+)}}
+
+\newcommand{\tbd}{\colorbox{green}{To be done}}
+\newcommand{\FA}[1]{\textcolor{blue}{Francesco and Artur: #1}}
+
 \begin{document}
 
 \author{Bing Gu}
@@ -39,6 +154,18 @@ Split-operator method in the diabatic representation
 Mixed quantum-classical methods
 
 Surface-hopping method
+
+\subsection{Discrete Variable Representation}
+\subsubsection{Vibronic model}
+How do we diagonalize a vibronic Hamiltonian in adiabatic representation?
+\be H_\text{M} = T_\text{n} + H_\text{BO}(\bf R) \ee 
+
+The basis set is $\ket{\alpha(\bf R), \bf R}$ where $\alpha(\bf R)$ is the adiabatic electronic states. 
+
+to construct the Hamiltonian matrix elements 
+\be \braket{\beta(\bf R'), \bf R' | H | \alpha(\bf R), \bf R} = 
+\ee 
+
 \chapter{Quantum chemistry} 
 Quantum chemistry solves the electronic structure given the nuclear geometry. This has been an active field of research for many decades, and sophisticated programs like Gaussian, Qchem, Psi4, Pyscf, Molpro have been widely used in the scientific community. We will take advantage of these remarkable developments. On one hand, we will apply existing methods to interesting molecules and materials. On the other hand, we will develop new techniques based on these programs as well since many functions and modules such as Coulomb integrals are the same irrespective of what your method is.
 
