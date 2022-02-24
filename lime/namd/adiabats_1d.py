@@ -392,7 +392,7 @@ if __name__ == '__main__':
     
     start_time = time.time()
 
-    nstates = 2
+    nstates = 2 # number of electronic states
     
     mx = 1.0 # mass
     
@@ -416,7 +416,7 @@ if __name__ == '__main__':
     psi[:, 0] = gwp(x, a=1.0, x0=1.0, k0=2.0)
         
     print('Propagation starts ...\n')
-    fig, ax = plt.subplots()
+    # fig, ax = plt.subplots()
     
     # for j in range(Nt//nout):
     #     for i in range(nout):
