@@ -5,3 +5,6 @@
 *.out
 *.log
 *.npc
+*.pyc
+*.pyc
+.DS_Store
