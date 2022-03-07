@@ -20,8 +20,18 @@ au2angstrom = bohr2angstrom = 0.529177249 # Bohr to angstrom
 ev2nm = electronvolt2nanometer = 1239.84193
  # 1 eV = 1239.847 nm
 
-alpha = 0.0072973525693 # fine structure constant
+fine_structure = alpha = 0.0072973525693 # fine structure constant
 
 eps0 = epsilon_0 = 8.85418781762e-12 # Farad m^-1
 c0 = speed_of_light = 299792458.0 #m s^-1
 imp0 =  376.730313668 # impedence of free space, Ohm
+
+au2volt_per_meter = 5.14220826e11 # m^2 e^5/hbar^4
+
+au2watt_per_centimeter_squared = 3.50944758e16 
+au2watt_per_meter_squared = 3.50944758e20 
+
+class AtomicUnits:
+    def __init__(self):
+        self.ev = 27.2116
+        
