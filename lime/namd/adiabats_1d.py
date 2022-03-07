@@ -94,11 +94,10 @@ class NAMD:
 
         return psi_x
 
-    def propagate(self, dt, psi_x, Nsteps = 1):
+    def spo(self, dt, psi_x, Nsteps = 1):
 
         """
-        Perform a series of time-steps via the time-dependent
-        Schrodinger Equation.
+        solve the time-dependent Schrodinger Equation with split-operator method.
 
         Parameters
         ----------
@@ -171,6 +170,35 @@ class NAMD:
         return psi_x
 
     def evolve(self, psi0, dt=0.001, Nt=1,  t0=0., nout=1, coordinates='linear'):
+        """
+        Propagate the wavepacket dynamics
+
+        Parameters
+        ----------
+        psi0 : TYPE
+            DESCRIPTION.
+        dt : TYPE, optional
+            DESCRIPTION. The default is 0.001.
+        Nt : TYPE, optional
+            DESCRIPTION. The default is 1.
+        t0 : TYPE, optional
+            DESCRIPTION. The default is 0..
+        nout : TYPE, optional
+            DESCRIPTION. The default is 1.
+        coordinates : TYPE, optional
+            DESCRIPTION. The default is 'linear'.
+
+        Raises
+        ------
+        NotImplementedError
+            DESCRIPTION.
+
+        Returns
+        -------
+        psi : TYPE
+            DESCRIPTION.
+
+        """
         
         psi = psi0
         t = t0
@@ -406,7 +434,7 @@ if __name__ == '__main__':
 
     vmat = apes(x) # list of APESs
     
-    # setup the polaritonic surfaces
+    # setup the nonadiabatic couplings
     nac = get_nac(x)
     
     # kx = 2.0 * np.pi * scipy.fftpack.fftfreq(nx, dx)
