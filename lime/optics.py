@@ -11,15 +11,55 @@ from scipy.sparse import lil_matrix, csr_matrix, kron, identity, linalg
 from numpy import sqrt, exp, pi
 import matplotlib.pyplot as plt
 
-from lime.units import au2k, au2ev
+from lime.units import au2k, au2ev, alpha, au2watt_per_centimeter_squared
 from lime.fft import fft2
 from lime.phys import rect, sinc, dag, interval
 from lime.style import set_style, imshow
 
 from numba import jit
 
+def intensity_to_field(I):
+    """
+    transform intensity to electric field
+
+    E = \sqrt(\frac{2I}{c \epsilon_0})
+    
+    Parameters
+    ----------
+    I : TYPE
+        intensity, in units of W/m^2
+
+    Returns
+    -------
+    None.
+        electric field in atomic units
+
+    """
+    return np.sqrt(2.* I * 4. * np.pi/au2watt_per_centimeter_squared/alpha)
+    
+
+def std_to_fwhm(tau):
+    """
+    Transformation between standard deviation to FWHM for a Gaussian pulse
+
+    Parameters
+    ----------
+    tau : float
+        std
+
+    Returns
+    -------
+    float
+        FWHM.
+
+    """
+    return (2.* np.sqrt(2. * np.log(2.))) * tau 
+
+def fwhm_to_std(fwhm):
+    return fwhm/(2.* np.sqrt(2. * np.log(2.)))
+    
 class Pulse:
-    def __init__(self, tau, omegac, delay=0., amplitude=0.001, cep=0., beta=0):
+    def __init__(self, omegac, tau, delay=0., amplitude=0.001, cep=0., beta=0):
         """
         (linearly chirped) Gaussian pulse
 
@@ -35,6 +75,7 @@ class Pulse:
         self.delay = delay
 
         self.tau = tau
+        self._fwhm = tau * 2.3548200450309493 # from tau to fwhm 
         self.sigma = tau # for compatibility only
         self.omegac = omegac # central frequency
         self.unit = 'au'
@@ -48,7 +89,7 @@ class Pulse:
 
 
     def envelop(self, t):
-        return np.exp(-(t-self.delay)**2/2./self.tau**2)
+        return self.amplitude * np.exp(-(t-self.delay)**2/2./self.tau**2)
 
     def spectrum(self, omega):
         """
@@ -89,15 +130,14 @@ class Pulse:
         a = self.amplitude
         tau = self.sigma
         beta = self.beta
-#
-#        if beta is None:
-#            return a * np.exp(-(t-delay)**2/2./sigma**2)*np.cos(omegac * (t-delay))
-#        else:
+        
+        return a * np.exp(-(t-t0)**2/2./tau**2)*np.cos(omegac * (t-t0))
 
-        E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
-            * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
 
-        return E.real 
+        # E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
+        #     * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
+
+        # return E.real 
 
     def spectrogram(self, efield):
 
@@ -107,6 +147,71 @@ class Pulse:
         # w, ts, fs = wvd.run()
         return
 
+class ChirpedPulse(Pulse):
+    def __init__(self, omegac, tau, delay=0., amplitude=0.001, cep=0., beta=0):
+        """
+        (linearly chirped) Gaussian pulse
+
+        The positive frequency component reads
+
+        E = A/2 * exp(-(t-t0)^2/2/T^2) * exp[-i w (t-t0)(1 + beta (t-t0)/T)]
+
+        A: electric field amplitude
+        T: time delay
+        sigma: duration
+
+        """
+        self.delay = delay
+
+        self.tau = tau
+        self._fwhm = tau * 2.3548200450309493 # from tau to fwhm 
+        self.sigma = tau # for compatibility only
+        self.omegac = omegac # central frequency
+        self.unit = 'au'
+        self.amplitude = amplitude
+        self.cep = cep
+        self.bandwidth = 1./tau
+        self.duration = 2. * tau 
+        self.beta = beta  # linear chirping rate, dimensionless
+        self.ndim = 1
+
+    def efield(self, t):
+        """
+
+        Parameters
+        ----------
+        t : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        electric field at time t.
+
+        """
+        omegac = self.omegac
+        t0 = self.delay
+        a = self.amplitude
+        tau = self.sigma
+        beta = self.beta
+#
+#        if beta is None:
+#            return a * np.exp(-(t-delay)**2/2./sigma**2)*np.cos(omegac * (t-delay))
+#        else:
+
+        E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
+            * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
+
+        return E.real 
+    
+    # def set_fwhm(self, fwhm):
+    #     self.tau = fwhm/(2.* np.sqrt(2. * np.log(2.)))
+    #     return
+
+    # @property
+    # def fwhm(self):
+    #     return self._fwhm
+        
+        
 # def heaviside(x):
 #     """
 #     Heaviside function defined in a grid.
