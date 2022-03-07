@@ -29,6 +29,49 @@ from lime.phys import dag, quantum_dynamics, \
 from lime.units import au2wavenumber
 
 
+def read_input(fname_e, fname_edip,  g_included=True):
+    """
+    Read input data from quantum chemistry output. 
+
+    Parameters
+    ----------
+    fname_e : str
+        filename for the energy levels.
+    fname_edip : list 
+        filenames for the electric dipole moment.
+    g_included : TYPE, optional
+        DESCRIPTION. The default is True.
+
+    Returns
+    -------
+    mol : TYPE
+        DESCRIPTION.
+
+    """
+    
+    E = np.genfromtxt(fname_e)
+    
+    if g_included:
+        nstates = len(E)
+    else:
+        E = np.insert(E, 0, 0)
+
+    nstates = len(E)
+    
+    # read electric dipole moment g-e 
+
+    edip = np.zeros((nstates, nstates, 3))
+
+    for k in range(3):
+        edip[:,:, k] = np.genfromtxt(fname_edip[k], unpack=False)
+
+
+    # H = np.diag(E)
+    # mol = Mol(H, edip)
+    # return mol
+    return E, edip
+
+
 class Result:
     def __init__(self, description=None, psi0=None, rho0=None, dt=None, \
                  Nt=None, times=None):
@@ -38,6 +81,7 @@ class Result:
         self.observables = None
         self.rholist = None
         self._psilist = None
+        self.psi = None
         self.rho0 = rho0
         self.psi0 = psi0
         self.times = np.arange(Nt) * dt
@@ -357,7 +401,7 @@ class Mol:
 
         return
 
-    def evolve(self, psi0, pulse=None, dt=0.001, Nt=1, obs_ops=None, nout=1, t0=0.0):
+    def evolve(self, psi0, dt=0.001, Nt=1, e_ops=None, nout=1, t0=0.0, pulse=None):
         '''
         quantum dynamics under time-independent hamiltonian
 
@@ -388,13 +432,17 @@ class Mol:
 
         if pulse is None:
             return quantum_dynamics(H, psi0, dt=dt, Nt=Nt, \
-                                    obs_ops=obs_ops, nout=nout, t0=t0)
+                                    obs_ops=e_ops, nout=nout, t0=t0)
         else:
 
             edip = self.edip
             return driven_dynamics(H, edip, psi0, pulse, dt=dt, Nt=Nt, \
-                                   e_ops=obs_ops, nout=nout, t0=t0)
+                                   e_ops=e_ops, nout=nout, t0=t0)
 
+    def run(self, psi0, dt=0.001, Nt=1, e_ops=None, nout=1, t0=0.0, pulse=None):
+        return self.evolve(psi0=psi0, pulse=pulse, dt=dt, Nt=Nt, e_ops=e_ops, nout=nout,\
+                           t0=t0)
+    
     # def heom(self, env, nado=5, c_ops=None, obs_ops=None, fname=None):
     #     nt = self.nt
     #     dt = self.dt
@@ -1005,9 +1053,11 @@ def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
 
         observables = np.zeros((Nt // nout, len(e_ops)), dtype=complex)
         psilist = [psi0.copy()]
+        psit = np.zeros((Nt//nout, len(psi0)), dtype=complex)
 
         # compute observables for t0
         observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
+        psit[0, :] = psi0
 
         for k1 in range(1, Nt // nout):
 
@@ -1023,10 +1073,11 @@ def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
             # f_obs.write(fmt.format(t, *e_list))
 
             psilist.append(psi.copy())
-
+            psit[k1, :] = psi 
         # f_obs.close()
 
         result.psilist = psilist
+        result.psi = psit
         result.observables = observables
 
         return result
