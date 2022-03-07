@@ -1,5 +1,7 @@
 from matplotlib import rc, ticker
 import matplotlib.pyplot as plt
+# import proplot as plt
+
 import matplotlib as mpl
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -261,6 +263,7 @@ def color_code(x, y, z, fig, ax, cbar=False):
 
     return line
 
+
 def level_scheme(E, ylim=None, fname=None):
     """
     plot the energy levels
@@ -274,10 +277,10 @@ def level_scheme(E, ylim=None, fname=None):
     """
     from matplotlib.lines import Line2D
 
-    fig, ax = plt.subplots(figsize=(2,4))
+    fig, ax = plt.subplots(figsize=(3,6))
     ax.set_frame_on(False)     # Alternate way to turn frame off
 
-    ax.hlines(E, xmin=0.0, xmax=0.1)
+    ax.hlines(y=E, xmin=0, xmax=0.1, lw=2)
     ax.set_ylabel('Energy (eV)')
     ax.set_ylim(ylim)
 
@@ -287,11 +290,13 @@ def level_scheme(E, ylim=None, fname=None):
     ymin, ymax = ax.get_yaxis().get_view_interval()
     ax.add_artist(Line2D((xmin, xmin), (ymin, ymax), color='black', linewidth=2))
 
+    fig.subplots_adjust(left=0.28, right=0.98)
     if fname is not None:
         fig.savefig(fname)
 
     plt.show()
     return ax
+
 
 def two_scales(x, yl, yr, xlabel=None, ylabels=None, xlim=None, yllim=None, yrlim=None,\
                yticks=None, fname='output.pdf'):
