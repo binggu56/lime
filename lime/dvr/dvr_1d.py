@@ -10,12 +10,13 @@ from matplotlib import pyplot as plt
 import numpy as np
 import scipy.sparse.linalg as sla
 import scipy.special.orthogonal as ortho
-import bessel
+# import bessel
 import warnings
 
 class DVR(object):
     def v(self, V):
-        """Return the potential matrix with the given potential.
+        """
+        Return the potential matrix with the given potential.
         Usage:
             v_matrix = self.v(V)
 
@@ -64,7 +65,7 @@ class DVR(object):
         if doshow: plt.show()
         return
 
-    def test_potential(self, V, num_eigs = 5, **kwargs):
+    def run(self, V, num_eigs = 5, **kwargs):
         h = self.h(V)
         # Get the eigenpairs
         # There are multiple options here.
@@ -139,7 +140,7 @@ class DVR(object):
         print('Testing 1-D DVR with an SHO potential')
         vF = VFactory()
         V = vF.sho(k=k)
-        self.test_potential(V, num_eigs=num_eigs,
+        self.run(V, num_eigs=num_eigs,
                             precision=precision,
                             xmin=xmin, xmax=xmax,
                             ymin=ymin, ymax=ymax)
@@ -200,7 +201,7 @@ class SincDVR(DVR):
     @method f return DVR basis vectors
     """
     def __init__(self, npts, L, x0=0.):
-        L = float(L)
+        # L = float(L)
         self.npts = npts
         self.L = L
         self.x0 = x0
@@ -653,7 +654,12 @@ class VFactory(object):
 
 
 if __name__ == '__main__':
-    # dvr = SincDVR(npts=200, L=14)
-    # dvr.sho_test(num_eigs=8)
+    dvr = SincDVR(npts=200, L=14)
+    x = dvr.x 
+    
+    def v(x):
+        return x**2
+    
+    dvr.run(v, num_eigs=8)
 
-    dvr = HermiteDVR(npts=20)
+    # dvr = HermiteDVR(npts=20)
