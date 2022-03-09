@@ -299,6 +299,8 @@ def plot3d():
 
     #data = [go.Surface(z=apes)]
     #fig = go.Figure(data = data)
+    import matplotlib.pyplot as plt 
+    
     fig = plt.figure(figsize=(5,4))
     set_style(fontsize=14)
 
@@ -419,7 +421,7 @@ if __name__ == '__main__':
     rcParams['xtick.major.pad']='2'
     rcParams['ytick.major.pad']='2'
 
-    #mayavi()
-    contour()
+    # mayavi()
+    # contour()
     #cut()
-    #plot3d()
+    plot3d()
