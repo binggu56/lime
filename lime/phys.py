@@ -12,6 +12,31 @@ import sys
 
 from lime.units import au2fs, au2ev
 
+def sort(eigvals, eigvecs):
+    """
+    sort eigenvalues and eigenvectors from low to high
+
+    Parameters
+    ----------
+    eigvals : TYPE
+        DESCRIPTION.
+    eigvecs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    eigvals : TYPE
+        DESCRIPTION.
+    eigvecs : TYPE
+        DESCRIPTION.
+
+    """
+    idx = np.argsort(eigvals)
+
+    eigvals = eigvals[idx]
+    eigvecs = eigvecs[:,idx]
+
+    return eigvals, eigvecs
 
 def coh_op(j, i, d):
     """
