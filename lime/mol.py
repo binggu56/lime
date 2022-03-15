@@ -31,13 +31,13 @@ from lime.units import au2wavenumber
 
 def read_input(fname_e, fname_edip,  g_included=True):
     """
-    Read input data from quantum chemistry output. 
+    Read input data from quantum chemistry output.
 
     Parameters
     ----------
     fname_e : str
         filename for the energy levels.
-    fname_edip : list 
+    fname_edip : list
         filenames for the electric dipole moment.
     g_included : TYPE, optional
         DESCRIPTION. The default is True.
@@ -48,17 +48,17 @@ def read_input(fname_e, fname_edip,  g_included=True):
         DESCRIPTION.
 
     """
-    
+
     E = np.genfromtxt(fname_e)
-    
+
     if g_included:
         nstates = len(E)
     else:
         E = np.insert(E, 0, 0)
 
     nstates = len(E)
-    
-    # read electric dipole moment g-e 
+
+    # read electric dipole moment g-e
 
     edip = np.zeros((nstates, nstates, 3))
 
@@ -322,7 +322,7 @@ class Mol:
         eigvecs: 2d array
         """
         if self.H is None:
-            raise ValueError('Call getH to compute H first.')
+            raise ValueError('Call getH/calcH to compute H first.')
 
         if k < self.dim:
             eigvals, eigvecs = linalg.eigs(self.H, k=k, which='SR')
@@ -439,10 +439,8 @@ class Mol:
             return driven_dynamics(H, edip, psi0, pulse, dt=dt, Nt=Nt, \
                                    e_ops=e_ops, nout=nout, t0=t0)
 
-    def run(self, psi0, dt=0.001, Nt=1, e_ops=None, nout=1, t0=0.0, pulse=None):
-        return self.evolve(psi0=psi0, pulse=pulse, dt=dt, Nt=Nt, e_ops=e_ops, nout=nout,\
-                           t0=t0)
-    
+
+
     # def heom(self, env, nado=5, c_ops=None, obs_ops=None, fname=None):
     #     nt = self.nt
     #     dt = self.dt
@@ -708,6 +706,12 @@ class SESolver:
             return driven_dynamics(H, edip, psi0, pulse, dt=dt, Nt=Nt, \
                                    e_ops=e_ops, nout=nout, t0=t0)
 
+    def run(self, psi0, dt=0.001, Nt=1, e_ops=[], nout=1, t0=0.0,\
+            edip=None, pulse=None):
+
+        return self.evolve(psi0=psi0, dt=dt, Nt=Nt, e_ops=e_ops, nout=nout,\
+                           t0=t0, edip=edip, pulse=pulse)
+
     def propagator(self, dt, Nt):
         H = self.H
         return _propagator(H, dt, Nt)
@@ -882,7 +886,8 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
         psilist = [psi0.copy()]
 
         # compute observables for t0
-        observables[0, :] = [obs(psi, e_op) for e_op in e_ops]
+        
+        observables[0, :] = [obs(psi, e_op).toarray().item() for e_op in e_ops]
 
         for k1 in range(1, Nt // nout):
 
@@ -892,7 +897,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
             t += dt * nout
 
             # compute observables
-            observables[k1, :] = [obs(psi, e_op) for e_op in e_ops]
+            observables[k1, :] = [obs(psi, e_op).toarray().item() for e_op in e_ops]
 
             # f_obs.write(fmt.format(t, *e_list))
 
@@ -916,7 +921,7 @@ def _quantum_dynamics(H, psi0, dt=0.001, Nt=1, e_ops=[], t0=0.0,
             t += dt * nout
 
             # compute observables
-            e_list = [obs(psi, e_op) for e_op in e_ops]
+            e_list = [obs(psi[:,0], e_op) for e_op in e_ops]
             f_obs.write(fmt.format(t, *e_list))
 
         f_obs.close()
@@ -1073,7 +1078,7 @@ def driven_dynamics(H, edip, psi0, pulse, dt=0.001, Nt=1, e_ops=None, nout=1, \
             # f_obs.write(fmt.format(t, *e_list))
 
             psilist.append(psi.copy())
-            psit[k1, :] = psi 
+            psit[k1, :] = psi
         # f_obs.close()
 
         result.psilist = psilist

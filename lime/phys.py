@@ -12,6 +12,45 @@ import sys
 
 from lime.units import au2fs, au2ev
 
+def jump(i, f, dim):
+
+    A = lil_matrix((dim, dim))
+
+    if i == f:
+        A[i, i] = 1.
+    else:
+        A[f, i] = 1
+        A[i, f] = 1.
+
+    return A.tocsr()
+
+def eig_asymm(h):
+    '''Diagonalize a real, *asymmetrix* matrix and return sorted results.
+
+    Return the eigenvalues and eigenvectors (column matrix)
+    sorted from lowest to highest eigenvalue.
+    '''
+    e, c = np.linalg.eig(h)
+    if np.allclose(e.imag, 0*e.imag):
+        e = np.real(e)
+    else:
+        print("WARNING: Eigenvalues are complex, will be returned as such.")
+
+    idx = e.argsort()
+    e = e[idx]
+    c = c[:,idx]
+
+    return e, c
+
+
+def is_positive_def(A):
+    try:
+        np.linalg.cholesky(A)
+        return True
+    except np.linalg.LinAlgError:
+        return False
+
+
 def sort(eigvals, eigvecs):
     """
     sort eigenvalues and eigenvectors from low to high
@@ -587,7 +626,7 @@ def pauli():
 
     for _ in [s0, sx, sy, sz]:
         _ = csr_matrix(_)
-        
+
     return s0, sx, sy, sz
 
 
@@ -982,6 +1021,88 @@ def multiboson(omega, nmodes, J=0, truncate=2):
 
         return ham
 
+
+def multimode(omegas, nmodes, J=0, truncate=2):
+    """
+    construct the direct tensor-product Hamiltonian for a multi-mode system
+
+    Parameters
+    ----------
+    omegas : 1D array
+        resonance frequenies of the boson modes
+    nmodes : integer
+        number of boson modes
+    J : float
+        nearest-neighbour hopping constant
+    truncate : list
+        size of Fock space for each mode
+
+    Returns
+    -------
+    ham : TYPE
+        DESCRIPTION.
+    xs : list
+        position operators in the composite space for each mode
+
+    """
+
+    N = truncate
+    h0 = boson(omegas[0], N)
+    idm = identity(N)
+    x = quadrature(N)
+
+    assert len(omegas) == nmodes
+
+    if nmodes == 1:
+
+        return h0, x
+
+    elif nmodes == 2:
+
+        hf = boson(omegas[-1], N)
+        ham = kron(idm, hf) + kron(h0, idm) + J * kron(x, x)
+
+        xs = [kron(x, idm), kron(idm, x)]
+        return ham, xs
+
+    elif nmodes > 2:
+        h0 = boson(omegas[0], N)
+        hf = boson(omegas[-1], N)
+
+        head = kron(h0, tensor_power(idm, nmodes-1))
+        tail = kron(tensor_power(idm, nmodes-1), hf)
+        ham = head + tail
+
+        for i in range(1, nmodes-1):
+            h = boson(omegas[i], N)
+            ham += kron(tensor_power(idm, i), \
+                                     kron(h, tensor_power(idm, nmodes-i-1)))
+
+        hop_head = J * kron(kron(x, x), tensor_power(idm, nmodes-2))
+        hop_tail = J * kron(tensor_power(idm, nmodes-2), kron(x, x))
+
+        ham += hop_head + hop_tail
+
+        for i in range(1, nmodes-2):
+            ham += J * kron(tensor_power(idm, i), \
+                                kron(kron(x, x), tensor_power(idm, nmodes-i-2)))
+
+        # connect the last mode to the first mode
+
+        lower_head = kron(x, tensor_power(idm, nmodes-1))
+        xs = []
+        xs.append(lower_head)
+
+        for i in range(1, nmodes-1):
+            # x = quadrature(dims[i])
+            lower = kron(tensor_power(idm, i), kron(x, tensor_power(idm, nmodes-i-1)))
+            xs.append(lower.copy())
+
+        lower_tail = kron(tensor_power(idm, nmodes-1), x)
+        xs.append(lower_tail)
+
+        return ham, xs
+
 def project(P, a):
     """
     reduce the representation of operators to a subspace defined by the
@@ -1122,12 +1243,12 @@ def expm(A, t, method='EOM'):
             U = rk4(U, ldo, dt, A)
 
         return Ulist
-    
+
     elif method == 'SOS':
-        
+
         raise NotImplementedError('Method of {} has not been implemented.\
                                   Choose from EOM'.format(method))
-                                  
+
 
 def ldo(b, A):
     '''

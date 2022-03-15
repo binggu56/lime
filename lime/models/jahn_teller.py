@@ -3,9 +3,9 @@
 """
 Created on Thu Feb 25 13:04:43 2021
 
-Three-state two-mode linear vibronic model of pyrazine (S0/S1/S2)
+Three-state two-mode linear vibronic  coupling (LVC) model (S0/S1/S2)
 
-@author: bing
+@author: Bing Gu
 """
 
 
@@ -14,14 +14,201 @@ import numba
 from numpy import cos, sin
 from scipy.sparse import identity, coo_matrix, lil_matrix, csr_matrix, kron
 
-import sys
+from collections import namedtuple
+
+from dataclasses import dataclass
+
+
+# import sys
 # sys.path.append(r'C:\Users\Bing\Google Drive\lime')
 #sys.path.append(r'/Users/bing/Google Drive/lime')
 
-from lime.phys import boson, dag, sort
+from lime.phys import boson, dag, sort, jump, multimode
 from lime.style import set_style
 from lime.units import au2ev, wavenumber2hartree, wavenum2au
+from lime.mol import Mol, SESolver
 
+
+@dataclass
+class Mode:
+    omega: float
+    couplings: list
+    truncate: int = 2
+
+
+# class LVC(Mol):
+#     def __init__(self, e_fc, omegas, off_diagonal_coupling, diagonal_coupling):
+#         """
+#         linear vibronic coupling model
+
+#         Parameters
+#         ----------
+#         e_fc : 1d array
+#             electronic energy at ground-state minimum
+#         omegas : TYPE
+#             DESCRIPTION.
+#         off_diagonal_coupling : TYPE
+#             DESCRIPTION.
+#         diagonal_coupling : TYPE
+#             DESCRIPTION.
+
+#         Raises
+#         ------
+#         NotImplementedError
+#             DESCRIPTION.
+
+#         Returns
+#         -------
+#         None.
+
+#         """
+
+#         if len(omegas) != 2 or len(e_fc) != 3:
+#             raise NotImplementedError
+
+#         self.nstates = len(e_fc)
+#         self.nmodes = len(omegas)
+#         self.e_fc = e_fc
+#         self.omegas = omegas
+#         self.off_diagonal_coupling = off_diagonal_coupling
+#         self.diagonal_coupling = diagonal_coupling
+
+#         self.H = None
+#         self.dim = None
+
+#     def calcH(self, nums):
+#         """
+#         Calculate the vibronic Hamiltonian.
+
+#         Parameters
+#         ----------
+#         nums : list of integers
+#             size for the Fock space of each mode
+
+#         Returns
+#         -------
+#         2d array
+#             Hamiltonian
+
+#         """
+#         self.H = vibronic(self.e_fc, self.omegas, self.nstates, nums, \
+#                         self.diagonal_coupling, self.off_diagonal_coupling)
+
+#         self.dim = self.H.shape[0]
+
+#         return self.H
+
+#     def calc_edip(self):
+#         pass
+
+#     def dpes(self, q):
+#         pass
+
+#     def apes(self, q):
+#         pass
+
+#     def wavepacket_dynamics(self):
+#         return SESolver(self.H)
+
+
+class LVC(Mol):
+    def __init__(self, e_fc, modes):
+        """
+        linear vibronic coupling model
+
+        Parameters
+        ----------
+        e_fc : 1d array
+            electronic energy at ground-state minimum
+        modes : list of Mode objs
+            vibrational modes
+
+        Raises
+        ------
+        NotImplementedError
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+
+        if len(e_fc) != 3:
+            raise NotImplementedError
+        self.e_fc = e_fc
+        self.nstates = len(e_fc)
+        self.nmodes = len(modes)
+        self.modes = modes
+        self.truncate = None
+        self.fock_dims = [m.truncate for m in modes]
+
+        self.H = None
+        self.dim = None
+
+    def calcH(self):
+        """
+        Calculate the vibronic Hamiltonian.
+
+        Parameters
+        ----------
+        nums : list of integers
+            size for the Fock space of each mode
+
+        Returns
+        -------
+        2d array
+            Hamiltonian
+
+        """
+
+        omegas = [mode.omega for mode in self.modes]
+        nmodes = self.nmodes
+
+        # indentity matrices in each subspace
+        nel = self.nstates
+        I_el = identity(nel)
+
+        h_el = np.diagflat(self.e_fc)
+
+        # calculate the vibrational Hamiltonian
+        hv, xs = multimode(omegas, nmodes, truncate=self.fock_dims[0])
+
+        # bare vibronic H
+        H = kron(h_el, identity(hv.shape[0])) + kron(I_el, hv)
+
+        # vibronic coupling, tuning + coupling
+        for j, mode in enumerate(self.modes):
+            # n = mode.truncate
+
+            # # vibrational Hamiltonian
+            # hv = boson(mode.omega, n, ZPE=False)
+
+            # H = kron(H, Iv) + kron(identity(H.shape), hv)
+            V = 0.
+            for c in mode.couplings:
+                a, b = c[0]
+                strength = c[1]
+                V += strength * jump(a, b, nel)
+
+            H += kron(V, xs[j])
+
+        self.H = H
+        self.dim = H.shape[0]
+
+        return self.H
+
+    def calc_edip(self):
+        pass
+
+    def dpes(self, q):
+        pass
+
+    def apes(self, q):
+        pass
+
+    def wavepacket_dynamics(self):
+        return SESolver(self.H)
 
 def pos(n_vib):
     """
@@ -37,20 +224,22 @@ def pos(n_vib):
     return X
 
 
-def vibronic(n_el, n_vc, n_vt):
+
+def vibronic(e_fc, omegas, n_el, ns, diagonal_coupling,\
+             off_diagonal_coupling):
     """
-    contruct vibronic-cavity basis for polaritonic states, that is a
-    direct product of electron-vibration-photon space
+    contruct vibronic Hamiltonian using
+    direct product of electron-vibration basis
     """
 
     #n_basis = n_el * n_cav * n_vc * n_vt
 
-    freq_vc = 952. * wavenumber2hartree
-    freq_vt = 597. * wavenumber2hartree
+    freq_vc, freq_vt = omegas
+    n_vc, n_vt = ns
 
-    Eshift = np.array([0.0, 31800.0, 39000]) * wavenumber2hartree
-    kappa = np.array([0.0, -847.0, 1202.]) * wavenumber2hartree
-    coup = 2110.0 * wavenumber2hartree # inter-state coupling lambda
+    Eshift = e_fc
+    kappa = diagonal_coupling
+    coup =  off_diagonal_coupling # inter-state coupling lambda
 
 
     # indentity matrices in each subspace
@@ -69,6 +258,7 @@ def vibronic(n_el, n_vc, n_vt):
 
     X = pos(n_vt)
 
+    # kappa * X
     h1 = kron(np.diagflat(kappa), kron(I_vc, X))
 
     Xc = pos(n_vc)
@@ -90,10 +280,11 @@ def vibronic(n_el, n_vc, n_vt):
 #            h_m[m,n] = trans_el[b0.n_el, b1.n_el] * I_cav[b0.n_cav, b1.n_cav] \
 #                    * Xc[b0.n_vc, b1.n_vc] * I_vt[b0.n_vt, b1.n_vt]
 
+    print(trans_el.shape, Xc.shape)
     h2 = coup * kron(trans_el, kron(Xc, I_vt), format='csr')
 
 
-    h_s = h0 + h1 + h2
+    h_s = h0 + h2
 
     # polaritonic states can be obtained by diagonalizing H_S
     # v is the basis transformation matrix, v[i,j] = <old basis i| polaritonic state j>
@@ -364,16 +555,79 @@ def mayavi(surfaces):
 
     mlab.show()
 
+
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from matplotlib import rcParams
+    from lime.units import au2fs
 
-    rcParams['axes.labelpad'] = 6
-    rcParams['xtick.major.pad']='2'
-    rcParams['ytick.major.pad']='2'
+    # rcParams['axes.labelpad'] = 6
+    # rcParams['xtick.major.pad']='2'
+    # rcParams['ytick.major.pad']='2'
 
     # mayavi()
     # contour()
     # cut()
-    geometric_phase()
+    # geometric_phase()
+    Eshift = np.array([0.0, 31800.0, 39000]) * wavenumber2hartree
+    kappa = np.array([0.0, -847.0, 1202.]) * wavenumber2hartree
+    coup = 2110.0 * wavenumber2hartree # inter-state coupling lambda
+
+    # omegas = [952. * wavenumber2hartree, 597. * wavenumber2hartree]
+
+    # jt = LVC(e_fc=Eshift, omegas=omegas, diagonal_coupling=kappa, \
+    #          off_diagonal_coupling=coup)
+
+
+    # H = jt.calcH(nums=[2, 2])
+    # e, evecs = jt.eigenstates(k=2)
+    # print(e)
+    # wpd = jt.wavepacket_dynamics()
+
+    # wpd.run(evecs[:, 0])
+
+
+
+    tuning_mode = Mode(597. * wavenumber2hartree, \
+                       couplings=[[[1, 1], kappa[1]], [[2, 2], kappa[2]]], truncate=16)
+
+    coupling_mode = Mode(952. * wavenumber2hartree, [[[1, 2], coup]], truncate=16)
+
+    modes =  [tuning_mode, coupling_mode]
+
+    model = LVC(Eshift, modes)
+    model.calcH()
+    print(model.H.shape)
+    # e, evecs = model.eigenstates(k=2)
+    # print(e)
+
+    nel = model.nstates
+    psi_el = np.zeros(model.nstates)
+    psi_el[2] = 1.
+    psi_v0 = np.zeros(model.fock_dims[0])
+    psi_v0[0] = 1.
+    psi_v1 = psi_v0
+
+    psi0 = kron(psi_el, kron(psi_v0, psi_v1))
+
+    p2 = np.zeros((nel, nel))
+    p2[2, 2] = 1.
+
+    p1 = np.zeros((nel, nel))
+    p1[1, 1] = 1.
+
+    p1 = kron(p1, kron(identity(model.fock_dims[0]), identity(model.fock_dims[1])))
+    p2 = kron(p2, kron(identity(model.fock_dims[0]), identity(model.fock_dims[1])))
+
+    wpd = model.wavepacket_dynamics()
+    r = wpd.run(psi0.T, dt=0.05/au2fs, Nt=1200, e_ops=[p1, p2])
+
+    fig, ax = plt.subplots()
+    ax.plot(r.times*au2fs, r.observables[:,0].real)
+    ax.plot(r.times*au2fs, r.observables[:,1].real)
+
+
+
+
+
