@@ -26,14 +26,7 @@ from dataclasses import dataclass
 from lime.phys import boson, dag, sort, jump, multimode
 from lime.style import set_style
 from lime.units import au2ev, wavenumber2hartree, wavenum2au
-from lime.mol import Mol, SESolver
-
-
-@dataclass
-class Mode:
-    omega: float
-    couplings: list
-    truncate: int = 2
+from lime.mol import Mol, SESolver, LVC, Mode
 
 
 # class LVC(Mol):
@@ -111,104 +104,7 @@ class Mode:
 #         return SESolver(self.H)
 
 
-class LVC(Mol):
-    def __init__(self, e_fc, modes):
-        """
-        linear vibronic coupling model
 
-        Parameters
-        ----------
-        e_fc : 1d array
-            electronic energy at ground-state minimum
-        modes : list of Mode objs
-            vibrational modes
-
-        Raises
-        ------
-        NotImplementedError
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        """
-
-        if len(e_fc) != 3:
-            raise NotImplementedError
-        self.e_fc = e_fc
-        self.nstates = len(e_fc)
-        self.nmodes = len(modes)
-        self.modes = modes
-        self.truncate = None
-        self.fock_dims = [m.truncate for m in modes]
-
-        self.H = None
-        self.dim = None
-
-    def calcH(self):
-        """
-        Calculate the vibronic Hamiltonian.
-
-        Parameters
-        ----------
-        nums : list of integers
-            size for the Fock space of each mode
-
-        Returns
-        -------
-        2d array
-            Hamiltonian
-
-        """
-
-        omegas = [mode.omega for mode in self.modes]
-        nmodes = self.nmodes
-
-        # indentity matrices in each subspace
-        nel = self.nstates
-        I_el = identity(nel)
-
-        h_el = np.diagflat(self.e_fc)
-
-        # calculate the vibrational Hamiltonian
-        hv, xs = multimode(omegas, nmodes, truncate=self.fock_dims[0])
-
-        # bare vibronic H
-        H = kron(h_el, identity(hv.shape[0])) + kron(I_el, hv)
-
-        # vibronic coupling, tuning + coupling
-        for j, mode in enumerate(self.modes):
-            # n = mode.truncate
-
-            # # vibrational Hamiltonian
-            # hv = boson(mode.omega, n, ZPE=False)
-
-            # H = kron(H, Iv) + kron(identity(H.shape), hv)
-            V = 0.
-            for c in mode.couplings:
-                a, b = c[0]
-                strength = c[1]
-                V += strength * jump(a, b, nel)
-
-            H += kron(V, xs[j])
-
-        self.H = H
-        self.dim = H.shape[0]
-
-        return self.H
-
-    def calc_edip(self):
-        pass
-
-    def dpes(self, q):
-        pass
-
-    def apes(self, q):
-        pass
-
-    def wavepacket_dynamics(self):
-        return SESolver(self.H)
 
 def pos(n_vib):
     """
@@ -584,7 +480,6 @@ if __name__ == '__main__':
     # e, evecs = jt.eigenstates(k=2)
     # print(e)
     # wpd = jt.wavepacket_dynamics()
-
     # wpd.run(evecs[:, 0])
 
 
@@ -597,10 +492,12 @@ if __name__ == '__main__':
     modes =  [tuning_mode, coupling_mode]
 
     model = LVC(Eshift, modes)
+
     model.calcH()
     print(model.H.shape)
+
     # e, evecs = model.eigenstates(k=2)
-    # print(e)
+
 
     nel = model.nstates
     psi_el = np.zeros(model.nstates)
