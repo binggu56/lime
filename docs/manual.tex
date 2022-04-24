@@ -10,7 +10,7 @@
 \usepackage{braket}
 \usepackage{hyperref, xcolor}
 \usepackage{units}
-%\usepackage{unicode-math}
+\usepackage{commath}
 
 
 \newcommand{\be}{\begin{equation}}
@@ -120,7 +120,7 @@
 \begin{document}
 
 \author{Bing Gu}
-\title{User manual for LIME} 
+\title{User manual for LIME}
 \date{Nov 2019}
 
 \frontmatter
@@ -135,17 +135,18 @@
 % bibliography, glossary and index would go here.
 
 
-\chapter{Quantum dynamics} 
+\chapter{Quantum dynamics}
 
 \section{ Adiabatic Nuclear Quantum Dynamics}
 
 Exact methods:
 
-\subsection{Split-operator method} 
+\subsection{Split-operator method}
 Discrete variable representation
 Semiclassical methods:
 
-\subsection{Quantum trajectory method} 
+
+\subsection{Quantum trajectory method}
 b. Non-adiabatic molecular dynamics
 
 Exact nonadiabatic quantum dynamic with multiple electronic surfaces.
@@ -156,17 +157,58 @@ Mixed quantum-classical methods
 Surface-hopping method
 
 \subsection{Discrete Variable Representation}
+Consider a finite basis set $\ket{\varphi_j}, j = 0, 1, \dots, n-1$. The usual spectral method amounts to constructing the kinetic energy operator $\hat{T}$ and potential energy operator $V(x)$,
+\be
+V_{jk} = \int \dif x {\varphi^*_j(x)}V(x) \varphi_k(x)
+.\ee
+
+\subsubsection{Orthogonal polynomials}
+For a given range $x \in [a, b]$, and for a weight function $w(x)$, the orthogonal polynormials, we want to require
+\be
+\int_a^b \dif x w(x)p_m(x)p_n(x) = \delta_{mn}
+\ee
+where $p_n(x)$ is n-degree polynomial. Several orthogonal polynomials for different ranges are known.
+
+If we have a OP, then we can construct basis set
+\be
+\phi_n(x) = \sqrt{w(x)} p_n(x)
+\ee
+
+We can apply Gaussian quadrature $\set{x_\alpha, w_\alpha}, \alpha=1, \dots, N$ for the integration
+\be
+\delta_{mn} = \int_a^b \dif x \phi^*_m(x) \phi_n(x)	= \sum_\alpha \frac{w_\alpha}{{w(x_\alpha)}} {\phi_m^*(x_\alpha) \phi_n(x_\alpha)}
+\label{eq:100}
+\ee
+we also have
+\be
+X_{mn} = \sum_\alpha w_\alpha \frac{\phi_m^*(x_\alpha)x_\alpha \phi_n(x_\alpha)}{w(x_\alpha)}
+\label{eq:101}
+\ee
+define $U_{\alpha j} = \sqrt{\frac{w_\alpha}{w(x_\alpha)}} \phi_j(x_\alpha)$, $U$ is the unitary from \eq{eq:100}. From \eq{eq:101}, it leads to
+\be
+\bf U \bf X \bf U^\dag = \bf X^\text{DVR}
+\ee
+Thus, the quadrature points can be determined by the diagonalizing the coordinate matrix elements.
+The eigenstates reads
+\be
+\varphi_\alpha(x) = \sum_j U_{\alpha j}^* \phi_j(x)
+\ee
+
+
+
+
+
 \subsubsection{Vibronic model}
 How do we diagonalize a vibronic Hamiltonian in adiabatic representation?
-\be H_\text{M} = T_\text{n} + H_\text{BO}(\bf R) \ee 
+\be H_\text{M} = T_\text{n} + H_\text{BO}(\bf R) \ee
 
-The basis set is $\ket{\alpha(\bf R), \bf R}$ where $\alpha(\bf R)$ is the adiabatic electronic states. 
+The basis set is $\ket{\alpha(\bf R), \bf R}$ where $\alpha(\bf R)$ is the adiabatic electronic states.
 
-to construct the Hamiltonian matrix elements 
-\be \braket{\beta(\bf R'), \bf R' | H | \alpha(\bf R), \bf R} = 
-\ee 
+to construct the Hamiltonian matrix elements
+\be \braket{\beta(\bf R'), \bf R' | H | \alpha(\bf R), \bf R} =
+\ee
 
-\chapter{Quantum chemistry} 
+\chapter{Quantum chemistry}
 Quantum chemistry solves the electronic structure given the nuclear geometry. This has been an active field of research for many decades, and sophisticated programs like Gaussian, Qchem, Psi4, Pyscf, Molpro have been widely used in the scientific community. We will take advantage of these remarkable developments. On one hand, we will apply existing methods to interesting molecules and materials. On the other hand, we will develop new techniques based on these programs as well since many functions and modules such as Coulomb integrals are the same irrespective of what your method is.
 
 Currently, we primarily use Pyscf and Molpro for Quantum Chemistry computations.
@@ -180,35 +222,35 @@ Generate white and colored noise to simulate stochastic dynamics, e.g., stochast
 5. Band structure of solids
 Compute band structure from tight-binding Hamiltonians.
 
-\chapter{Open quantum systems} 
+\chapter{Open quantum systems}
 Quantum systems are rarely isolated from their surrounding environment. For an isolated quantum system, dynamics can be described by the time-dependent Schrödinger equation (TDSE). One straightforward approach simulating the open quantum system dynamics is to include the environment degrees of freedom directly into the TDSE. While conceptually simple, this is not always the optimal choice when the environment is complex. Alternatively, we can solve a quantum master equation describing the equation of motion for the reduced density matrix.
 
 The following methods are currently implemented
 
-\section{Redfield equations} 
+\section{Redfield equations}
 
-\section{Lindblad quantum master equations} 
-\section{Hierarchical equation of motion} 
-\section{second-order time-convolutionless equation} 
+\section{Lindblad quantum master equations}
+\section{Hierarchical equation of motion}
+\section{second-order time-convolutionless equation}
 
-\chapter{Periodically driven quantum systems} 
+\chapter{Periodically driven quantum systems}
 Quasienergy levels of a periodically driven quantum system using Floquet theorem
 
 
-\chapter{Nonlinear molecular spectroscopy} 
+\chapter{Nonlinear molecular spectroscopy}
 Time-independent approach to optical signals via sum-over-states expressions
 
 Absorption
-\section{Transient absorption spectroscopy} 
+\section{Transient absorption spectroscopy}
 Photo echo
 Time-dependent approach to coherent signals via explicitly solving the dynamics of matter interacting with laser pulses employed in the spectroscopic experiment. For example, pump and probe pulses in pump-probe experiments.
 
-\section{Transient absorption} 
+\section{Transient absorption}
 
-\chapter{ Quantum transport} 
+\chapter{ Quantum transport}
 This module is to compute the current of nano-structures under a finite bias using the non-equilibrium Green's function (NEGF) method.
 
-\section{NEGF for time-independent transport} 
+\section{NEGF for time-independent transport}
 
 
 \chapter{Uncategorized}

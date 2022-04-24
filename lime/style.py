@@ -384,7 +384,7 @@ def surf(f, x, y, fname='output.png', xlabel='X', \
 
 def export(x, y, z, fname='output.dat', fmt='gnuplot'):
     """
-    export data to gnuplot format
+    export 3D data to gnuplot format
 
     Parameters
     ----------
@@ -412,6 +412,88 @@ def export(x, y, z, fname='output.dat', fmt='gnuplot'):
         f.write('\n')
     return
 
+def plot_surface(x, y, surface):
+
+    #data = [go.Surface(z=apes)]
+    #fig = go.Figure(data = data)
+    import matplotlib.pyplot as plt 
+    from lime.units import au2ev 
+    
+    fig = plt.figure(figsize=(5,4))
+
+    ax = fig.add_subplot(111, projection='3d')
+
+
+
+    X, Y = np.meshgrid(x, y)
+
+    ax.plot_surface(X, Y, surface * au2ev, rstride=1, cstride=1, cmap='viridis',\
+                edgecolor='k',
+                linewidth=0.1)
+
+    #surf(ground)
+#    ax.plot_surface(X, Y, apes1 * au2ev, rstride=6, cstride=6, cmap='viridis', edgecolor='k'\
+#                    , linewidth=0.5)
+#
+#    ax.plot_surface(X, Y, apes2 * au2ev, rstride=6, cstride=6, cmap='viridis', edgecolor='k'\
+#                    , linewidth=0.5)
+
+    ax.view_init(10, -60)
+    # ax.set_zlim(0, 7)
+    ax.set_xlabel(r'Couping mode')
+    ax.set_ylabel(r'Tuning mode')
+
+    ax.zaxis.set_rotate_label(False)  # disable automatic rotation
+    ax.set_zlabel('Energy (eV)', rotation=90)
+
+    #fig.subplots_adjust(top=0.95, bottom=0.16,left=0.16, right=0.9)
+
+    plt.savefig('apes_3d.pdf')
+
+    plt.show()
+    return 
+
+def plot_surfaces(x, y, surfaces):
+
+    #data = [go.Surface(z=apes)]
+    #fig = go.Figure(data = data)
+    import matplotlib.pyplot as plt 
+    from lime.units import au2ev 
+    
+    fig = plt.figure(figsize=(5,4))
+
+    ax = fig.add_subplot(111, projection='3d')
+
+
+
+    X, Y = np.meshgrid(x, y)
+
+    for surface in surfaces:
+        ax.plot_surface(X, Y, surface * au2ev, rstride=1, cstride=1, cmap='viridis',\
+                edgecolor='k',
+                linewidth=0.1)
+
+    #surf(ground)
+#    ax.plot_surface(X, Y, apes1 * au2ev, rstride=6, cstride=6, cmap='viridis', edgecolor='k'\
+#                    , linewidth=0.5)
+#
+#    ax.plot_surface(X, Y, apes2 * au2ev, rstride=6, cstride=6, cmap='viridis', edgecolor='k'\
+#                    , linewidth=0.5)
+
+    ax.view_init(10, -60)
+    # ax.set_zlim(0, 7)
+    ax.set_xlabel(r'Couping mode')
+    ax.set_ylabel(r'Tuning mode')
+
+    ax.zaxis.set_rotate_label(False)  # disable automatic rotation
+    ax.set_zlabel('Energy (eV)', rotation=90)
+
+    #fig.subplots_adjust(top=0.95, bottom=0.16,left=0.16, right=0.9)
+
+    plt.savefig('apes_3d.pdf')
+
+    plt.show()
+    return 
 
 ############
 # tests
