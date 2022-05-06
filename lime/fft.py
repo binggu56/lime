@@ -3,32 +3,59 @@
 
 import numpy as np
 #import numba
+import proplot as plt
 
-def fft(f, x=None, **kwargs):
+
+def fft(f, x=None, axis=-1, **kwargs):
     """
     customized fourier transform of function f
-    g = int dt f(t) * exp(- i * freq * t)
 
-    Return:
-        freq: frequencies where f are evaluated
-        g: the fourier transform of f
+    g(\omega) = \int dt f(t) * exp(- i * \omega * t)
+
+
+    Parameters
+    ----------
+    f : ndarray
+        input data
+    x : TYPE, optional
+        the grid points. The default is None.
+    axis : int, optional
+       Axis over which to compute the FFT.  If not given, the last axis is
+       used.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    g: ndarray
+        the fourier transform of f
+    freq: 1darray
+        frequencies where f are evaluated
+
+
     """
-    nx = len(f)
+    nx = np.asarray(f).shape[axis]
 
     if x is None:
         x = np.arange(nx)
 
     dx = x[1] - x[0]
 
-    g = np.fft.fft(f, **kwargs)
-    g = np.fft.fftshift(g)
+    g = np.fft.fft(f, axis=axis, **kwargs)
+    g = np.fft.fftshift(g, axes=(axis, ))
     g *= dx
 
+
     freq = 2. * np.pi * np.fft.fftshift(np.fft.fftfreq(nx, d=dx))
+    g *= np.exp(-1j * freq * x[0])
 
-    return freq, g * np.exp(-1j * freq * x[0])
+    # fig, ax = plt.subplots()
+    # ax.plot(freq, g.real)
+    # ax.plot(freq, g.imag)
 
-def ifft(f, x=None):
+    return g, freq
+
+def ifft(f, x=None, axis=-1):
     """
     customized fourier transform of function f
     g = int dt f(t) * exp(i * freq * t)
@@ -36,19 +63,19 @@ def ifft(f, x=None):
         freq: frequencies where f are evaluated
         g: the fourier transform of f
     """
-    nx = len(f)
+    nx = np.asarray(f).shape[axis]
 
     if x is None:
         x = np.arange(nx)
 
     dx = x[1] - x[0]
 
-    g = np.fft.ifft(f)
+    g = np.fft.ifft(f, axis=axis)
     g = np.fft.ifftshift(g)
     g = g * dx /2./np.pi * len(x)
     freq = 2. * np.pi * np.fft.ifftshift(np.fft.fftfreq(nx, d=dx))
 
-    return freq, g * np.exp(1j * freq * x[0])
+    return g * np.exp(1j * freq * x[0]), freq
 
 def fft2(f, dx=1, dy=1):
     """
@@ -85,6 +112,9 @@ def dft(x, f, k):
 
     for i in range(len(k)):
         g[i] = np.sum(f * np.exp(-1j * k[i] * x)) * dx
+
+    fig, ax = plt.subplots()
+    ax.plot(k, np.abs(g))
 
     return g
 

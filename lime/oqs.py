@@ -158,7 +158,7 @@ class Redfield_solver:
 
             return -1j * expm(R, t)
 
-        elif method == 'eseries':
+        elif method in ['eseries', 'diag', 'diagonalization']:
 
             if self.R is None:
                 R, evecs = self.redfield_tensor(secular=secular)

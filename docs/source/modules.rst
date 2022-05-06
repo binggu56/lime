@@ -5,4 +5,3 @@ lime
    :maxdepth: 4
 
    lime
-   setup

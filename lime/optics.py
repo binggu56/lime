@@ -9,12 +9,14 @@ Created on Tue Mar 26 17:26:02 2019
 import numpy as np
 from scipy.sparse import lil_matrix, csr_matrix, kron, identity, linalg
 from numpy import sqrt, exp, pi
-import matplotlib.pyplot as plt
+import proplot as plt
 
-from lime.units import au2k, au2ev, alpha, au2watt_per_centimeter_squared
-from lime.fft import fft2
+from lime.units import au2k, au2ev, alpha, \
+    au2watt_per_centimeter_squared, au2fs
+from lime.fft import fft
 from lime.phys import rect, sinc, dag, interval
-from lime.style import set_style, imshow
+# from lime.style import set_style, imshow
+from lime.wigner import spectrogram
 
 from numba import jit
 
@@ -23,7 +25,7 @@ def intensity_to_field(I):
     transform intensity to electric field
 
     E = \sqrt(\frac{2I}{c \epsilon_0})
-    
+
     Parameters
     ----------
     I : TYPE
@@ -36,7 +38,9 @@ def intensity_to_field(I):
 
     """
     return np.sqrt(2.* I * 4. * np.pi/au2watt_per_centimeter_squared/alpha)
-    
+
+def field_to_intensity(E):
+    pass
 
 def std_to_fwhm(tau):
     """
@@ -53,58 +57,200 @@ def std_to_fwhm(tau):
         FWHM.
 
     """
-    return (2.* np.sqrt(2. * np.log(2.))) * tau 
+    return (2.* np.sqrt(2. * np.log(2.))) * tau
 
 def fwhm_to_std(fwhm):
     return fwhm/(2.* np.sqrt(2. * np.log(2.)))
-    
+
+
+class Analyser:
+    def __init__(self, E, t):
+        self.E = E
+        self.t = t
+        self.dt = interval(t)
+        self.I = None # Wigner transform of the signal I(\omega, t)
+
+    def FROG(self, w=None, use_fft=False):
+        # FROG spectrogram of the field
+        # I(\omega, \tau) = \abs{ \int_{-\infty}^\infty E(t) E(t-\tau) e^{-i\omega t} dt}^2
+
+        E = self.E
+        N = len(E)
+
+        # I, J = np.meshgrid(np.arrange(N), np.arange(N))
+        Esig = np.zeros((N, N))
+        for i in range(N):
+            tau = np.arange(i, dtype=int)
+            Esig[i, tau] = E[i] * E[i-tau]
+
+        if use_fft:
+            I, w = fft(Esig, self.t)
+
+            return np.abs(I)**2, w
+        else:
+            I = Esig.dot(np.exp(-1j * np.outer(w, t)).T)
+
+            return np.abs(I)**2
+
+    def spectrogram(self):
+        Ew, w = spectrogram(self.E, self.dt)
+
+        self.I = Ew
+
+        return Ew, w
+
+    def plot_spectrogram(self):
+        fig, ax = plt.subplots()
+        ax.contourf(t*au2fs, w*au2ev, I, origin='lower')
+        ax.format(xlabel='Time (fs)', ylabel='E (eV)', ylim=(0, None))
+        return fig, ax
+
+
 class Pulse:
-    def __init__(self, omegac, tau, delay=0., amplitude=0.001, cep=0., beta=0):
+    def __init__(self, omegac=3./au2ev, tau=5./au2fs, tc=0, delay=0., amplitude=0.001, cep=0., beta=0):
         """
         (linearly chirped) Gaussian pulse
 
         The positive frequency component reads
 
-        E = A/2 * exp(-(t-t0)^2/2/T^2) * exp[-i w (t-t0)(1 + beta (t-t0)/T)]
+        E = A/2 * exp(-(t-t0)^2/2/T^2) * exp[-i w (t-t0)]
 
         A: electric field amplitude
         T: time delay
         sigma: duration
 
+        DEPRECATED, Use GaussianPulse instead.
         """
-        self.delay = delay
+        self.delay = delay # deprecated, use tc
+        self.tc = tc
 
         self.tau = tau
-        self._fwhm = tau * 2.3548200450309493 # from tau to fwhm 
+        self.fwhm = tau * 2.3548200450309493 # from tau to fwhm
         self.sigma = tau # for compatibility only
         self.omegac = omegac # central frequency
         self.unit = 'au'
         self.amplitude = amplitude
         self.cep = cep
         self.bandwidth = 1./tau
-        self.duration = 2. * tau 
+        self.duration = 2. * tau
         self.beta = beta  # linear chirping rate, dimensionless
         self.ndim = 1
 
 
 
     def envelop(self, t):
-        return self.amplitude * np.exp(-(t-self.delay)**2/2./self.tau**2)
+        tc = self.tc
+        return self.amplitude * np.exp(-(t-tc)**2/2./self.tau**2)
 
     def spectrum(self, omega):
         """
         Fourier transform of the Gaussian pulse
         """
         omega0 = self.omegac
-        T = self.tau
+        tau = self.tau
         A0 = self.amplitude
+
+        return A0 * tau * np.sqrt(2.*np.pi) * np.exp(-(omega-omega0)**2 * tau**2/2.)
+
+    def field(self, t):
+        '''
+        electric field
+        '''
+        return self.efield(t)
+
+    def efield(self, t, return_complex=False):
+        """
+
+        Parameters
+        ----------
+        t : TYPE
+            time.
+
+        Returns
+        -------
+        complex
+            complex-valued  electric field at time t. Take the real part for the
+            electric field.
+
+        """
+        omegac = self.omegac
+        t0 = self.tc
+        a = self.amplitude
+        tau = self.sigma
         beta = self.beta
 
-#        if beta is None:
-#            return A0 * sigma * np.sqrt(2.*np.pi) * np.exp(-(omega-omega0)**2 * sigma**2/2.)
-#        else:
-        a = 0.5/T**2 + 1j * beta * omega0/T
-        return A0 * np.sqrt(np.pi/a) * np.exp(-(omega - omega0)**2/4./a)
+
+        E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
+            * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
+
+        return E
+
+    def spectrogram(self, efield):
+
+        # from tftb.processing import WignerVilleDistribution
+
+        # wvd = WignerVilleDistribution(z)
+        # w, ts, fs = wvd.run()
+        return
+
+    def plt_efield(self):
+
+        import proplot as plt
+        from lime.units import au2volt_per_angstrom
+
+        fig, ax = plt.subplots()
+
+        t = np.linspace(self.tc - 2.*self.fwhm, self.tc + 2 * self.fwhm, 100)
+
+        ax.plot(t*au2fs, self.efield(t) * au2volt_per_angstrom)
+        ax.format(xlabel='Time (fs)', ylabel='$E(t)$')
+
+        return
+
+class GaussianPulse:
+    def __init__(self, omegac=3./au2ev, tau=5./au2fs, tc=0, delay=0., amplitude=0.001, cep=0., beta=0):
+        """
+        (linearly chirped) Gaussian pulse
+
+        The positive frequency component reads
+
+        E = A/2 * exp(-(t-t0)^2/2/T^2) * exp[-i w (t-t0)]
+
+        A: electric field amplitude
+        T: time delay
+        sigma: duration
+
+        """
+        self.delay = delay # deprecated, use tc
+        self.tc = tc
+
+        self.tau = tau
+        self.fwhm = tau * 2.3548200450309493 # from tau to fwhm
+        self.sigma = tau # for compatibility only
+        self.omegac = omegac # central frequency
+        self.unit = 'au'
+        self.amplitude = amplitude
+        self.cep = cep
+        self.bandwidth = 1./tau
+        self.duration = 2. * tau
+        self.beta = beta  # linear chirping rate, dimensionless
+        self.ndim = 1
+
+
+
+    def envelop(self, t):
+        tc = self.tc
+        return self.amplitude * np.exp(-(t-tc)**2/2./self.tau**2)
+
+    def spectrum(self, omega):
+        """
+        Fourier transform of the Gaussian pulse
+        """
+        omega0 = self.omegac
+        tau = self.tau
+        A0 = self.amplitude
+
+        return A0 * tau * np.sqrt(2.*np.pi) * np.exp(-(omega-omega0)**2 * tau**2/2.)
 
     def field(self, t):
         '''
@@ -126,18 +272,18 @@ class Pulse:
 
         """
         omegac = self.omegac
-        t0 = self.delay
+        t0 = self.tc
         a = self.amplitude
         tau = self.sigma
         beta = self.beta
-        
+
         return a * np.exp(-(t-t0)**2/2./tau**2)*np.cos(omegac * (t-t0))
 
 
         # E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
         #     * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
 
-        # return E.real 
+        # return E.real
 
     def spectrogram(self, efield):
 
@@ -147,8 +293,22 @@ class Pulse:
         # w, ts, fs = wvd.run()
         return
 
+    def plt_efield(self):
+
+        import proplot as plt
+        from lime.units import au2volt_per_angstrom
+
+        fig, ax = plt.subplots()
+
+        t = np.linspace(self.tc - 2.*self.fwhm, self.tc + 2 * self.fwhm, 100)
+
+        ax.plot(t*au2fs, self.efield(t) * au2volt_per_angstrom)
+        ax.format(xlabel='Time (fs)', ylabel='$E(t)$')
+
+        return
+
 class ChirpedPulse(Pulse):
-    def __init__(self, omegac, tau, delay=0., amplitude=0.001, cep=0., beta=0):
+    def __init__(self, omegac=3./au2ev, tau=5./au2fs, tc=0, amplitude=0.001, cep=0., beta=0):
         """
         (linearly chirped) Gaussian pulse
 
@@ -161,17 +321,17 @@ class ChirpedPulse(Pulse):
         sigma: duration
 
         """
-        self.delay = delay
+        self.tc = tc
 
         self.tau = tau
-        self._fwhm = tau * 2.3548200450309493 # from tau to fwhm 
+        self._fwhm = tau * 2.3548200450309493 # from tau to fwhm
         self.sigma = tau # for compatibility only
         self.omegac = omegac # central frequency
         self.unit = 'au'
         self.amplitude = amplitude
         self.cep = cep
         self.bandwidth = 1./tau
-        self.duration = 2. * tau 
+        self.duration = 2. * tau
         self.beta = beta  # linear chirping rate, dimensionless
         self.ndim = 1
 
@@ -189,7 +349,7 @@ class ChirpedPulse(Pulse):
 
         """
         omegac = self.omegac
-        t0 = self.delay
+        t0 = self.tc
         a = self.amplitude
         tau = self.sigma
         beta = self.beta
@@ -201,8 +361,23 @@ class ChirpedPulse(Pulse):
         E = a * np.exp(-(t-t0)**2/2./tau**2)*np.exp(-1j * omegac * (t-t0))\
             * np.exp(-1j * beta * omegac * (t-t0)**2/tau)
 
-        return E.real 
-    
+        return E.real
+
+    def spectrum(self, omega):
+        """
+        Fourier transform of the Gaussian pulse
+        """
+        omega0 = self.omegac
+        T = self.tau
+        A0 = self.amplitude
+        beta = self.beta
+
+#        if beta is None:
+#            return A0 * sigma * np.sqrt(2.*np.pi) * np.exp(-(omega-omega0)**2 * sigma**2/2.)
+#        else:
+        a = 0.5/T**2 + 1j * beta * omega0/T
+        return A0 * np.sqrt(np.pi/a) * np.exp(-(omega - omega0)**2/4./a)
+
     # def set_fwhm(self, fwhm):
     #     self.tau = fwhm/(2.* np.sqrt(2. * np.log(2.)))
     #     return
@@ -210,8 +385,8 @@ class ChirpedPulse(Pulse):
     # @property
     # def fwhm(self):
     #     return self._fwhm
-        
-        
+
+
 # def heaviside(x):
 #     """
 #     Heaviside function defined in a grid.
@@ -674,22 +849,37 @@ def _detection_amplitude(jsa, omega1, omega2, dp, dq):
 
 
 if __name__ == '__main__':
-    from lime.units import au2ev, au2fs
 
-    p = np.linspace(-2, 2, 128) / au2ev
-    q = p
-    epp = Biphoton(omegap=3 / au2ev, bw=0.2 / au2ev, Te=10/au2fs,
-                   p=p, q=q)
+    def test_biphoton():
+        from lime.units import au2ev, au2fs
 
-    JSA = epp.get_jsa()
+        p = np.linspace(-2, 2, 128) / au2ev
+        q = p
+        epp = Biphoton(omegap=3 / au2ev, bw=0.2 / au2ev, Te=10/au2fs,
+                       p=p, q=q)
 
-    # epp.plt_jsa()
-    # t1, t2, d = epp.detect()
-    tau = np.linspace(-10, 10)/au2fs
+        JSA = epp.get_jsa()
 
-    prob = hom(p, q, JSA, tau)
+        # epp.plt_jsa()
+        # t1, t2, d = epp.detect()
+        tau = np.linspace(-10, 10)/au2fs
 
-    fig, ax = plt.subplots()
-    ax.plot(tau, prob)
+        prob = hom(p, q, JSA, tau)
 
-    plt.show()
+        fig, ax = plt.subplots()
+        ax.plot(tau, prob)
+
+        plt.show()
+
+    # pulse = GaussianPulse()
+    pulse = Pulse(omegac=4/au2ev, tau=8/au2fs, beta=0.2)
+
+    t = np.linspace(-12, 12, 256)/au2fs
+
+    analyser = Analyser(pulse.efield(t), t)
+
+    I, w = analyser.spectrogram()
+    print(w)
+
+
+

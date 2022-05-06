@@ -1,7 +1,7 @@
-setup module
-============
+SPO\_1D module
+==============
 
-.. automodule:: setup
+.. automodule:: SPO_1D
    :members:
    :undoc-members:
    :show-inheritance:

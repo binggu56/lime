@@ -8,7 +8,7 @@ Real time time-dependent Hartree-Fock
 @author: Bing Gu
 """
 import numpy as np
-import scipy.linalg
+import scipy.linalg as linalg
 from scipy.optimize import newton
 
 from pyscf.lib import logger
@@ -17,7 +17,7 @@ import pyscf
 from functools import reduce
 
 
-from lime.phys import eig_asymm, is_positive_def
+from lime.phys import eig_asymm, is_positive_def, dag
 from lime.optics import Pulse
 
 
@@ -37,12 +37,43 @@ def charge_center(mol):
 def _tdhf(mo_coeff, hcore, r, pulse):
     pass
 
+def self_energy_hf(eri, rdm1):
+    """
+    HF self energy
+
+    The Hartree term reads
+        \Sigma_{H, pq} = v_{pq, rs} \sum_\sigma P^\sigma_{rs}
+
+    Make sure both quantities are represented by the same basis set.
+
+    Parameters
+    ----------
+    eri : TYPE
+        DESCRIPTION.
+    rdm1 : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    S : TYPE
+        DESCRIPTION.
+
+    """
+
+    sigmaH = 2. * np.einsum('ijkl, kl -> ij', eri, rdm1)
+    sigmax = - np.einsum('ijkl, kl -> ik', eri, rdm1)
+
+    return sigmaH + sigmax
+
 class TDHF:
     def __init__(mf, pulse):
         pass
 
 if __name__ == '__main__':
     from pyscf import scf, gto
+    from lime.units import au2fs, au2ev
+    import proplot as plt
+
     mol = gto.Mole()
     mol.verbose = 3
     #mol.atom = [['Ne' , (0., 0., 0.)]]
@@ -62,7 +93,7 @@ if __name__ == '__main__':
 
     mf.kernel()
 
-    # 1-particle RDM
+    # 1-particle RDM in AOs
     C = mf.mo_coeff[:, mf.mo_occ > 0]
     rdm1 = np.conj(C).dot(C.T)
 
@@ -71,12 +102,43 @@ if __name__ == '__main__':
 
     r = mol.intor('int1e_r') # AO-matrix elements of r
     eri = mol.intor('int2e')
-    print(eri.shape)
-    # fock matrix including the drive
-    # f = hcore + se + r * pulse(t)
 
 
-    # propagate
+    Nt = 2000
+    dt = 0.02/au2fs
+    t0 = -8/au2fs
+    t = t0
+    ts = t0 + np.arange(Nt) * dt
+    pulse = Pulse(omegac=0.1, tau=2/au2fs, amplitude=0.01)
 
-def self_energy_hf(eri):
-    pass
+    out = np.zeros(Nt, dtype=complex)
+    for k in range(Nt):
+
+        sigma = self_energy_hf(eri, rdm1)
+
+        # fock matrix including the drive in the electric dipole gauge
+        f = hcore + sigma + r[0, :, :] * pulse.efield(t)
+
+        # propagate
+        u = linalg.expm(-1j * f * dt)
+        rdm1 = u.dot(rdm1.dot(dag(u)))
+
+        t += dt
+        out[k] = rdm1[0, 1]
+
+    fig, ax = plt.subplots()
+    ax.plot(ts, out.real)
+    ax.plot(ts, out.imag)
+
+    # omega = np.linspace(-1.5, 1.5, 100)
+    from lime.fft import dft, fft
+    # g = dft(ts, out, omega)
+    omega, g = fft(out, ts)
+
+    fig, ax = plt.subplots()
+    ax.plot(omega, np.abs(g))
+    ax.format(xlim=(0.6, 1.5), ylim=(0, 50))
+
+
+
+

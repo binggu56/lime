@@ -7,19 +7,11 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   lime.models
    lime.polariton
 
 Submodules
 ----------
-
-
-lime.ETPA module
-----------------
-
-.. automodule:: lime.ETPA
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 lime.Floquet module
 -------------------
@@ -45,6 +37,14 @@ lime.backup module
    :undoc-members:
    :show-inheritance:
 
+lime.beam module
+----------------
+
+.. automodule:: lime.beam
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 lime.cavity module
 ------------------
 
@@ -61,6 +61,14 @@ lime.common module
    :undoc-members:
    :show-inheritance:
 
+lime.coordinates module
+-----------------------
+
+.. automodule:: lime.coordinates
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 lime.correlation module
 -----------------------
 
@@ -73,6 +81,22 @@ lime.fft module
 ---------------
 
 .. automodule:: lime.fft
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+lime.group module
+-----------------
+
+.. automodule:: lime.group
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+lime.gwp module
+---------------
+
+.. automodule:: lime.gwp
    :members:
    :undoc-members:
    :show-inheritance:
@@ -129,6 +153,14 @@ lime.qnm module
 ---------------
 
 .. automodule:: lime.qnm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+lime.quadrature module
+----------------------
+
+.. automodule:: lime.quadrature
    :members:
    :undoc-members:
    :show-inheritance:

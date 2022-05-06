@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lime package &mdash; LIME 0.1 documentation</title>
+  <title>lime package &mdash; lime 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="lime.polariton package" href="lime.polariton.html" />
+    <link rel="next" title="lime.models package" href="lime.models.html" />
     <link rel="prev" title="lime" href="modules.html" /> 
 </head>
 
@@ -27,7 +27,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> LIME
+            <a href="index.html" class="icon icon-home"> lime
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -42,18 +42,22 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">lime</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">lime package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="lime.models.html">lime.models package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lime.polariton.html">lime.polariton package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#lime-etpa-module">lime.ETPA module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.Floquet">lime.Floquet module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.FranckCondon">lime.FranckCondon module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lime-backup-module">lime.backup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-lime.beam">lime.beam module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.cavity">lime.cavity module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.common">lime.common module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-lime.coordinates">lime.coordinates module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.correlation">lime.correlation module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.fft">lime.fft module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-lime.group">lime.group module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-lime.gwp">lime.gwp module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.liouville">lime.liouville module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.mol">lime.mol module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.noise">lime.noise module</a></li>
@@ -61,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.oqs">lime.oqs module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.phys">lime.phys module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lime-qnm-module">lime.qnm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-lime.quadrature">lime.quadrature module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.spin_boson">lime.spin_boson module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.style">lime.style module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-lime.superoperator">lime.superoperator module</a></li>
@@ -71,7 +76,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-lime">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="setup.html">setup module</a></li>
 </ul>
 </li>
 </ul>
@@ -82,7 +86,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">LIME</a>
+          <a href="index.html">lime</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -107,6 +111,15 @@
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="lime.models.html">lime.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lime.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.models.html#module-lime.models.dho">lime.models.dho module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.models.html#module-lime.models.jahn_teller">lime.models.jahn_teller module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.models.html#module-lime.models.pyrazine">lime.models.pyrazine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.models.html#module-lime.models.pyrrole">lime.models.pyrrole module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.models.html#module-lime.models">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="lime.polariton.html">lime.polariton package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="lime.polariton.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lime.polariton.html#module-lime.polariton.cavity">lime.polariton.cavity module</a></li>
@@ -118,9 +131,6 @@
 </section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
-</section>
-<section id="lime-etpa-module">
-<h2>lime.ETPA module<a class="headerlink" href="#lime-etpa-module" title="Permalink to this headline"></a></h2>
 </section>
 <section id="module-lime.Floquet">
 <span id="lime-floquet-module"></span><h2>lime.Floquet module<a class="headerlink" href="#module-lime.Floquet" title="Permalink to this headline"></a></h2>
@@ -185,6 +195,35 @@ E0    : electric field amplitude</p>
 </section>
 <section id="lime-backup-module">
 <h2>lime.backup module<a class="headerlink" href="#lime-backup-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-lime.beam">
+<span id="lime-beam-module"></span><h2>lime.beam module<a class="headerlink" href="#module-lime.beam" title="Permalink to this headline"></a></h2>
+<p>Created on Fri Oct  8 17:10:45 2021</p>
+<p>&#64;author: bing</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.beam.beam">
+<span class="sig-prename descclassname"><span class="pre">lime.beam.</span></span><span class="sig-name descname"><span class="pre">beam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.beam.beam" title="Permalink to this definition"></a></dt>
+<dd><p>cylindrical vector beam</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rho</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>phi</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>z</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>k</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>pol</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is [1, 0, 0].</p></li>
+<li><p><strong>l</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-lime.cavity">
 <span id="lime-cavity-module"></span><h2>lime.cavity module<a class="headerlink" href="#module-lime.cavity" title="Permalink to this headline"></a></h2>
@@ -519,19 +558,7 @@ a single cavity mode including the ground state</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.cavity.Polariton.setH">
 <span class="sig-name descname"><span class="pre">setH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.cavity.Polariton.setH" title="Permalink to this definition"></a></dt>
-<dd><p>Set model Hamiltonian</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>H</strong> (<em>2d array</em>) – DESCRIPTION.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.cavity.Polariton.transform_basis">
@@ -632,6 +659,39 @@ n : size of matrix</p>
 <dd></dd></dl>
 
 </section>
+<section id="module-lime.coordinates">
+<span id="lime-coordinates-module"></span><h2>lime.coordinates module<a class="headerlink" href="#module-lime.coordinates" title="Permalink to this headline"></a></h2>
+<p>Created on Thu Mar 17 11:28:20 2022</p>
+<p>Cartesian to internal coordinates transformation</p>
+<p>Based on QCL <a class="reference external" href="https://github.com/ben-albrecht/qcl/blob/master/qcl/">https://github.com/ben-albrecht/qcl/blob/master/qcl/</a></p>
+<p>&#64;author: Bing Gu</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.coordinates.Molecule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.coordinates.</span></span><span class="sig-name descname"><span class="pre">Molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.coordinates.Molecule" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyscf.gto.mole.Mole</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.coordinates.Molecule.atom_symbols">
+<span class="sig-name descname"><span class="pre">atom_symbols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.coordinates.Molecule.atom_symbols" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.coordinates.Molecule.jacobian">
+<span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.coordinates.Molecule.jacobian" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.coordinates.Molecule.metric">
+<span class="sig-name descname"><span class="pre">metric</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.coordinates.Molecule.metric" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.coordinates.Molecule.zmat">
+<span class="sig-name descname"><span class="pre">zmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.coordinates.Molecule.zmat" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-lime.correlation">
 <span id="lime-correlation-module"></span><h2>lime.correlation module<a class="headerlink" href="#module-lime.correlation" title="Permalink to this headline"></a></h2>
 <p>Created on Wed Dec 18 20:36:55 2019</p>
@@ -680,16 +740,25 @@ args: dictionary of parameters for dynamics</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.fft.fft">
-<span class="sig-prename descclassname"><span class="pre">lime.fft.</span></span><span class="sig-name descname"><span class="pre">fft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.fft.fft" title="Permalink to this definition"></a></dt>
-<dd><p>customized fourier transform of function f
-g = int dt f(t) * exp(- i * freq * t)</p>
+<span class="sig-prename descclassname"><span class="pre">lime.fft.</span></span><span class="sig-name descname"><span class="pre">fft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.fft.fft" title="Permalink to this definition"></a></dt>
+<dd><p>customized fourier transform of function f</p>
+<p>g(omega) = int dt f(t) * exp(- i * omega * t)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>frequencies where f are evaluated
-g: the fourier transform of f</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>ndarray</em>) – input data</p></li>
+<li><p><strong>x</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – the grid points. The default is None.</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis over which to compute the FFT.  If not given, the last axis is
+used.</p></li>
+<li><p><strong>**kwargs</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>freq</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>g</strong> (<em>ndarray</em>) – the fourier transform of f</p></li>
+<li><p><strong>freq</strong> (<em>1darray</em>) – frequencies where f are evaluated</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -723,7 +792,7 @@ input:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.fft.ifft">
-<span class="sig-prename descclassname"><span class="pre">lime.fft.</span></span><span class="sig-name descname"><span class="pre">ifft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.fft.ifft" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">lime.fft.</span></span><span class="sig-name descname"><span class="pre">ifft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.fft.ifft" title="Permalink to this definition"></a></dt>
 <dd><p>customized fourier transform of function f
 g = int dt f(t) * exp(i * freq * t)
 :returns: frequencies where f are evaluated</p>
@@ -735,6 +804,90 @@ g = int dt f(t) * exp(i * freq * t)
 <dd class="field-odd"><p>freq</p>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="module-lime.group">
+<span id="lime-group-module"></span><h2>lime.group module<a class="headerlink" href="#module-lime.group" title="Permalink to this headline"></a></h2>
+<p>Created on Wed Mar 23 21:30:04 2022</p>
+<p>Some trivial computations for the group theory</p>
+<p>&#64;author: bing</p>
+</section>
+<section id="module-lime.gwp">
+<span id="lime-gwp-module"></span><h2>lime.gwp module<a class="headerlink" href="#module-lime.gwp" title="Permalink to this headline"></a></h2>
+<p>Created on Fri Apr  1 21:22:56 2022</p>
+<p>Using Gaussian basis set to propagate the nonadiabatic molecular dynamics</p>
+<p>&#64;author: Bing Gu</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.gwp.GWP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">GWP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeff</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.GWP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.gwp.H">
+<span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">H</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.H" title="Permalink to this definition"></a></dt>
+<dd><p>construct the hamiltonian matrix
+Kinetic energy operator can be computed exactly.
+Potential energy operator - approximation
+Nonadiabatic coupling -</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.gwp.NAMD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">NAMD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.NAMD" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.gwp.NAMD.kmat">
+<span class="sig-name descname"><span class="pre">kmat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.NAMD.kmat" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.gwp.NAMD.overlap">
+<span class="sig-name descname"><span class="pre">overlap</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.NAMD.overlap" title="Permalink to this definition"></a></dt>
+<dd><p>construct overlap matrix from GWPs defined by {a,x,p}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.gwp.NAMD.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.NAMD.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.gwp.NAMD.vmat">
+<span class="sig-name descname"><span class="pre">vmat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.NAMD.vmat" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.gwp.kin_1d">
+<span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">kin_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ak</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">am</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.kin_1d" title="Permalink to this definition"></a></dt>
+<dd><p>kinetic energy matrix elements between two multidimensional GWPs</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.gwp.kin_me">
+<span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">kin_me</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.kin_me" title="Permalink to this definition"></a></dt>
+<dd><p>kinetic energy matrix elements between two multidimensional GWPs</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.gwp.kmat">
+<span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">kmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.kmat" title="Permalink to this definition"></a></dt>
+<dd><p>kinetic energy matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.gwp.overlap">
+<span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.overlap" title="Permalink to this definition"></a></dt>
+<dd><p>overlap between two GWPs defined by {a,x,p}</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.gwp.overlap_1d">
+<span class="sig-prename descclassname"><span class="pre">lime.gwp.</span></span><span class="sig-name descname"><span class="pre">overlap_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ak</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">py</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.gwp.overlap_1d" title="Permalink to this definition"></a></dt>
+<dd><p>overlap between two 1D GWPs</p>
 </dd></dl>
 
 </section>
@@ -753,10 +906,205 @@ g = int dt f(t) * exp(i * freq * t)
 <span id="lime-mol-module"></span><h2>lime.mol module<a class="headerlink" href="#module-lime.mol" title="Permalink to this headline"></a></h2>
 <p>Created on Tue Jun 30 21:16:53 2020</p>
 <p>&#64;author: Bing Gu</p>
-<p>Basic module for molecules</p>
+<p>Basic module for many-level systems</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.mol.JahnTeller">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">JahnTeller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.JahnTeller" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lime.mol.LVC" title="lime.mol.LVC"><code class="xref py py-class docutils literal notranslate"><span class="pre">lime.mol.LVC</span></code></a></p>
+<p>E otimes e Jahn-Teller model with two degenerate modes and two degenerate electronic states
+(+ the ground state)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.JahnTeller.APES">
+<span class="sig-name descname"><span class="pre">APES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.JahnTeller.APES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.JahnTeller.buildH">
+<span class="sig-name descname"><span class="pre">buildH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.JahnTeller.buildH" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the vibronic Hamiltonian.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nums</strong> (<em>list of integers</em>) – size for the Fock space of each mode</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hamiltonian</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>2d array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.mol.LVC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">LVC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lime.mol.Mol" title="lime.mol.Mol"><code class="xref py py-class docutils literal notranslate"><span class="pre">lime.mol.Mol</span></code></a></p>
+<p>linear vibronic coupling model in Fock space</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.APES">
+<span class="sig-name descname"><span class="pre">APES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.APES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.add_coupling">
+<span class="sig-name descname"><span class="pre">add_coupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coupling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.add_coupling" title="Permalink to this definition"></a></dt>
+<dd><p>add additional coupling terms to the Hamiltonian such as Stark
+and Zeeman effects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coupling</strong> (<em>list</em><em>, </em><em>[</em><em>[</em><em>a</em><em>, </em><em>b</em><em>]</em><em>, </em><em>strength</em><em>]</em>) – describe the coupling, a, b labels the electronic states</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>updated H.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.buildH">
+<span class="sig-name descname"><span class="pre">buildH</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.buildH" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the vibronic Hamiltonian.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nums</strong> (<em>list of integers</em>) – size for the Fock space of each mode</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hamiltonian</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>2d array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.buildop">
+<span class="sig-name descname"><span class="pre">buildop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isherm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.buildop" title="Permalink to this definition"></a></dt>
+<dd><p>construct electronic operator</p>
+<blockquote>
+<div><p>ket{f}ra{i}</p>
+</div></blockquote>
+<dl class="simple">
+<dt>if isherm:</dt><dd><p>return ket{f}ra{i} + ket{i}ra{f}</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – initial state.</p></li>
+<li><p><strong>f</strong> (<em>int</em><em>, </em><em>optional</em>) – final state. Default None. If None, set f = i.</p></li>
+<li><p><strong>isherm</strong> (<em>bool</em><em>, </em><em>optional</em>) – indicator of whether the returned matrix is Hermitian or not
+Default: True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>2darray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.calc_edip">
+<span class="sig-name descname"><span class="pre">calc_edip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.calc_edip" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.dpes">
+<span class="sig-name descname"><span class="pre">dpes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.dpes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.groundstate">
+<span class="sig-name descname"><span class="pre">groundstate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.groundstate" title="Permalink to this definition"></a></dt>
+<dd><p>return the ground state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.promote">
+<span class="sig-name descname"><span class="pre">promote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'el'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.promote" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.rdm_el">
+<span class="sig-name descname"><span class="pre">rdm_el</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.rdm_el" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the electronic reduced density matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>psi</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.vertical">
+<span class="sig-name descname"><span class="pre">vertical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.vertical" title="Permalink to this definition"></a></dt>
+<dd><p>generate the initial state created by vertical excitation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – initially excited state. The default is 1.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>psi</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.LVC.wavepacket_dynamics">
+<span class="sig-name descname"><span class="pre">wavepacket_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RK4'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.LVC.wavepacket_dynamics" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.mol.Mode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">Mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">couplings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mode" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lime.mol.Mode.couplings">
+<span class="sig-name descname"><span class="pre">couplings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#lime.mol.Mode.couplings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lime.mol.Mode.omega">
+<span class="sig-name descname"><span class="pre">omega</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#lime.mol.Mode.omega" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lime.mol.Mode.truncate">
+<span class="sig-name descname"><span class="pre">truncate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#lime.mol.Mode.truncate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="lime.mol.Mol">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">Mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">Mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip_rms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.mol.Mol.DQC">
@@ -880,9 +1228,14 @@ Transforming t1 and t2 to frequency domain.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.Mol.energy">
+<span class="sig-name descname"><span class="pre">energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.energy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="lime.mol.Mol.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.evolve" title="Permalink to this definition"></a></dt>
-<dd><p>quantum dynamics under time-independent hamiltonian</p>
+<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.evolve" title="Permalink to this definition"></a></dt>
+<dd><p>quantum dynamics under time-independent Hamiltonian</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -904,11 +1257,6 @@ Transforming t1 and t2 to frequency domain.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.mol.Mol.getH">
-<span class="sig-name descname"><span class="pre">getH</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.getH" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="lime.mol.Mol.get_dip">
 <span class="sig-name descname"><span class="pre">get_dip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.get_dip" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -924,11 +1272,6 @@ Transforming t1 and t2 to frequency domain.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.mol.Mol.get_ham">
-<span class="sig-name descname"><span class="pre">get_ham</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.get_ham" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="lime.mol.Mol.get_nonhermH">
 <span class="sig-name descname"><span class="pre">get_nonhermH</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.get_nonhermH" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -939,8 +1282,8 @@ Transforming t1 and t2 to frequency domain.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.mol.Mol.ground">
-<span class="sig-name descname"><span class="pre">ground</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.ground" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.mol.Mol.groundstate">
+<span class="sig-name descname"><span class="pre">groundstate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trivial'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.groundstate" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -979,23 +1322,6 @@ Transforming t1 and t2 to frequency domain.</p>
 <li><p><strong>nout</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 1.</p></li>
 <li><p><strong>t0</strong> (<em>float</em>) – initial time</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="lime.mol.Mol.setH">
-<span class="sig-name descname"><span class="pre">setH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Mol.setH" title="Permalink to this definition"></a></dt>
-<dd><p>Set model Hamiltonian</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>H</strong> (<em>2d array</em>) – DESCRIPTION.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p></p>
@@ -1092,23 +1418,18 @@ Transforming t1 and t2 to frequency domain.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="lime.mol.Result">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">Result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Result" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">Result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Result" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.mol.Result.expect">
 <span class="sig-name descname"><span class="pre">expect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.Result.expect" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="lime.mol.Result.psilist">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">psilist</span></span><a class="headerlink" href="#lime.mol.Result.psilist" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="lime.mol.SESolver">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">SESolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isherm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.SESolver" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">SESolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.SESolver" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.mol.SESolver.correlation_2op_1t">
@@ -1176,14 +1497,19 @@ Transforming t1 and t2 to frequency domain.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.mol.SESolver.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.SESolver.evolve" title="Permalink to this definition"></a></dt>
-<dd><p>quantum dynamics under time-independent and time-dependent hamiltonian</p>
+<dt class="sig sig-object py" id="lime.mol.SESolver.propagator">
+<span class="sig-name descname"><span class="pre">propagator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.SESolver.propagator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.mol.SESolver.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.SESolver.run" title="Permalink to this definition"></a></dt>
+<dd><p>quantum dynamics under time-independent and time-dependent Hamiltonian</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>psi0</strong> (<em>1d array</em>) – initial state</p></li>
-<li><p><strong>pulse</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>pulse</strong> (<em>callable/list of callable</em>) – external laser pulses</p></li>
 <li><p><strong>dt</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 0.001.</p></li>
 <li><p><strong>Nt</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 1.</p></li>
 <li><p><strong>obs_ops</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
@@ -1200,16 +1526,11 @@ Transforming t1 and t2 to frequency domain.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="lime.mol.SESolver.propagator">
-<span class="sig-name descname"><span class="pre">propagator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.SESolver.propagator" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.mol.driven_dynamics">
-<span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">driven_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.driven_dynamics" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">driven_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.driven_dynamics" title="Permalink to this definition"></a></dt>
 <dd><p>Laser-driven dynamics in the presence of laser pulses</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1237,6 +1558,32 @@ Transforming t1 and t2 to frequency domain.</p>
 <dt class="sig sig-object py" id="lime.mol.mls">
 <span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">mls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.mls" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.mol.polar">
+<span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">polar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.polar" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.mol.read_input">
+<span class="sig-prename descclassname"><span class="pre">lime.mol.</span></span><span class="sig-name descname"><span class="pre">read_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname_e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname_edip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_included</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.mol.read_input" title="Permalink to this definition"></a></dt>
+<dd><p>Read input data from quantum chemistry output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname_e</strong> (<em>str</em>) – filename for the energy levels.</p></li>
+<li><p><strong>fname_edip</strong> (<em>list</em>) – filenames for the electric dipole moment.</p></li>
+<li><p><strong>g_included</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>mol</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.mol.test_sesolver">
@@ -1284,6 +1631,27 @@ D: strength of the noise, default 0.0025</p>
 <span id="lime-optics-module"></span><h2>lime.optics module<a class="headerlink" href="#module-lime.optics" title="Permalink to this headline"></a></h2>
 <p>Created on Tue Mar 26 17:26:02 2019</p>
 <p>&#64;author: binggu</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.optics.Analyser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">Analyser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Analyser" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.Analyser.FROG">
+<span class="sig-name descname"><span class="pre">FROG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_fft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Analyser.FROG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.Analyser.plot_spectrogram">
+<span class="sig-name descname"><span class="pre">plot_spectrogram</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Analyser.plot_spectrogram" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.Analyser.spectrogram">
+<span class="sig-name descname"><span class="pre">spectrogram</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Analyser.spectrogram" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="lime.optics.Biphoton">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">Biphoton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omegap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Te</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_matching</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sinc'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Biphoton" title="Permalink to this definition"></a></dt>
@@ -1396,12 +1764,12 @@ the spectral grid.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="lime.optics.Pulse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">Pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omegac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Pulse" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dt class="sig sig-object py" id="lime.optics.ChirpedPulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">ChirpedPulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omegac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.11024710050125681</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">206.70686668237954</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.ChirpedPulse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lime.optics.Pulse" title="lime.optics.Pulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">lime.optics.Pulse</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.optics.Pulse.efield">
-<span class="sig-name descname"><span class="pre">efield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Pulse.efield" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.optics.ChirpedPulse.efield">
+<span class="sig-name descname"><span class="pre">efield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.ChirpedPulse.efield" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>t</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
@@ -1411,6 +1779,84 @@ the spectral grid.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>electric field at time t.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.ChirpedPulse.spectrum">
+<span class="sig-name descname"><span class="pre">spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.ChirpedPulse.spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>Fourier transform of the Gaussian pulse</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">GaussianPulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omegac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.11024710050125681</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">206.70686668237954</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse.efield">
+<span class="sig-name descname"><span class="pre">efield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse.efield" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>electric field at time t.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse.envelop">
+<span class="sig-name descname"><span class="pre">envelop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse.envelop" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse.field">
+<span class="sig-name descname"><span class="pre">field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse.field" title="Permalink to this definition"></a></dt>
+<dd><p>electric field</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse.plt_efield">
+<span class="sig-name descname"><span class="pre">plt_efield</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse.plt_efield" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse.spectrogram">
+<span class="sig-name descname"><span class="pre">spectrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">efield</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse.spectrogram" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.GaussianPulse.spectrum">
+<span class="sig-name descname"><span class="pre">spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.GaussianPulse.spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>Fourier transform of the Gaussian pulse</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.optics.Pulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">Pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omegac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.11024710050125681</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">206.70686668237954</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Pulse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.Pulse.efield">
+<span class="sig-name descname"><span class="pre">efield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_complex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Pulse.efield" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>TYPE</em>) – time.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>complex-valued  electric field at time t. Take the real part for the
+electric field.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>complex</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1427,6 +1873,11 @@ the spectral grid.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="lime.optics.Pulse.plt_efield">
+<span class="sig-name descname"><span class="pre">plt_efield</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Pulse.plt_efield" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="lime.optics.Pulse.spectrogram">
 <span class="sig-name descname"><span class="pre">spectrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">efield</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.Pulse.spectrogram" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -1438,6 +1889,16 @@ the spectral grid.</p>
 </dd></dl>
 
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.optics.field_to_intensity">
+<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">field_to_intensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.field_to_intensity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.optics.fwhm_to_std">
+<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">fwhm_to_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwhm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.fwhm_to_std" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.optics.hom">
@@ -1482,6 +1943,26 @@ the spectral grid.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.optics.intensity_to_field">
+<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">intensity_to_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">I</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.intensity_to_field" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>transform intensity to electric field</p>
+<p>E = sqrt(</p>
+</div></blockquote>
+<p>rac{2I}{c epsilon_0})</p>
+<blockquote>
+<div><dl class="simple">
+<dt>I<span class="classifier">TYPE</span></dt><dd><p>intensity, in units of W/m^2</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>None.</dt><dd><p>electric field in atomic units</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -1540,6 +2021,23 @@ f: 2D array,</p>
 <dt>nmodes: int</dt><dd><p>number of modes to be kept</p>
 </dd>
 <dt>method: str</dt><dd><p>rdm or svd</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.optics.std_to_fwhm">
+<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">std_to_fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.std_to_fwhm" title="Permalink to this definition"></a></dt>
+<dd><p>Transformation between standard deviation to FWHM for a Gaussian pulse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tau</strong> (<em>float</em>) – std</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>FWHM.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1830,19 +2328,7 @@ if H = [H0, [f(t), H1]], H = H0 - f(t) * H1 is time-dependent</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.oqs.OQS.setH">
 <span class="sig-name descname"><span class="pre">setH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.oqs.OQS.setH" title="Permalink to this definition"></a></dt>
-<dd><p>Set model Hamiltonian</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>H</strong> (<em>2d array</em>) – DESCRIPTION.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="lime.oqs.OQS.set_c_ops">
@@ -2151,6 +2637,57 @@ l = sm for polarization decay</p>
 </section>
 <section id="module-lime.phys">
 <span id="lime-phys-module"></span><h2>lime.phys module<a class="headerlink" href="#module-lime.phys" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.phys.HarmonicOscillator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">HarmonicOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.HarmonicOscillator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>basic class for harmonic oscillator</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.phys.HarmonicOscillator.eigenstate">
+<span class="sig-name descname"><span class="pre">eigenstate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.HarmonicOscillator.eigenstate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.phys.HarmonicOscillator.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.HarmonicOscillator.potential" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.phys.Morse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">Morse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">re</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.Morse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>basic class for Morse oscillator</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.phys.Morse.eigenstate">
+<span class="sig-name descname"><span class="pre">eigenstate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.Morse.eigenstate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.phys.Morse.eigval">
+<span class="sig-name descname"><span class="pre">eigval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.Morse.eigval" title="Permalink to this definition"></a></dt>
+<dd><p>Given an (integer) quantum number v, return the vibrational energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.phys.Morse.potential">
+<span class="sig-name descname"><span class="pre">potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.Morse.potential" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.anticomm">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">anticomm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.anticomm" title="Permalink to this definition"></a></dt>
@@ -2316,6 +2853,14 @@ v: basis transformation matrix</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.eig_asymm">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">eig_asymm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.eig_asymm" title="Permalink to this definition"></a></dt>
+<dd><p>Diagonalize a real, <em>asymmetrix</em> matrix and return sorted results.</p>
+<p>Return the eigenvalues and eigenvectors (column matrix)
+sorted from lowest to highest eigenvalue.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.expm">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">expm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EOM'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.expm" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
@@ -2425,6 +2970,24 @@ T : temperture (in units of energy, i.e., kT)</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.gwp2">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">gwp2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.,</span> <span class="pre">0.],</span> <span class="pre">[0.,</span> <span class="pre">1.]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.gwp2" title="Permalink to this definition"></a></dt>
+<dd><p>generate a 2D Gaussian wavepacket in grid
+:param x0: float, mean value of gaussian wavepacket along x
+:param y0: float, mean value of gaussian wavepacket along y
+:param sigma: float array, covariance matrix with 2X2 dimension
+:param kx0: float, initial momentum along x
+:param ky0: float, initial momentum along y
+:return: float 2darray, the gaussian distribution in 2D grid</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.gwp_k">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">gwp_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.gwp_k" title="Permalink to this definition"></a></dt>
+<dd><p>analytical fourier transform of gauss_x(x), above</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.ham_ho">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">ham_ho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ZPE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.ham_ho" title="Permalink to this definition"></a></dt>
 <dd><p>Hamiltonian for harmonic oscilator</p>
@@ -2471,6 +3034,11 @@ ZPE: boolean, if ZPE is included in the Hamiltonian</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.is_positive_def">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">is_positive_def</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.is_positive_def" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.isdiag">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">isdiag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.isdiag" title="Permalink to this definition"></a></dt>
 <dd><p>Check if a matrix is diagonal.</p>
@@ -2490,6 +3058,11 @@ ZPE: boolean, if ZPE is included in the Hamiltonian</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.isherm">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">isherm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.isherm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.jump">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">jump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isherm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.jump" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -2570,6 +3143,48 @@ l = sm for polarization decay</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.meshgrid">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">meshgrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.meshgrid" title="Permalink to this definition"></a></dt>
+<dd><p>fix the indexing of the Numpy meshgrid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.morse">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">morse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">re</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.morse" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Morse potential</dt><dd><p>D * (1. - e^{-a * (r - r_e)})**2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>float/1darray</em>) – DESCRIPTION.</p></li>
+<li><p><strong>D</strong> (<em>float</em>) – well depth</p></li>
+<li><p><strong>a</strong> (<em>TYPE</em>) – ‘width’ of the potential.</p></li>
+<li><p><strong>re</strong> (<em>TYPE</em>) – equilibrium bond distance</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.multi_spin">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">multi_spin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">onsite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsites</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.multi_spin" title="Permalink to this definition"></a></dt>
 <dd><p>construct the hamiltonian for a multi-spin system
@@ -2604,9 +3219,33 @@ nsites: number of spins</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.multimode">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">multimode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omegas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.multimode" title="Permalink to this definition"></a></dt>
+<dd><p>construct the direct tensor-product Hamiltonian for a multi-mode system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omegas</strong> (<em>1D array</em>) – resonance frequenies of the boson modes</p></li>
+<li><p><strong>nmodes</strong> (<em>integer</em>) – number of boson modes</p></li>
+<li><p><strong>J</strong> (<em>float</em>) – nearest-neighbour hopping constant</p></li>
+<li><p><strong>truncate</strong> (<em>list</em>) – size of Fock space for each mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>ham</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>xs</strong> (<em>list</em>) – position operators in the composite space for each mode</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.norm">
-<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.norm" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.norm" title="Permalink to this definition"></a></dt>
 <dd><p>normalization of the wavefunction</p>
+<p>N = int dx psi^*(x) psi(x)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>psi</strong> (<em>1d array</em><em>, </em><em>complex</em>) – DESCRIPTION.</p>
@@ -2823,6 +3462,11 @@ omega: float</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.rotate">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.rotate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.phys.sigmax">
 <span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">sigmax</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.sigmax" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -2850,6 +3494,27 @@ omega: float</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.phys.sort">
+<span class="sig-prename descclassname"><span class="pre">lime.phys.</span></span><span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eigvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigvecs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.phys.sort" title="Permalink to this definition"></a></dt>
+<dd><p>sort eigenvalues and eigenvectors from low to high</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eigvals</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>eigvecs</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>eigvals</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>eigvecs</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2946,6 +3611,79 @@ v: basis transformation matrix</p>
 <section id="lime-qnm-module">
 <h2>lime.qnm module<a class="headerlink" href="#lime-qnm-module" title="Permalink to this headline"></a></h2>
 </section>
+<section id="module-lime.quadrature">
+<span id="lime-quadrature-module"></span><h2>lime.quadrature module<a class="headerlink" href="#module-lime.quadrature" title="Permalink to this headline"></a></h2>
+<p>Created on Wed Oct 27 15:43:40 2021</p>
+<p>&#64;author: Bing</p>
+<p>Computing multidimensional Gaussian integral with Gaussian-Hermite quadrature</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.quadrature.Quadrature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.quadrature.</span></span><span class="sig-name descname"><span class="pre">Quadrature</span></span><a class="headerlink" href="#lime.quadrature.Quadrature" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.quadrature.Quadrature.gauss_hermite">
+<span class="sig-name descname"><span class="pre">gauss_hermite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.quadrature.Quadrature.gauss_hermite" title="Permalink to this definition"></a></dt>
+<dd><p>Compute int f(x) exp(-x^2) dx = sum_{i=0}^n w[i] * f(x[i])
+using Gaussian-Hermite quadrature</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>mu</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>sigma</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>TYPE</em> – DESCRIPTION.</p></li>
+<li><p><strong>w</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.quadrature.Quadrature.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.quadrature.Quadrature.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.quadrature.covfunc">
+<span class="sig-prename descclassname"><span class="pre">lime.quadrature.</span></span><span class="sig-name descname"><span class="pre">covfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.quadrature.covfunc" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.quadrature.f">
+<span class="sig-prename descclassname"><span class="pre">lime.quadrature.</span></span><span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.quadrature.f" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.quadrature.gauss_hermite_quadrature">
+<span class="sig-prename descclassname"><span class="pre">lime.quadrature.</span></span><span class="sig-name descname"><span class="pre">gauss_hermite_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.quadrature.gauss_hermite_quadrature" title="Permalink to this definition"></a></dt>
+<dd><p>Compute int f(x) exp(-x^2) dx = sum_{i=0}^n w[i] * f(x[i])
+using Gaussian-Hermite quadrature</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>mu</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>sigma</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>TYPE</em> – DESCRIPTION.</p></li>
+<li><p><strong>w</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-lime.spin_boson">
 <span id="lime-spin-boson-module"></span><h2>lime.spin_boson module<a class="headerlink" href="#module-lime.spin_boson" title="Permalink to this headline"></a></h2>
 <dl class="py class">
@@ -3018,7 +3756,7 @@ INPUT:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.style.export">
 <span class="sig-prename descclassname"><span class="pre">lime.style.</span></span><span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gnuplot'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.style.export" title="Permalink to this definition"></a></dt>
-<dd><p>export data to gnuplot format</p>
+<dd><p>export 3D data to gnuplot format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3083,6 +3821,16 @@ INPUT:</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.style.plot_surface">
+<span class="sig-prename descclassname"><span class="pre">lime.style.</span></span><span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.style.plot_surface" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.style.plot_surfaces">
+<span class="sig-prename descclassname"><span class="pre">lime.style.</span></span><span class="sig-name descname"><span class="pre">plot_surfaces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surfaces</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.style.plot_surfaces" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.style.set_style">
@@ -3477,6 +4225,12 @@ vector to matrix rearrangement done by the vec2mat function.</p>
 </section>
 <section id="module-lime.units">
 <span id="lime-units-module"></span><h2>lime.units module<a class="headerlink" href="#module-lime.units" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.units.AtomicUnits">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.units.</span></span><span class="sig-name descname"><span class="pre">AtomicUnits</span></span><a class="headerlink" href="#lime.units.AtomicUnits" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
 </section>
 <section id="module-lime.wigner">
 <span id="lime-wigner-module"></span><h2>lime.wigner module<a class="headerlink" href="#module-lime.wigner" title="Permalink to this headline"></a></h2>
@@ -3492,8 +4246,8 @@ vector to matrix rearrangement done by the vec2mat function.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.wigner.spectrogram">
 <span class="sig-prename descclassname"><span class="pre">lime.wigner.</span></span><span class="sig-name descname"><span class="pre">spectrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wigner.spectrogram" title="Permalink to this definition"></a></dt>
-<dd><p>Wigner transform of an input signal with FFT.
-W(w, t) = int dtau x(t + tau/2) x^*(t - tau/2) e^{i w tau}</p>
+<dd><p>Wigner transform of an input signal with FFT.</p>
+<p>W(w, t) = int d    au x(t +        au/2) x^*(t -   au/2) e^{i w tau}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3590,65 +4344,224 @@ after being half time step forward</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.wpd.S0">
+<span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">S0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.S0" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lime.wpd.S1">
+<span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">S1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.S1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
-<dt class="sig sig-object py" id="lime.wpd.SPO_1d">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">SPO_1d</span></span><a class="headerlink" href="#lime.wpd.SPO_1d" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lime.wpd.Solver" title="lime.wpd.Solver"><code class="xref py py-class docutils literal notranslate"><span class="pre">lime.wpd.Solver</span></code></a></p>
+<dt class="sig sig-object py" id="lime.wpd.SPO">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">SPO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_1d.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_1d.evolve" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.build" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_1d.set_grid">
-<span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_1d.set_grid" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO.k_evolve">
+<span class="sig-name descname"><span class="pre">k_evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi_x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.k_evolve" title="Permalink to this definition"></a></dt>
+<dd><p>one time step for exp(-i * K * dt)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.run" title="Permalink to this definition"></a></dt>
+<dd><p>Time-dependent Schrodinger Equation for wavepackets on a single PES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psi0</strong> (<em>1d array</em><em>, </em><em>complex</em>) – initial wavepacket</p></li>
+<li><p><strong>t0</strong> (<em>float</em>) – initial time</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – the small time interval over which to integrate</p></li>
+<li><p><strong>nt</strong> (<em>float</em><em>, </em><em>optional</em>) – the number of intervals to compute.  The total change
+in time at the end of this method will be dt * Nsteps.
+default is N = 1</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO.set_grid">
+<span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.set_grid" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_1d.set_potential">
-<span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_1d.set_potential" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO.set_potential">
+<span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.set_potential" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO.x_evolve">
+<span class="sig-name descname"><span class="pre">x_evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.x_evolve" title="Permalink to this definition"></a></dt>
+<dd><p>one time step for exp(-i * V * dt)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>psi</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO.x_evolve_half">
+<span class="sig-name descname"><span class="pre">x_evolve_half</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO.x_evolve_half" title="Permalink to this definition"></a></dt>
+<dd><p>one time step for exp(-i * V * dt)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>psi</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lime.wpd.SPO2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">SPO2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>second-order split-operator method for nonadiabatic wavepacket dynamics
+in the diabatic representation with two-dimensional nuclear coordinate</p>
+<p>For time-independent Hamiltonian</p>
+<blockquote>
+<div><p>e^{-i H Delta t} = e^{- i V Delta t/2} e^{-i K Delta t} e^{-iVDelta t/2}</p>
+</div></blockquote>
+<dl class="simple">
+<dt>For time-dependent H,</dt><dd><p>TBI</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inertia</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.build" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Setup the propagators appearing in the split-operator method.</p>
+<p>For the kinetic energy operator with Jacobi coordinates</p>
+<blockquote>
+<div><p>K =</p>
+</div></blockquote>
+</div></blockquote>
+<p>rac{p_r^2}{2mu} +
+rac{1}{I(r)} <a href="#id9"><span class="problematic" id="id10">p_</span></a>    heta^2</p>
+<blockquote>
+<div><p>Since the two KEOs for each dof do not commute, it has to be factorized as</p>
+<p>e^{-i K delta t} = e{-i K_1 delta t} e^{- i K_2 delta t}</p>
+<p>where $p_       heta = -i pa_  heta$ is the momentum operator.</p>
+<dl class="simple">
+<dt>dt<span class="classifier">TYPE</span></dt><dd><p>DESCRIPTION.</p>
+</dd>
+<dt>intertia: func</dt><dd><p>moment of inertia, only used for Jocabi coordinates.</p>
+</dd>
+</dl>
+<p>None.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.plot_surface">
+<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'2D'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.plot_surface" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.plt_wp">
+<span class="sig-name descname"><span class="pre">plt_wp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psilist</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.plt_wp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.population">
+<span class="sig-name descname"><span class="pre">population</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.population" title="Permalink to this definition"></a></dt>
+<dd><p>return the electronic populations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>psi</strong> (<em>TYPE</em>) – DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_states</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.setG">
+<span class="sig-name descname"><span class="pre">setG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.setG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.set_DPES">
+<span class="sig-name descname"><span class="pre">set_DPES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surfaces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diabatic_couplings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.set_DPES" title="Permalink to this definition"></a></dt>
+<dd><p>set the diabatic PES and diabatic couplings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surfaces</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>diabatic_couplings</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>abc</strong> (<em>boolean</em><em>, </em><em>optional</em>) – indicator of whether using absorbing boundary condition. This is
+often used for dissociation.
+The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>v</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.set_grid">
+<span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.set_grid" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="lime.wpd.SPO2.set_masses">
+<span class="sig-name descname"><span class="pre">set_masses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masses</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO2.set_masses" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="lime.wpd.SPO_2d">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">SPO_2d</span></span><a class="headerlink" href="#lime.wpd.SPO_2d" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO3">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">SPO3</span></span><a class="headerlink" href="#lime.wpd.SPO3" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_2d.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_2d.evolve" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO3.evolve">
+<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO3.evolve" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_2d.set_grid">
-<span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_2d.set_grid" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO3.set_grid">
+<span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO3.set_grid" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_2d.set_potential">
-<span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_2d.set_potential" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="lime.wpd.SPO_3d">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">SPO_3d</span></span><a class="headerlink" href="#lime.wpd.SPO_3d" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_3d.evolve">
-<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_3d.evolve" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_3d.set_grid">
-<span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_3d.set_grid" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="lime.wpd.SPO_3d.set_potential">
-<span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO_3d.set_potential" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="lime.wpd.SPO3.set_potential">
+<span class="sig-name descname"><span class="pre">set_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.SPO3.set_potential" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3736,6 +4649,11 @@ in y</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="lime.wpd.diabatic_coupling">
+<span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">diabatic_coupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.diabatic_coupling" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="lime.wpd.dpsi">
 <span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">dpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ky</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.dpsi" title="Permalink to this definition"></a></dt>
 <dd><p>Momentum operator operates on the wavefunction</p>
@@ -3808,19 +4726,13 @@ in y</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="lime.wpd.gwp">
-<span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">gwp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.gwp" title="Permalink to this definition"></a></dt>
-<dd><p>a Gaussian wave packet centered at x0, with momentum k0</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="lime.wpd.hpsi">
 <span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">hpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ky</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.hpsi" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="lime.wpd.k_evolve_2d">
-<span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">k_evolve_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ky</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.k_evolve_2d" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">lime.wpd.</span></span><span class="sig-name descname"><span class="pre">k_evolve_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ky</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.wpd.k_evolve_2d" title="Permalink to this definition"></a></dt>
 <dd><p>propagate the state in grid basis a time step forward with H = K
 :param dt: float, time step
 :param kx: float, momentum corresponding to x
@@ -3924,13 +4836,13 @@ after being half time step forward</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="modules.html" class="btn btn-neutral float-left" title="lime" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="lime.polariton.html" class="btn btn-neutral float-right" title="lime.polariton package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="lime.models.html" class="btn btn-neutral float-right" title="lime.models package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bing Gu.</p>
+    <p>&#169; Copyright 2022, Bing Gu.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
