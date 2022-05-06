@@ -4,4 +4,4 @@ lime
 .. toctree::
    :maxdepth: 4
 
-   lime
+   SPO_1D

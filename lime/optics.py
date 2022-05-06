@@ -13,7 +13,7 @@ import proplot as plt
 
 from lime.units import au2k, au2ev, alpha, \
     au2watt_per_centimeter_squared, au2fs
-from lime.fft import fft
+from lime.fft import fft, fft2
 from lime.phys import rect, sinc, dag, interval
 # from lime.style import set_style, imshow
 from lime.wigner import spectrogram
@@ -69,6 +69,7 @@ class Analyser:
         self.t = t
         self.dt = interval(t)
         self.I = None # Wigner transform of the signal I(\omega, t)
+        self.omegas = None # frequency domain
 
     def FROG(self, w=None, use_fft=False):
         # FROG spectrogram of the field
@@ -96,13 +97,14 @@ class Analyser:
         Ew, w = spectrogram(self.E, self.dt)
 
         self.I = Ew
+        self.omegas = w
 
         return Ew, w
 
     def plot_spectrogram(self):
         fig, ax = plt.subplots()
-        ax.contourf(t*au2fs, w*au2ev, I, origin='lower')
-        ax.format(xlabel='Time (fs)', ylabel='E (eV)', ylim=(0, None))
+        ax.contourf(self.t*au2fs, self.omegas*au2ev, np.abs(self.I)**2, origin='lower')
+        ax.format(xlabel='Time (fs)', ylabel='Frequency (eV)', ylim=(0, None))
         return fig, ax
 
 
@@ -879,7 +881,7 @@ if __name__ == '__main__':
     analyser = Analyser(pulse.efield(t), t)
 
     I, w = analyser.spectrogram()
-    print(w)
+    analyser.plot_spectrogram()
 
 
 
