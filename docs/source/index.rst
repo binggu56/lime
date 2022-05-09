@@ -20,8 +20,7 @@ Nonlinear molecular spectroscopy
 
 Pros: computationally cheap 
 
-.. note::
-decay is introduced phenomelogically; pure dephasing cannot be addressed 
+.. note:: decay is introduced phenomelogically; pure dephasing cannot be addressed.  
 
 * correlation function approach --  Direct computing the many-point correlation functions with the quantum regression theorem 
 
