@@ -12,7 +12,10 @@ Welcome to lime's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   lime
    modules
+   heom
+   Floquet
 
 
 Indices and tables
