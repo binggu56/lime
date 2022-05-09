@@ -60,14 +60,14 @@ Open quantum systems
 # Quantum transport 
 - Landauer transport 
 
-# Soid state materials 
+Soid state materials 
+--------------------
 - Band structure from tight-binding Hamiltonians 
 
-# Periodically driven matter 
-- Floquet spectrum 
+Periodically driven matter
+--------------------------
+* Floquet spectrum 
 
-# Others 
-- Schmidt decomposition 
 
 .. toctree::
    :maxdepth: 2
