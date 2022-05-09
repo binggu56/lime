@@ -42,19 +42,20 @@ Molecular quantum dynamics
 	* Discrete variable representation 
 
 - Nonadiabatic wavepacket dynamics 
--- Split-operator method 
+	* Split-operator method - For the exact nonadiabatic dynamics of vibronic models in the diabatic representation. 
+	* RK4 -  For the exact nonadiabatic wavepacket dynamics in the adiabatic representation.
 
-For the exact nonadiabatic dynamics of vibronic models in the diabatic representation. 
 
 # Semiclassical quantum trajectory method 
 
 # Quantum chemistry 
 
-# Open quantum systems 
-- Lindblad quantum master equation
-- Redfield theory  
-- second-order time-convolutionless master equation 
-- hierarchical equation of motion 
+Open quantum systems 
+--------------------
+* Lindblad quantum master equation
+* Redfield theory  
+* second-order time-convolutionless master equation 
+* hierarchical equation of motion 
 
 # Quantum transport 
 - Landauer transport 
