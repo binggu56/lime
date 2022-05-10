@@ -16,11 +16,11 @@ Main modules
 Nonlinear molecular spectroscopy 
 --------------------------------
 
-#. sum-of-states for multilevel system
+#. Sum-of-states (SOS) for multilevel system
 
-Pros: computationally cheap 
+	Pros: computationally cheap and intuitive
 
-.. note:: decay is introduced phenomelogically; pure dephasing cannot be addressed.  
+	.. note:: In the SOS method, decay is introduced phenomelogically. 
 
 #. correlation function approach --  Direct computing the many-point correlation functions with the quantum regression theorem 
 
