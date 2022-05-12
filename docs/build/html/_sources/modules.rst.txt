@@ -1,7 +1,7 @@
-lime
-====
+models
+======
 
 .. toctree::
    :maxdepth: 4
 
-   lime
+   models

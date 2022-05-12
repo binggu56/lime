@@ -1,7 +1,7 @@
-models
-======
+Floquet
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   models
+   Floquet

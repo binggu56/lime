@@ -1,9 +1,19 @@
-Floquet module
-==============
+Floquet package
+===============
 
-This modules deals with periodically driven matter including both finite and extended systems.
+Submodules
+----------
 
-.. math:: H(t) = H(t+T)
+Floquet.Floquet module
+----------------------
+
+.. automodule:: Floquet.Floquet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: Floquet
    :members:

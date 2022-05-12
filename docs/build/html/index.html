@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="lime" href="modules.html" /> 
+    <link rel="next" title="lime package" href="lime.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,7 +38,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">lime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lime.html">lime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heom.html">heom module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Floquet.html">Floquet module</a></li>
 </ul>
 
         </div>
@@ -65,161 +68,125 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-lime.optics">
-<span id="welcome-to-lime-s-documentation"></span><h1>Welcome to lime’s documentation!<a class="headerlink" href="#module-lime.optics" title="Permalink to this headline"></a></h1>
-<p>Created on Tue Mar 26 17:26:02 2019</p>
-<p>&#64;author: binggu</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.hom">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">hom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.hom" title="Permalink to this definition"></a></dt>
-<dd><p>HOM coincidence probability</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>p</strong> – </p></li>
-<li><p><strong>q</strong> – </p></li>
-<li><p><strong>f</strong> – </p></li>
-<li><p><strong>tau</strong> – </p></li>
-<li><p><strong>method</strong> (<em>str</em>) – <p>“brute”: directly integrating the JSA over the frequency grid
-“schmidt”: compute the signal using the Schmidt modes of the</p>
+  <section id="welcome-to-lime-s-documentation">
+<h1>Welcome to lime’s documentation!<a class="headerlink" href="#welcome-to-lime-s-documentation" title="Permalink to this headline"></a></h1>
+<p>The goal is to provide a simple-to-use package to study how light interacts with matter.</p>
+<p>Check docs/manual.pdf for documentations.</p>
+<p>Main modules</p>
+<section id="nonlinear-molecular-spectroscopy">
+<h2>Nonlinear molecular spectroscopy<a class="headerlink" href="#nonlinear-molecular-spectroscopy" title="Permalink to this headline"></a></h2>
+<ol class="arabic">
+<li><p>Sum-of-states (SOS) for multilevel system</p>
 <blockquote>
-<div><p>entangled light</p>
+<div><p>Pros: computationally cheap and intuitive</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the SOS method, decay is introduced phenomelogically.</p>
+</div>
 </div></blockquote>
-</p></li>
-<li><p><strong>nmodes</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>prob</strong> – coincidence probability</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>1d array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.hom_schmidt">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">hom_schmidt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rdm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.hom_schmidt" title="Permalink to this definition"></a></dt>
-<dd><p>HOM signal with Schmidt modes</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>p</strong> – </p></li>
-<li><p><strong>q</strong> – </p></li>
-<li><p><strong>f</strong> – </p></li>
-<li><p><strong>nmodes</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.intensity_to_field">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">intensity_to_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">I</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.intensity_to_field" title="Permalink to this definition"></a></dt>
-<dd><blockquote>
-<div><p>transform intensity to electric field</p>
-<p>E = sqrt(</p>
-</div></blockquote>
-<p>rac{2I}{c epsilon_0})</p>
+</li>
+<li><p>correlation function approach –  Direct computing the many-point correlation functions with the quantum regression theorem</p>
 <blockquote>
-<div><dl class="simple">
-<dt>I<span class="classifier">TYPE</span></dt><dd><p>intensity, in units of W/m^2</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>None.</dt><dd><p>electric field in atomic units</p>
-</dd>
-</dl>
+<div><p>Valid for open quantum systems where environment effects can be rigirously described with quantum master equations.</p>
+<p>Visulize with double-sided Feynman diagrams instead of the time-loop diagrams.</p>
 </div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.jta">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">jta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omegap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Te</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.jta" title="Permalink to this definition"></a></dt>
-<dd><p>Analytical form for the joint temporal amplitude for SPDC type-II
-two-photon state.</p>
-<p>Note that two single-photon electric field prefactors are neglected.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t2</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>t1</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>None.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.rdm">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">rdm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.rdm" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the reduced density matrix by tracing out the other dof for a 2D wavefunction</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> (<em>2D array</em>) – 2D wavefunction</p></li>
-<li><p><strong>dx</strong> (<em>float</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 1.</p></li>
-<li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 1.</p></li>
-<li><p><strong>which</strong> (<em>str</em>) – indicator which rdm is required. Default is ‘x’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>rho1</strong> – Reduced density matrix</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>TYPE</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.schmidt_decompose">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">schmidt_decompose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rdm'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.schmidt_decompose" title="Permalink to this definition"></a></dt>
-<dd><p>kernel method
-f: 2D array,</p>
+</li>
+<li><p>non-perturbative approah – valid for ALL systems provided a quantum dynamics solver is provided.</p>
 <blockquote>
-<div><p>input function to be decomposed</p>
+<div><p>Simulating the laser-driven dynamics including explicitly all laser pulses</p>
 </div></blockquote>
-<dl class="simple">
-<dt>nmodes: int</dt><dd><p>number of modes to be kept</p>
-</dd>
-<dt>method: str</dt><dd><p>rdm or svd</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="lime.optics.std_to_fwhm">
-<span class="sig-prename descclassname"><span class="pre">lime.optics.</span></span><span class="sig-name descname"><span class="pre">std_to_fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#lime.optics.std_to_fwhm" title="Permalink to this definition"></a></dt>
-<dd><p>Transformation between standard deviation to FWHM for a Gaussian pulse</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tau</strong> (<em>float</em>) – std</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>FWHM.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
+</li>
+</ol>
+</section>
+<section id="molecular-quantum-dynamics">
+<h2>Molecular quantum dynamics<a class="headerlink" href="#molecular-quantum-dynamics" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Adiabatic wavepacket dynamics</dt><dd><ul>
+<li><p>Split-operator method</p></li>
+<li><p>Discrete variable representation</p></li>
+</ul>
 </dd>
 </dl>
-</dd></dl>
-
+</li>
+<li><dl class="simple">
+<dt>Nonadiabatic wavepacket dynamics</dt><dd><ul>
+<li><p>Split-operator method - For the exact nonadiabatic dynamics of vibronic models in the diabatic representation.</p></li>
+<li><p>RK4 -  For the exact nonadiabatic wavepacket dynamics in the adiabatic representation.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p># Semiclassical quantum trajectory method</p>
+<p># Quantum chemistry</p>
+</section>
+<section id="open-quantum-systems">
+<h2>Open quantum systems<a class="headerlink" href="#open-quantum-systems" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Lindblad quantum master equation</p></li>
+<li><p>Redfield theory</p></li>
+<li><p>second-order time-convolutionless master equation</p></li>
+<li><p>hierarchical equation of motion</p></li>
+</ul>
+<p># Quantum transport
+- Landauer transport</p>
+</section>
+<section id="soid-state-materials">
+<h2>Soid state materials<a class="headerlink" href="#soid-state-materials" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Band structure from tight-binding Hamiltonians</p></li>
+</ul>
+</section>
+<section id="periodically-driven-matter">
+<h2>Periodically driven matter<a class="headerlink" href="#periodically-driven-matter" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Floquet spectrum</p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">lime</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="lime.html">lime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lime.html">lime package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.Floquet">lime.Floquet module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.FranckCondon">lime.FranckCondon module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#lime-backup-module">lime.backup module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.beam">lime.beam module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.cavity">lime.cavity module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.common">lime.common module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.coordinates">lime.coordinates module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.correlation">lime.correlation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.fft">lime.fft module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.group">lime.group module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.gwp">lime.gwp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.liouville">lime.liouville module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.mol">lime.mol module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.noise">lime.noise module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.optics">lime.optics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.oqs">lime.oqs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.phys">lime.phys module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#lime-qnm-module">lime.qnm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.quadrature">lime.quadrature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.spin_boson">lime.spin_boson module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.style">lime.style module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.superoperator">lime.superoperator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#lime-susceptibility-module">lime.susceptibility module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.units">lime.units module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.wigner">lime.wigner module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime.wpd">lime.wpd module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lime.html#module-lime">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="heom.html">heom module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Floquet.html">Floquet module</a></li>
 </ul>
 </div>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
@@ -234,7 +201,7 @@ f: 2D array,</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-right" title="lime" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="lime.html" class="btn btn-neutral float-right" title="lime package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
