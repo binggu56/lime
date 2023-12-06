@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-General Numerical Solver for non-adiabatic molecular dynamics with two electronic
-state in 2-dimensional nuclear space 
+General Numerical Solver for non-adiabatic molecular dynamics with multi potential
+energy surfaces in 2-dimensional nuclear space 
 
 
 @author: Bing Gu
@@ -159,6 +159,7 @@ def k_evolve_2d(dt, kx, ky, psi_grid):
 #    def compute_x_from_k(self, psi_k):
 #        psi_x = ifft(psi_k)
 #        return psi_x
+
 
 
 def spo_dynamics(dt, v_2d, psi0, num_steps=0):

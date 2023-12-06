@@ -1,4 +1,4 @@
-numpy~=1.19.5
+numpy>=1.21
 mpmath~=1.2.1
 scipy~=1.6.0
 lime~=0.1.0
@@ -7,4 +7,4 @@ numba~=0.52.0
 proplot~=0.6.4
 setuptools~=51.1.1
 qutip~=4.5.3
-PyYAML~=5.3.1
+PyYAML>=5.4

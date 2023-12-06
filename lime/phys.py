@@ -4,16 +4,217 @@ import numpy as np
 from numpy import exp, pi, sqrt
 from scipy.sparse import csr_matrix, lil_matrix, identity, kron, linalg,\
                         spdiags, issparse
-
+from scipy.special import hermite
+from math import factorial
 import scipy as sp
 import numba
 from numba import jit
 import sys
 
-from lime.units import au2fs, au2ev
+
+def rotate(angle):
+    return np.array()
+
+class HarmonicOscillator:
+    """
+    basic class for harmonic oscillator
+    """
+    def __init__(self, omega, mass=1, x0=0):
+        self.mass = mass 
+        self.omega = omega 
+        self.x0 = 0
+    
+    def eigenstate(self, x, n=0):
+        x = x - self.x0 
+        alpha = (self.mass * self.omega)
+        phi = 1/sqrt(2**n * factorial(n)) * (alpha/np.pi)**(1/4) * np.exp(-alpha * x**2/2.) * \
+            hermite(n=n)(np.sqrt(alpha) * x)
+        return phi 
+    
+    def potential(self, x):
+        return 1/2 * self.omega * (x-self.x0)**2 
+    
+    
+
+class Morse:
+    """
+    basic class for Morse oscillator
+    """
+    def __init__(self, D, a, re, mass=1):
+        self.D = D
+        self.a = a
+        self.re = re
+        self.mass = mass
+        self.omega = a * sqrt(2.*D/mass)
+
+    def eigval(self, n):
+        """
+
+        Given an (integer) quantum number v, return the vibrational energy.
+
+        Parameters
+        ----------
+        n : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        D = self.D
+
+        return (n+0.5)* self.omega - (self.omega * (n+0.5))**2/(4. * D)
+
+    def eigenstate(self, x, n=0):
+
+        from scipy.special import genlaguerre, gamma
+        from math import factorial
+
+        l = sqrt(2.*self.mass * self.D)/self.a
+        alpha = 2*l - 2*n - 1
+
+        z = 2*l*exp(-(x-self.re))
+
+        # normalization coeff
+        C = sqrt(factorial(n) * alpha /gamma(2*l - n))
+
+        psi = C * z**(alpha/2.) * exp(-0.5 * z) * genlaguerre(n, alpha)(z)
+
+        return psi
+
+
+    def potential(self, x):
+        return morse(x, self.D, self.a, self.re)
+
+
+
+def morse(r, D, a, re):
+    """
+    Morse potential
+        D * (1. - e^{-a * (r - r_e)})**2
+
+    Parameters
+    ----------
+    r : float/1darray
+        DESCRIPTION.
+    D : float
+        well depth
+    a : TYPE
+        'width' of the potential.
+    re : TYPE
+        equilibrium bond distance
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    return D * (1. - exp(-a * (r - re)))**2
+
+
+def gwp2(x, y, sigma=np.identity(2), xc=[0, 0], kc=[0, 0]):
+    """
+    generate a 2D Gaussian wavepacket in grid
+    :param x0: float, mean value of gaussian wavepacket along x
+    :param y0: float, mean value of gaussian wavepacket along y
+    :param sigma: float array, covariance matrix with 2X2 dimension
+    :param kx0: float, initial momentum along x
+    :param ky0: float, initial momentum along y
+    :return: float 2darray, the gaussian distribution in 2D grid
+    """
+    gauss_2d = np.zeros((len(x), len(y)), dtype=np.complex128)
+    x0, y0 = xc
+    kx, ky = kc
+
+    A = inv(sigma)
+
+    delta = A[0, 0] * (x-x0)**2 + A[1, 1] * (y-y0)**2 + 2. * A[0, 1]*(x-x0)*(y-y0)
+
+    gauss_2d = (sqrt(det(sigma)) * sqrt(pi) ** 2) ** (-0.5) \
+                              * exp(-0.5 * delta + 1j * kx * (x-x0) + 1j * ky * (y-y0))
+
+    return gauss_2d
+
+
+def meshgrid(*args):
+    """
+    fix the indexing of the Numpy meshgrid
+
+    Parameters
+    ----------
+    *args : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    return np.meshgrid(*args, indexing='ij')
+
+def jump(f, i, dim=2, isherm=True):
+
+    A = lil_matrix((dim, dim))
+
+    if i == f:
+        A[i, i] = 1.
+    else:
+        if isherm:
+            A[f, i] = A[i, f] = 1.
+        else:
+            A[f, i] = 1.
+
+    return A.tocsr()
+
+def eig_asymm(h):
+    '''Diagonalize a real, *asymmetrix* matrix and return sorted results.
+
+    Return the eigenvalues and eigenvectors (column matrix)
+    sorted from lowest to highest eigenvalue.
+    '''
+    e, c = np.linalg.eig(h)
+    if np.allclose(e.imag, 0*e.imag):
+        e = np.real(e)
+    else:
+        print("WARNING: Eigenvalues are complex, will be returned as such.")
+
+    idx = e.argsort()
+    e = e[idx]
+    c = c[:,idx]
+
+    return e, c
+
+
+def is_positive_def(A):
+    try:
+        np.linalg.cholesky(A)
+        return True
+    except np.linalg.LinAlgError:
+        return False
+
 
 def sort(eigvals, eigvecs):
+    """
+    sort eigenvalues and eigenvectors from low to high
 
+    Parameters
+    ----------
+    eigvals : TYPE
+        DESCRIPTION.
+    eigvecs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    eigvals : TYPE
+        DESCRIPTION.
+    eigvecs : TYPE
+        DESCRIPTION.
+
+    """
     idx = np.argsort(eigvals)
 
     eigvals = eigvals[idx]
@@ -100,7 +301,7 @@ def tensor(*args):
         if n == 0:
             out = q
         else:
-            out = sp.kron(out, q)
+            out = sp.kron(out, q, format='csr')
 
     return out
 
@@ -333,6 +534,15 @@ def gwp(x, sigma=1., x0=0., p0=0.):
         np.exp(-(x-x0)**2/2./sigma**2 + 1j * p0 * (x-x0))
     return psi
 
+def gwp_k(k, sigma, x0,k0):
+    """
+    analytical fourier transform of gauss_x(x), above
+    """
+    a = 1./sigma**2
+
+    return ((a / np.sqrt(np.pi))**0.5
+            * np.exp(-0.5 * (a * (k - k0)) ** 2 - 1j * (k - k0) * x0))
+
 def thermal_dm(n, u):
     """
     return the thermal density matrix for a boson
@@ -383,9 +593,11 @@ def ket2dm(psi):
     """
     return np.einsum("i, j -> ij", psi, psi.conj())
 
-def norm(psi):
+def norm(psi, dx=1):
     '''
     normalization of the wavefunction
+    
+    N = \int dx \psi^*(x) \psi(x) 
 
     Parameters
     ----------
@@ -397,7 +609,7 @@ def norm(psi):
     float, L2 norm
 
     '''
-    return dag(psi).dot(psi).real
+    return dag(psi).dot(psi).real * dx
 
 
 def destroy(N):
@@ -648,7 +860,6 @@ def obs(psi, a):
         Expectation of operator a.
 
     """
-
     return dag(psi).dot(a.dot(psi))
 
 def resolvent(omega, Ulist, dt):
@@ -965,6 +1176,88 @@ def multiboson(omega, nmodes, J=0, truncate=2):
 
 
         return ham
+
+
+def multimode(omegas, nmodes, J=0, truncate=2):
+    """
+    construct the direct tensor-product Hamiltonian for a multi-mode system
+
+    Parameters
+    ----------
+    omegas : 1D array
+        resonance frequenies of the boson modes
+    nmodes : integer
+        number of boson modes
+    J : float
+        nearest-neighbour hopping constant
+    truncate : list
+        size of Fock space for each mode
+
+    Returns
+    -------
+    ham : TYPE
+        DESCRIPTION.
+    xs : list
+        position operators in the composite space for each mode
+
+    """
+
+    N = truncate
+    h0 = boson(omegas[0], N)
+    idm = identity(N)
+    x = quadrature(N)
+
+    assert len(omegas) == nmodes
+
+    if nmodes == 1:
+
+        return h0, x
+
+    elif nmodes == 2:
+
+        hf = boson(omegas[-1], N)
+        ham = kron(idm, hf) + kron(h0, idm) + J * kron(x, x)
+
+        xs = [kron(x, idm), kron(idm, x)]
+        return ham, xs
+
+    elif nmodes > 2:
+        h0 = boson(omegas[0], N)
+        hf = boson(omegas[-1], N)
+
+        head = kron(h0, tensor_power(idm, nmodes-1))
+        tail = kron(tensor_power(idm, nmodes-1), hf)
+        ham = head + tail
+
+        for i in range(1, nmodes-1):
+            h = boson(omegas[i], N)
+            ham += kron(tensor_power(idm, i), \
+                                     kron(h, tensor_power(idm, nmodes-i-1)))
+
+        hop_head = J * kron(kron(x, x), tensor_power(idm, nmodes-2))
+        hop_tail = J * kron(tensor_power(idm, nmodes-2), kron(x, x))
+
+        ham += hop_head + hop_tail
+
+        for i in range(1, nmodes-2):
+            ham += J * kron(tensor_power(idm, i), \
+                                kron(kron(x, x), tensor_power(idm, nmodes-i-2)))
+
+        # connect the last mode to the first mode
+
+        lower_head = kron(x, tensor_power(idm, nmodes-1))
+        xs = []
+        xs.append(lower_head)
+
+        for i in range(1, nmodes-1):
+            # x = quadrature(dims[i])
+            lower = kron(tensor_power(idm, i), kron(x, tensor_power(idm, nmodes-i-1)))
+            xs.append(lower.copy())
+
+        lower_tail = kron(tensor_power(idm, nmodes-1), x)
+        xs.append(lower_tail)
+
+        return ham, xs
 
 def project(P, a):
     """

@@ -1,10 +1,15 @@
 
 *.gz
 *.aux
-*.aux
-docs/manual.aux
-.DS_Store
-docs/manual.aux
+*.npz
+*.out
 *.log
-docs/manual.out
-lime/__pycache__/phys.cpython-37.pyc
+*.npc
+*.pyc
+*.pyc
+.DS_Store
+*.toc
+lime/models/apes_3d.pdf
+*.dat
+*.pyc
+*.dat

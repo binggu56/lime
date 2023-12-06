@@ -6,11 +6,16 @@ Check manual.pdf for documentations!
 
 Main modules
 
-# Nonlinear molecular spectroscopy 
-* sum-of-states for multilevel system
+============================
+Nonlinear molecular spectroscopy
+============================
+
+#. sum-of-states for multilevel system
 
 Pros: computationally cheap 
-Cons: decay is introduced phenomelogically; pure dephasing cannot be addressed 
+
+.. note::
+ decay is introduced phenomelogically; pure dephasing cannot be described.  
 
 * correlation function approach --  Direct computing the many-point correlation functions with the quantum regression theorem 
 

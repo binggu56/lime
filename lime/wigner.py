@@ -151,11 +151,12 @@ def wvd(audioFile, t=None, N=None, trace=0, make_analytic=True):
 def spectrogram(x, d=1):
     """
     Wigner transform of an input signal with FFT.
-    W(w, t) = int dtau x(t + tau/2) x^*(t - tau/2) e^{i w tau}
+
+    W(w, t) = \int d\tau x(t + \tau/2) x^*(t - \tau/2) e^{i w tau}
 
     Parameters
     ----------
-    x : 1d array 
+    x : 1d array
         The time-domain signal.
 
     d : TYPE, optional
@@ -166,7 +167,7 @@ def spectrogram(x, d=1):
     TYPE
         spectrogram in (f, t)
     freqs : 1d array
-        sample frequencies. 
+        sample frequencies.
 
     """
 
@@ -205,9 +206,9 @@ def spectrogram(x, d=1):
         #     tfr[tausec, icol] = signal[icol + tausec, 0] * \
         #         np.conj(signal[icol - tausec, 0]) + \
         #         signal[icol - tausec, 0] * conj_signal[icol + tausec, 0]
-        freqs, w[:, j] = lime.fft.ifft(w[:, j], taus)
+        w[:, j], freqs = lime.fft.ifft(w[:, j], taus)
 
-    return np.real(w), freqs
+    return w, freqs/2
 
 
 def wigner(x, d=1):
@@ -283,13 +284,14 @@ if __name__=='__main__':
     from lime.units import au2fs, au2ev
     #from lime.phys import
 
-    pulse = Pulse(sigma=6/au2fs, omegac=2/au2ev, beta=0.2)
-    # sigma=4/au2fs
-    t = np.linspace(-14, 14, 128)/au2fs
+    pulse = Pulse(tau=4/au2fs, omegac=2/au2ev, beta=0.1)
+    sigma=4/au2fs
+    omegac=2/au2ev
+    t = np.linspace(-14, 14, 256)/au2fs
     N = len(t)
 
     efield = pulse.efield(t)
-    # efield = np.exp(-t**2/sigma**2)
+    # efield = np.exp(-t**2/sigma**2-0.1j*omegac*t**2)
     dt = interval(t)
 
     # w = wvd(efield.real, N=None, trace=0, make_analytic=False)[0]
@@ -301,10 +303,9 @@ if __name__=='__main__':
     # ax.imshow(wvd)
 
     from lime.style import imshow
-    # # fig, ax = plt.subplots()
-    imshow(freqs, t, wvd, xlabel=r'$\omega$', ylabel='$t$')
+
+    imshow(freqs, t, wvd.T.real, xlabel=r'$\omega$', ylabel='$t$')
 
     # from lime.style import surf
     # ax = surf(wvd, t, freqs)
-    # # ax.set_ylim(-0.1, 0)
-    
+    # ax.set_ylim(-0.1, 0)
